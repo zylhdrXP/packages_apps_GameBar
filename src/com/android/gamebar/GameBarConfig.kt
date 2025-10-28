@@ -41,13 +41,18 @@ object GameBarConfig {
     }
 
     
-    // CPU configuration
-    val cpuBasePath: String
-        get() = context.getString(R.string.config_cpu_base_path)
-    val cpuTempPath: String
-        get() = context.getString(R.string.config_cpu_temp_path)
+    // CPU configuration - now dynamic
+    val cpuBasePath: String?
+        get() = SysfsDetector.getCpuBasePath()
+    
+    val cpuTempPath: String?
+        get() = SysfsDetector.getCpuTempInfo().first
     val cpuTempDivider: Int
-        get() = context.resources.getInteger(R.integer.config_cpu_temp_divider)
+        get() = SysfsDetector.getCpuTempInfo().second
+
+    fun getCpuTempConfig(): Pair<String?, Int> {
+        return SysfsDetector.getCpuTempInfo()
+    }
     
     // GPU configuration
     val gpuUsagePath: String
@@ -82,7 +87,8 @@ object GameBarConfig {
     fun isSystemSupported(): Boolean {
         return listOf(
             SysfsDetector.getBatteryTempPath(),
-            SysfsDetector.getFpsPath()
+            SysfsDetector.getFpsPath(),
+            SysfsDetector.getCpuTempPath()
         ).any { it != null }
     }
 

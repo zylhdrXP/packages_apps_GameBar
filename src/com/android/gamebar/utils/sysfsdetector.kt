@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
- package com.android.gamebar.utils
- import android.util.Log
+package com.android.gamebar.utils
+import android.util.Log
 import java.io.File
 
 /**
@@ -72,6 +72,121 @@ object SysfsDetector {
         return Pair(path, divider)
     }
 
+    /**
+     * Dynamically searches for CPU temperature node with type-based prioritization
+     * For cpuss-0, cpuss-1, etc., selects the first available one
+     * 
+     * @return The path to CPU temperature node or null if not found
+     */
+    private fun findCpuTempPath(): String? {
+        // Return cached path if available
+        detectedPaths["cpu_temp"]?.let { return it }
+
+        val thermalBaseDirs = arrayOf(
+            "/sys/class/thermal",
+            "/sys/devices/virtual/thermal"
+        )
+
+        // Priority order for CPU sensor types (most specific to least specific)
+        // add more on newer or older devices
+        val priorityTypes = arrayOf(
+            "cpu_therm",    // Highest priority - specific CPU thermal
+            "cpuss",        // CPU subsystem
+            "cpu",          // Generic CPU
+            "cluster0"     // CPU clusters
+        )
+
+       // Scan all thermal base directories
+        for (baseDirPath in thermalBaseDirs) {
+            val baseDir = File(baseDirPath)
+            if (!baseDir.exists() || !baseDir.isDirectory()) continue
+
+            Log.d(TAG, "Scanning thermal directory: $baseDirPath")
+
+            // First pass: search by priority type order
+            for (priorityType in priorityTypes) {
+                baseDir.listFiles()?.forEach { zone ->
+                    val typeFile = File(zone, "type")
+                    val tempFile = File(zone, "temp")
+
+                    if (typeFile.exists() && tempFile.exists() && tempFile.canRead()) {
+                        try {
+                            val type = typeFile.readText().trim().lowercase()
+                            
+                            // For cpuss, accept any cpuss-* variant (cpuss-0, cpuss-1, etc.)
+                            val isMatch = when {
+                                priorityType == "cpuss" && type.startsWith("cpuss") -> true
+                                else -> type == priorityType
+                            }
+                            
+                            if (isMatch) {
+                                detectedPaths["cpu_temp"] = tempFile.absolutePath
+                                Log.d(TAG, "Found CPU temp (priority): ${tempFile.absolutePath} (type=$type)")
+                                return tempFile.absolutePath
+                            }
+                        } catch (e: Exception) {
+                            // Continue to next file on error
+                        }
+                    }
+                }
+            }
+
+            // Second pass: search for any thermal zone that might be CPU-related
+            baseDir.listFiles()?.forEach { zone ->
+                val typeFile = File(zone, "type")
+                val tempFile = File(zone, "temp")
+
+                if (typeFile.exists() && tempFile.exists() && tempFile.canRead()) {
+                    try {
+                        val type = typeFile.readText().trim().lowercase()
+                        
+                        // Look for patterns indicating CPU sensor
+                        if (type.contains("cpu") || 
+                            type.contains("core") || 
+                            type.contains("cluster") ||
+                            type.contains("tsens") ||
+                            type.startsWith("thermal")) {
+                            
+                            // Read value to verify it's a reasonable temperature
+                            val tempValue = tempFile.readText().trim().toIntOrNull()
+                            if (tempValue != null && tempValue in 20000..90000) { // 20-90°C in milli
+                                detectedPaths["cpu_temp"] = tempFile.absolutePath
+                                Log.d(TAG, "Found CPU temp (fallback): ${tempFile.absolutePath} (type=$type)")
+                                return tempFile.absolutePath
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // Continue to next file on error
+                    }
+                }
+            }
+        }
+
+        Log.w(TAG, "No suitable CPU temperature node found")
+        detectedPaths["cpu_temp"] = null
+        return null
+    }
+
+    /**
+     * Gets CPU temperature path and divider information
+     * 
+     * @return Pair containing path and divider, or (null, 1000) if not found
+     */
+    fun getCpuTempInfo(): Pair<String?, Int> {
+        val path = getCpuTempPath()
+        if (path == null) return Pair(null, 1000)
+
+        // Return cached divider if available
+        if (detectedDividers.containsKey("cpu_temp")) {
+            return Pair(path, detectedDividers["cpu_temp"]!!)
+        }
+
+        // Auto-detect divider and cache it
+        val divider = detectTemperatureDivider(path)
+        detectedDividers["cpu_temp"] = divider
+        return Pair(path, divider)
+    }
+
     // Possible paths for each hardware component
     private val BATTERY_TEMP_PATHS = arrayOf(
         "/sys/class/power_supply/battery/temp",
@@ -118,6 +233,27 @@ object SysfsDetector {
     
     fun getBatteryTempPath(): String? = detectPath("battery_temp", BATTERY_TEMP_PATHS)
 
+    /** @return CPU temperature sysfs path or null if not supported */
+    fun getCpuTempPath(): String? = findCpuTempPath()
+
+    /** @return CPU base sysfs path*/
+    fun getCpuBasePath(): String? {
+        // Check cache first
+        detectedPaths["cpu_base"]?.let { return it }
+        
+        val path = "/sys/devices/system/cpu"
+        val file = File(path)
+        if (file.exists() && file.isDirectory()) {
+            detectedPaths["cpu_base"] = path
+            Log.d(TAG, "Using CPU base path: $path")
+            return path
+        }
+        
+        Log.w(TAG, "CPU base path not found: $path")
+        detectedPaths["cpu_base"] = null
+        return null
+    }
+
     /**
      * Clear cache and re-detect all paths (useful for debugging)
      */
@@ -128,11 +264,14 @@ object SysfsDetector {
     
     /**
      * Check if a specific hardware component is supported
+     * for future usage
      */
     fun isComponentSupported(component: String): Boolean {
         return when (component) {
             "fps" -> getFpsPath() != null
             "battery_temp" -> getBatteryTempPath() != null
+            "cpu_temp" -> getCpuTempPath() != null
+            "cpu_base" -> getCpuBasePath() != null
             else -> false
         }
     }
