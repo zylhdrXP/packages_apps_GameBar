@@ -6,14 +6,6 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <!-- GameBar Device Paths Configuration -->
-    
-    <!-- FPS Measurement -->
-    <string name="config_fps_sysfs_path" translatable="false">/sys/class/drm/sde-crtc-0/measured_fps</string>
-    
-    <!-- Battery Temperature -->
-    <string name="config_battery_temp_path" translatable="false">/sys/class/power_supply/battery/temp</string>
-    <integer name="config_battery_temp_divider">10</integer>
-    
     <!-- CPU Configuration -->
     <string name="config_cpu_base_path" translatable="false">/sys/devices/system/cpu</string>
     <string name="config_cpu_temp_path" translatable="false">/sys/class/thermal/thermal_zone48/temp</string>

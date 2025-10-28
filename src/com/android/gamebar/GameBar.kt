@@ -462,13 +462,18 @@ class GameBar private constructor(context: Context) {
 
         // 2) Battery temp - Always collect for logging
         var batteryTempStr = "N/A"
-        val tmp = readLine(GameBarConfig.batteryTempPath)
-        if (!tmp.isNullOrEmpty()) {
-            try {
-                val raw = tmp.trim().toInt()
-                val celsius = raw / GameBarConfig.batteryTempDivider.toFloat()
-                batteryTempStr = String.format(Locale.getDefault(), "%.1f", celsius)
-            } catch (ignored: NumberFormatException) {}
+        val (path, divider) = GameBarConfig.getBatteryTempConfig()
+        if (path != null) {
+            val tmp = readLine(path)
+            if (!tmp.isNullOrEmpty()) {
+                try {
+                    val raw = tmp.trim().toInt()
+                    val celcius = raw / divider.toFloat()
+                    batteryTempStr =  String.format(Locale.getDefault(), "%.1f", celcius)
+                } catch (ignored: NumberFormatException){
+                    batteryTempStr = "Err"
+                }
+            }
         }
         if (showBatteryTemp) {
             statViews.add(createStatLine("Temp", "${batteryTempStr}°C"))

@@ -6,6 +6,7 @@
 package com.android.gamebar
 
 import android.content.Context
+import com.android.gamebar.utils.SysfsDetector
 
 /**
  * Centralized configuration for GameBar hardware paths and conversion factors.
@@ -14,20 +15,31 @@ import android.content.Context
 object GameBarConfig {
     
     private lateinit var context: Context
-    
+
+    // Cache for detected paths
+    private val detectedPaths = mutableMapOf<String, String?>()
+
+    // cache for detected dividers
+    private val detectedDividers = mutableMapOf<String, Int>()
+
     fun init(ctx: Context) {
         context = ctx.applicationContext
     }
     
     // FPS paths
-    val fpsSysfsPath: String
-        get() = context.getString(R.string.config_fps_sysfs_path)
+    val fpsSysfsPath: String?
+        get() = SysfsDetector.getFpsPath()
     
     // Battery configuration
-    val batteryTempPath: String
-        get() = context.getString(R.string.config_battery_temp_path)
+    val batteryTempPath: String?
+        get() = SysfsDetector.getBatteryTempInfo().first
     val batteryTempDivider: Int
-        get() = context.resources.getInteger(R.integer.config_battery_temp_divider)
+        get() = SysfsDetector.getBatteryTempInfo().second
+
+    fun getBatteryTempConfig(): Pair<String?, Int> {
+        return SysfsDetector.getBatteryTempInfo()
+    }
+
     
     // CPU configuration
     val cpuBasePath: String
@@ -62,4 +74,16 @@ object GameBarConfig {
         get() = context.getString(R.string.config_proc_stat_path)
     val procMeminfoPath: String
         get() = context.getString(R.string.config_proc_meminfo_path)
+
+
+    /**
+     * Utility function to check if all essential components are available
+     */
+    fun isSystemSupported(): Boolean {
+        return listOf(
+            SysfsDetector.getBatteryTempPath(),
+            SysfsDetector.getFpsPath()
+        ).any { it != null }
+    }
+
 }
