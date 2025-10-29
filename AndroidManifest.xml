@@ -38,7 +38,7 @@
 
     <application
         android:label="@string/app_title"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_gamebar_launcher"
         android:persistent="true"
         android:defaultToDeviceProtectedStorage="true"
         android:directBootAware="true"
@@ -64,7 +64,7 @@
         <activity
             android:name=".GameBarSettingsActivity"
             android:label="@string/app_title"
-            android:icon="@mipmap/ic_launcher"
+            android:icon="@mipmap/ic_gamebar_launcher"
             android:theme="@style/Theme.SubSettingsBase.Expressive"
             android:exported="true">
             <intent-filter>
@@ -76,7 +76,10 @@
             </intent-filter>
             <meta-data
                 android:name="com.android.settings.category"
-                android:value="com.android.settings.category.ia.apps" />
+                android:value="com.android.settings.category.ia.system" />
+            <meta-data
+                android:name="com.android.settings.icon"
+                android:resource="@drawable/ic_gamebar" />    
         </activity>
 
         <!-- GameBar Overlay Tile Service -->
