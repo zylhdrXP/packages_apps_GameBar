@@ -125,6 +125,20 @@
             android:max="255"
             android:min="0"
             settings:units="" />
+
+        <com.android.gamebar.colorpicker.ColorPreferenceCompat
+            android:key="game_bar_background_color"
+            android:title="Overlay Background Color"
+            android:summary="Color for the overlay background"
+            android:defaultValue="0xFF000000"
+            app:gamebar_dialogType="custom"
+            app:gamebar_showAlphaSlider="true"
+            app:gamebar_colorShape="circle"
+            app:gamebar_showColorShades="true"
+            app:gamebar_allowPresets="true"
+            app:gamebar_allowCustom="true"
+            app:gamebar_colorPresets="@array/fps_overlay_color_int_values" />
+
         <com.android.gamebar.utils.PartsCustomSeekBarPreference
             android:key="game_bar_corner_radius"
             android:title="Overlay Corner Radius"
