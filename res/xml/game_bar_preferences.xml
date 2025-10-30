@@ -199,6 +199,11 @@
             app:gamebar_allowCustom="true"
             app:gamebar_colorPresets="@array/fps_overlay_color_int_values" />
 
+        <Preference
+            android:key="game_bar_font_selector"
+            android:title="Overlay Font Style"
+            android:summary="Choose custom font for overlay text" />
+
         <ListPreference
             android:key="game_bar_position"
             android:title="Overlay Position"
