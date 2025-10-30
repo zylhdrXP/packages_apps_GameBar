@@ -1,6 +1,7 @@
 /*
  * SPDX-FileCopyrightText: 2025 kenway214
  * SPDX-FileCopyrightText: 2017 Jared Rummler
+ * SPDX-FileCopyrightText: 2025 DerpFest AOSP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -290,6 +291,9 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
               }
             }
           }
+          // Persist reset and close
+          onColorSelected(color);
+          dismiss();
         }
       });
     }
