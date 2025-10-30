@@ -18,6 +18,34 @@
       android:padding="16dp"
       >
 
+    <!-- Custom presets grid (GameBar colors) -->
+    <com.android.gamebar.colorpicker.NestedGridView
+        android:id="@+id/custom_presets_grid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:cacheColorHint="@android:color/transparent"
+        android:clickable="false"
+        android:columnWidth="@dimen/gamebar_column_width"
+        android:horizontalSpacing="4dp"
+        android:listSelector="@android:color/transparent"
+        android:numColumns="auto_fit"
+        android:stretchMode="spacingWidthUniform"
+        android:verticalSpacing="8dp"
+        android:visibility="gone"
+        />
+
+    <!-- Divider between custom and default presets -->
+    <View
+        android:id="@+id/custom_presets_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="12dp"
+        android:background="?android:attr/dividerVertical"
+        android:visibility="gone"
+        />
+
+
     <!-- Default presets grid -->
     <com.android.gamebar.colorpicker.NestedGridView
         android:id="@+id/gridView"
