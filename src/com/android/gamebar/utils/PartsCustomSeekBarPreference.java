@@ -223,9 +223,7 @@ public class PartsCustomSeekBarPreference extends Preference implements Slider.O
             mSlider.setThumbElevation(res.getDimensionPixelSize(
                     com.android.settingslib.widget.preference.slider.R.dimen
                     .settingslib_expressive_slider_thumb_elevation));
-            mSlider.setThumbStrokeWidth(res.getDimensionPixelSize(
-                    com.android.settingslib.widget.preference.slider.R.dimen
-                    .settingslib_expressive_slider_thumb_stroke_width));
+            mSlider.setThumbStrokeWidth(0);
             mSlider.setThumbTrackGapSize(res.getDimensionPixelSize(
                     com.android.settingslib.widget.preference.slider.R.dimen
                     .settingslib_expressive_slider_thumb_track_gap_size));
