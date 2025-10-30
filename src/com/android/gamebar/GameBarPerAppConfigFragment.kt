@@ -20,12 +20,15 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
 import com.android.gamebar.R
 
-class GameBarPerAppConfigFragment : PreferenceFragmentCompat() {
+import java.util.Locale
+
+import com.android.settingslib.widget.SettingsBasePreferenceFragment
+
+class GameBarPerAppConfigFragment : SettingsBasePreferenceFragment() {
     
     companion object {
         const val PREF_AUTO_APPS = "game_bar_auto_apps"
