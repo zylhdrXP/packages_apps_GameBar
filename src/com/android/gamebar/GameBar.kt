@@ -1,5 +1,6 @@
 /*
  * SPDX-FileCopyrightText: 2025 kenway214
+ * SPDX-FileCopyrightText: 2025 DerpFest AOSP
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -673,7 +674,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
-                setTypeface(getTypeface(), Typeface.NORMAL)
+                setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
                 text = "CPU Freq "
             }
             freqContainer.addView(labelTv)
@@ -695,7 +696,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
-                setTypeface(getTypeface(), Typeface.NORMAL)
+                setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
                 text = freqLine
             }
 
@@ -729,7 +730,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
-                setTypeface(getTypeface(), Typeface.NORMAL)
+                setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
                 text = if (title.isEmpty()) "" else "$title "
             }
 
@@ -740,7 +741,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
-                setTypeface(getTypeface(), Typeface.NORMAL)
+                setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
                 text = rawValue
             }
 
@@ -754,7 +755,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
-                setTypeface(getTypeface(), Typeface.NORMAL)
+                setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
                 text = rawValue
             }
             lineLayout.addView(tvMinimal)
@@ -780,7 +781,7 @@ class GameBar private constructor(context: Context) {
             } catch (e: Exception) {
                 setTextColor(Color.WHITE)
             }
-            setTypeface(getTypeface(), Typeface.NORMAL)
+            setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
             text = " . "
         }
     }
