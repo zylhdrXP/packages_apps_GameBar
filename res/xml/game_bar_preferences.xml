@@ -5,7 +5,8 @@
 -->
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:settings="http://schemas.android.com/apk/res-auto">
+    xmlns:settings="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.android.settingslib.widget.MainSwitchPreference
         android:key="game_bar_enable"
@@ -158,21 +159,31 @@
             android:entries="@array/fps_overlay_update_interval_entries"
             android:entryValues="@array/fps_overlay_update_interval_values" />
 
-        <ListPreference
+        <com.android.gamebar.colorpicker.ColorPreferenceCompat
             android:key="game_bar_title_color"
             android:title="Stat Title Color"
             android:summary="Color for 'FPS', 'Temp', 'CPU', etc. text"
-            android:defaultValue="#FFFFFF"
-            android:entries="@array/fps_overlay_color_entries"
-            android:entryValues="@array/fps_overlay_color_values" />
+            android:defaultValue="@color/gamebar_default_title_color"
+            app:gamebar_dialogType="custom"
+            app:gamebar_showAlphaSlider="false"
+            app:gamebar_colorShape="circle"
+            app:gamebar_showColorShades="true"
+            app:gamebar_allowPresets="true"
+            app:gamebar_allowCustom="true"
+            app:gamebar_colorPresets="@array/fps_overlay_color_int_values" />
 
-        <ListPreference
+        <com.android.gamebar.colorpicker.ColorPreferenceCompat
             android:key="game_bar_value_color"
             android:title="Stat Value Color"
             android:summary="Color for numeric stats (e.g., '29', '32.0°C')"
-            android:defaultValue="#4CAF50"
-            android:entries="@array/fps_overlay_color_entries"
-            android:entryValues="@array/fps_overlay_color_values" />
+            android:defaultValue="@color/gamebar_default_value_color"
+            app:gamebar_dialogType="custom"
+            app:gamebar_showAlphaSlider="false"
+            app:gamebar_colorShape="circle"
+            app:gamebar_showColorShades="true"
+            app:gamebar_allowPresets="true"
+            app:gamebar_allowCustom="true"
+            app:gamebar_colorPresets="@array/fps_overlay_color_int_values" />
 
         <ListPreference
             android:key="game_bar_position"

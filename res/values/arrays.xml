@@ -48,29 +48,6 @@
         <item>draggable</item>
     </string-array>
 
-    <!-- Overlay color -->
-    <string-array name="fps_overlay_color_entries">
-        <item>White</item>
-        <item>Crimson</item>
-        <item>Fruit Salad</item>
-        <item>Royal Blue</item>
-        <item>Amber</item>
-        <item>Teal</item>
-        <item>Electric Violet</item>
-        <item>Magenta</item>
-    </string-array>
-
-    <string-array name="fps_overlay_color_values">
-        <item>#FFFFFF</item>
-        <item>#DC143C</item>
-        <item>#4CAF50</item>
-        <item>#4169E1</item>
-        <item>#FFBF00</item>
-        <item>#008080</item>
-        <item>#8A2BE2</item>
-        <item>#FF1493</item>
-    </string-array>
-
     <!-- Overlay format -->
     <string-array name="game_bar_format_entries">
         <item>Full</item>
@@ -104,5 +81,17 @@
         <item>5000</item>
         <item>10000</item>
     </string-array>
+
+    <!-- Color presets as integer array for ColorPicker -->
+    <integer-array name="fps_overlay_color_int_values">
+        <item>0xFFFFFFFF</item> <!-- White -->
+        <item>0xFFDC143C</item> <!-- Crimson -->
+        <item>0xFF4CAF50</item> <!-- Fruit Salad -->
+        <item>0xFF4169E1</item> <!-- Royal Blue -->
+        <item>0xFFFFBF00</item> <!-- Amber -->
+        <item>0xFF008080</item> <!-- Teal -->
+        <item>0xFF8A2BE2</item> <!-- Electric Violet -->
+        <item>0xFFFF1493</item> <!-- Magenta -->
+    </integer-array>
 
 </resources>
