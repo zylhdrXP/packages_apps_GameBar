@@ -109,6 +109,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
   FrameLayout rootView;
   int[] presets;
   @ColorInt int color;
+  @ColorInt int initialColor;
   int dialogType;
   int dialogId;
   boolean showColorShades;
@@ -176,12 +177,15 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
       selectedButtonStringRes = R.string.gamebar_select;
     }
 
+    initialColor = getArguments().getInt(ARG_COLOR);
+    
     AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity()).setView(rootView)
         .setPositiveButton(selectedButtonStringRes, new DialogInterface.OnClickListener() {
           @Override public void onClick(DialogInterface dialog, int which) {
             onColorSelected(color);
           }
-        });
+        })
+        .setNegativeButton("Reset", null); // Reset button - will be handled in onStart
 
     int dialogTitleStringRes = getArguments().getInt(ARG_DIALOG_TITLE);
     if (dialogTitleStringRes != 0) {
@@ -217,7 +221,9 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
         .clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
 
-    // Do not dismiss the dialog when clicking the neutral button.
+    setupResetButton();
+
+    // Do not dismiss the dialog when clicking the neutral button (Presets/Custom toggle).
     Button neutralButton = dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
     if (neutralButton != null) {
       neutralButton.setOnClickListener(new View.OnClickListener() {
@@ -228,11 +234,61 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
               dialogType = TYPE_PRESETS;
               ((Button) v).setText(customButtonStringRes != 0 ? customButtonStringRes : R.string.gamebar_custom);
               rootView.addView(createPresetsView());
+              setupResetButton(); // Update reset button handler after view change
               break;
             case TYPE_PRESETS:
               dialogType = TYPE_CUSTOM;
               ((Button) v).setText(presetsButtonStringRes != 0 ? presetsButtonStringRes : R.string.gamebar_presets);
               rootView.addView(createPickerView());
+              setupResetButton(); // Update reset button handler after view change
+          }
+        }
+      });
+    }
+  }
+
+  private void setupResetButton() {
+    AlertDialog dialog = (AlertDialog) getDialog();
+    if (dialog == null) return;
+    
+    Button resetButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+    if (resetButton != null) {
+      resetButton.setOnClickListener(new View.OnClickListener() {
+        @Override public void onClick(View v) {
+          color = initialColor;
+          if (dialogType == TYPE_PRESETS) {
+            // Update color shades
+            if (showColorShades) {
+              createColorShades(color);
+            }
+            // Reselect the initial color in presets
+            if (adapter != null && presets != null) {
+              // Find the initial color position in presets
+              int initialPosition = -1;
+              for (int i = 0; i < presets.length; i++) {
+                if (presets[i] == initialColor) {
+                  initialPosition = i;
+                  break;
+                }
+              }
+              adapter.selectedPosition = initialPosition;
+              adapter.notifyDataSetChanged();
+            }
+          } else if (dialogType == TYPE_CUSTOM) {
+            // Update color picker and hex field
+            if (colorPicker != null) {
+              colorPicker.setColor(color, true);
+            }
+            if (newColorPanel != null) {
+              newColorPanel.setColor(color);
+            }
+            if (hexEditText != null) {
+              if (showAlphaSlider) {
+                hexEditText.setText(String.format("%08X", color));
+              } else {
+                hexEditText.setText(String.format("%06X", (0xFFFFFF & color)));
+              }
+            }
           }
         }
       });
@@ -423,8 +479,14 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     transparencySeekBar = (SeekBar) contentView.findViewById(R.id.transparency_seekbar);
     transparencyPercText = (TextView) contentView.findViewById(R.id.transparency_text);
     GridView gridView = (GridView) contentView.findViewById(R.id.gridView);
+    GridView customPresetsGrid = (GridView) contentView.findViewById(R.id.custom_presets_grid);
+    View customPresetsDivider = contentView.findViewById(R.id.custom_presets_divider);
 
     loadPresets();
+    
+    // Hide custom presets grid and divider - presets come from XML configuration
+    customPresetsGrid.setVisibility(View.GONE);
+    customPresetsDivider.setVisibility(View.GONE);
 
     if (showColorShades) {
       createColorShades(color);

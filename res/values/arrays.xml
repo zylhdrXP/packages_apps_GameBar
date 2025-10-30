@@ -82,7 +82,7 @@
         <item>10000</item>
     </string-array>
 
-    <!-- Color presets as integer array for ColorPicker -->
+    <!-- Color presets for GameBar -->
     <integer-array name="fps_overlay_color_int_values">
         <item>0xFFFFFFFF</item> <!-- White -->
         <item>0xFFDC143C</item> <!-- Crimson -->
