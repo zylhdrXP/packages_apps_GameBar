@@ -128,6 +128,12 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             startActivity(Intent(requireContext(), GameBarPerAppConfigActivity::class.java))
             true
         }
+        
+        val fontSelectorPref: Preference? = findPreference("game_bar_font_selector")
+        fontSelectorPref?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), GameBarFontSelectorActivity::class.java))
+            true
+        }
     }
 
     private fun setupMasterSwitchListener() {

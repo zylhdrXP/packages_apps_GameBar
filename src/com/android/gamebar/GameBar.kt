@@ -11,6 +11,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Handler
 import android.os.Looper
@@ -91,6 +92,7 @@ class GameBar private constructor(context: Context) {
     private var paddingDp = 8
     private var titleColorHex = "#FFFFFF"
     private var valueColorHex = "#FFFFFF"
+    private var customTypeface: Typeface? = null
     private var overlayFormat = "full"
     private var position = "top_center"
     private var splitMode = "side_by_side"
@@ -246,6 +248,11 @@ class GameBar private constructor(context: Context) {
         val valueColorInt = prefs.getInt("game_bar_value_color", 0xFF4CAF50.toInt())
         val valueColorHex = String.format("#%06X", 0xFFFFFF and valueColorInt)
         updateValueColor(valueColorHex)
+        
+        // Load custom font
+        val fontPath = prefs.getString("game_bar_font_path", "default") ?: "default"
+        loadCustomFont(fontPath)
+        
         updateOverlayFormat(prefs.getString("game_bar_format", "full") ?: "full")
         updateUpdateInterval(prefs.getString("game_bar_update_interval", "1000") ?: "1000")
         updatePosition(prefs.getString("game_bar_position", "draggable") ?: "draggable")
@@ -666,6 +673,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
+                setTypeface(getTypeface(), Typeface.NORMAL)
                 text = "CPU Freq "
             }
             freqContainer.addView(labelTv)
@@ -687,6 +695,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
+                setTypeface(getTypeface(), Typeface.NORMAL)
                 text = freqLine
             }
 
@@ -720,6 +729,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
+                setTypeface(getTypeface(), Typeface.NORMAL)
                 text = if (title.isEmpty()) "" else "$title "
             }
 
@@ -730,6 +740,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
+                setTypeface(getTypeface(), Typeface.NORMAL)
                 text = rawValue
             }
 
@@ -743,6 +754,7 @@ class GameBar private constructor(context: Context) {
                 } catch (e: Exception) {
                     setTextColor(Color.WHITE)
                 }
+                setTypeface(getTypeface(), Typeface.NORMAL)
                 text = rawValue
             }
             lineLayout.addView(tvMinimal)
@@ -768,6 +780,7 @@ class GameBar private constructor(context: Context) {
             } catch (e: Exception) {
                 setTextColor(Color.WHITE)
             }
+            setTypeface(getTypeface(), Typeface.NORMAL)
             text = " . "
         }
     }
@@ -816,6 +829,47 @@ class GameBar private constructor(context: Context) {
     fun updateBackgroundColor(colorInt: Int) {
         backgroundColorInt = colorInt
         applyBackgroundStyle()
+    }
+
+    fun updateFont(fontPath: String) {
+        loadCustomFont(fontPath)
+        // Force refresh by recreating the overlay if it's showing
+        if (isShowing) {
+            val wasShowing = isShowing
+            hide()
+            if (wasShowing) {
+                show()
+            }
+        }
+    }
+
+    private fun loadCustomFont(fontPath: String) {
+        android.util.Log.d("GameBar", "Loading font: $fontPath")
+        customTypeface = if (fontPath == "default" || fontPath.isEmpty()) {
+            android.util.Log.d("GameBar", "Using default font")
+            null
+        } else {
+            try {
+                // Load font from assets
+                val typeface = Typeface.createFromAsset(context.assets, fontPath)
+                android.util.Log.d("GameBar", "Font loaded successfully: $fontPath")
+                android.util.Log.d("GameBar", "Typeface object: $typeface")
+                android.util.Log.d("GameBar", "Typeface is default: ${typeface == Typeface.DEFAULT}")
+                typeface
+            } catch (e: Exception) {
+                android.util.Log.e("GameBar", "Failed to load font from assets: $fontPath - ${e.message}")
+                e.printStackTrace()
+                null
+            }
+        }
+        android.util.Log.d("GameBar", "customTypeface set to: $customTypeface")
+    }
+
+    private fun getTypeface(): Typeface {
+        android.util.Log.d("GameBar", "getTypeface called - customTypeface: $customTypeface")
+        val typeface = customTypeface ?: Typeface.DEFAULT
+        android.util.Log.d("GameBar", "getTypeface returning: $typeface (isCustom: ${customTypeface != null})")
+        return typeface
     }
 
     fun updateOverlayFormat(format: String) {

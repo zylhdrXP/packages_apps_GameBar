@@ -140,6 +140,11 @@
         android:exported="false"
         android:theme="@style/Theme.SubSettingsBase.Expressive" />
 
+    <activity
+        android:name=".GameBarFontSelectorActivity"
+        android:exported="false"
+        android:theme="@style/Theme.SubSettingsBase.Expressive" />
+
 <!-- FileProvider for sharing log files -->
     <provider
         android:name="androidx.core.content.FileProvider"
