@@ -86,6 +86,7 @@ class GameBar private constructor(context: Context) {
     // Style properties
     private var textSizeSp = 14
     private var backgroundAlpha = 128
+    private var backgroundColorInt = 0xFF000000.toInt()
     private var cornerRadius = 90
     private var paddingDp = 8
     private var titleColorHex = "#FFFFFF"
@@ -235,6 +236,7 @@ class GameBar private constructor(context: Context) {
         updateSplitMode(prefs.getString("game_bar_split_mode", "side_by_side") ?: "side_by_side")
         updateTextSize(prefs.getInt("game_bar_text_size", 12))
         updateBackgroundAlpha(prefs.getInt("game_bar_background_alpha", 95))
+        updateBackgroundColor(prefs.getInt("game_bar_background_color", 0xFF000000.toInt()))
         updateCornerRadius(prefs.getInt("game_bar_corner_radius", 100))
         updatePadding(prefs.getInt("game_bar_padding", 4))
         val titleColorInt = prefs.getInt("game_bar_title_color", 0xFFFFFFFF.toInt())
@@ -811,6 +813,11 @@ class GameBar private constructor(context: Context) {
         valueColorHex = hex
     }
 
+    fun updateBackgroundColor(colorInt: Int) {
+        backgroundColorInt = colorInt
+        applyBackgroundStyle()
+    }
+
     fun updateOverlayFormat(format: String) {
         overlayFormat = format
         if (isShowing) {
@@ -890,9 +897,14 @@ class GameBar private constructor(context: Context) {
         }
         
         // Apply background color with proper alpha
+        val red = Color.red(backgroundColorInt)
+        val green = Color.green(backgroundColorInt)
+        val blue = Color.blue(backgroundColorInt)
+        
+        // Use backgroundAlpha for transparency control
         val color = Color.argb(
             Math.max(backgroundAlpha, 16), // Minimum alpha of 16 to prevent invisible overlays
-            0, 0, 0
+            red, green, blue
         )
         bgDrawable?.setColor(color)
         bgDrawable?.cornerRadius = cornerRadius.toFloat()

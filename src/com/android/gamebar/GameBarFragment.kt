@@ -51,6 +51,7 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private var textColorPref: ListPreference? = null
     private var titleColorPref: ColorPreferenceCompat? = null
     private var valueColorPref: ColorPreferenceCompat? = null
+    private var backgroundColorPref: ColorPreferenceCompat? = null
     private var positionPref: ListPreference? = null
     private var splitModePref: ListPreference? = null
     private var overlayFormatPref: ListPreference? = null
@@ -93,6 +94,7 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
         textColorPref = findPreference("game_bar_text_color")
         titleColorPref = findPreference("game_bar_title_color")
         valueColorPref = findPreference("game_bar_value_color")
+        backgroundColorPref = findPreference("game_bar_background_color")
         positionPref = findPreference("game_bar_position")
         splitModePref = findPreference("game_bar_split_mode")
         overlayFormatPref = findPreference("game_bar_format")
@@ -305,6 +307,12 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             if (newValue is Int) {
                 val hexColor = String.format("#%06X", 0xFFFFFF and newValue)
                 gameBar?.updateValueColor(hexColor)
+            }
+            true
+        }
+        backgroundColorPref?.setOnPreferenceChangeListener { _, newValue ->
+            if (newValue is Int) {
+                gameBar?.updateBackgroundColor(newValue)
             }
             true
         }
