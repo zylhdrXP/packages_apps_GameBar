@@ -17,6 +17,7 @@ import com.android.gamebar.utils.PartsCustomSeekBarPreference
 import androidx.preference.SwitchPreferenceCompat
 import com.android.settingslib.widget.MainSwitchPreference
 import com.android.gamebar.R
+import com.android.gamebar.colorpicker.ColorPreferenceCompat
 
 import java.util.Locale
 
@@ -48,8 +49,8 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private var itemSpacingPref: PartsCustomSeekBarPreference? = null
     private var updateIntervalPref: ListPreference? = null
     private var textColorPref: ListPreference? = null
-    private var titleColorPref: ListPreference? = null
-    private var valueColorPref: ListPreference? = null
+    private var titleColorPref: ColorPreferenceCompat? = null
+    private var valueColorPref: ColorPreferenceCompat? = null
     private var positionPref: ListPreference? = null
     private var splitModePref: ListPreference? = null
     private var overlayFormatPref: ListPreference? = null
@@ -294,14 +295,16 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             true
         }
         titleColorPref?.setOnPreferenceChangeListener { _, newValue ->
-            if (newValue is String) {
-                gameBar?.updateTitleColor(newValue)
+            if (newValue is Int) {
+                val hexColor = String.format("#%06X", 0xFFFFFF and newValue)
+                gameBar?.updateTitleColor(hexColor)
             }
             true
         }
         valueColorPref?.setOnPreferenceChangeListener { _, newValue ->
-            if (newValue is String) {
-                gameBar?.updateValueColor(newValue)
+            if (newValue is Int) {
+                val hexColor = String.format("#%06X", 0xFFFFFF and newValue)
+                gameBar?.updateValueColor(hexColor)
             }
             true
         }
