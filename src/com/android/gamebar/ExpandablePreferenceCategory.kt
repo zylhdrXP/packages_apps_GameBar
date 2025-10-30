@@ -8,6 +8,7 @@ package com.android.gamebar
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.preference.Preference
@@ -51,7 +52,14 @@ class ExpandablePreferenceCategory @JvmOverloads constructor(
         // Update title style
         titleView?.let {
             it.textSize = 14f
-            it.setTextColor(context.getColor(android.R.color.white))
+            val typedValue = TypedValue()
+            val theme = context.theme
+            if (theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true)) {
+                it.setTextColor(typedValue.data)
+            } else {
+                // Fallback
+                it.setTextColor(context.getColor(android.R.color.white))
+            }
         }
     }
 
