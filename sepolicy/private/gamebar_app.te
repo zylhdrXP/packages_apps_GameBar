@@ -29,8 +29,6 @@ allow gamebar_app system_app_data_file:{ file lnk_file } create_file_perms;
 
 binder_call(gamebar_app, gpuservice)
 
-get_prop(gamebar_app, settingslib_prop)
-
 # Allow reading thermal sensor data
 r_dir_file(gamebar_app, sysfs_thermal)
 allow gamebar_app sysfs_thermal:file { read open };
