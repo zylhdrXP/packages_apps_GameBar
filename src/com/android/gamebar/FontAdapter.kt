@@ -14,7 +14,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
 class FontAdapter(
-    private val fonts: List<FontItem>,
+    private var fonts: List<FontItem>,
     private val onFontSelected: (FontItem) -> Unit
 ) : RecyclerView.Adapter<FontAdapter.FontViewHolder>() {
 
@@ -88,5 +88,11 @@ class FontAdapter(
             
             onFontSelected(fonts[position])
         }
+    }
+    
+    fun updateFonts(newFonts: List<FontItem>) {
+        fonts = newFonts
+        selectedPosition = fonts.indexOfFirst { it.isSelected }
+        notifyDataSetChanged()
     }
 }
