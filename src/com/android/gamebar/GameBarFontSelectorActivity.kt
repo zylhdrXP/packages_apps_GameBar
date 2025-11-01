@@ -6,6 +6,9 @@
 package com.android.gamebar
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
 import android.widget.Toast
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,20 +17,24 @@ import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity
 
 class GameBarFontSelectorActivity : CollapsingToolbarBaseActivity() {
 
+    private lateinit var searchBox: EditText
     private lateinit var recyclerView: RecyclerView
     private lateinit var fontAdapter: FontAdapter
     private val fontList = mutableListOf<FontItem>()
+    private val allFonts = mutableListOf<FontItem>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_font_selector)
         title = "Select Overlay Font"
 
+        searchBox = findViewById(R.id.font_search_box)
         recyclerView = findViewById(R.id.font_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
         loadFonts()
         setupAdapter()
+        setupSearch()
     }
 
     private fun loadFonts() {
@@ -80,6 +87,9 @@ class GameBarFontSelectorActivity : CollapsingToolbarBaseActivity() {
             fontList.sortBy { it.displayName }
             fontList.add(0, defaultFont)
         }
+        
+        // Store all fonts for filtering
+        allFonts.addAll(fontList)
     }
 
     private fun setupAdapter() {
@@ -105,5 +115,30 @@ class GameBarFontSelectorActivity : CollapsingToolbarBaseActivity() {
         }
 
         recyclerView.adapter = fontAdapter
+    }
+    
+    private fun setupSearch() {
+        searchBox.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                filterFonts(s.toString())
+            }
+            
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+    
+    private fun filterFonts(query: String) {
+        val filtered = if (query.isEmpty()) {
+            allFonts
+        } else {
+            allFonts.filter { font ->
+                font.displayName.contains(query, ignoreCase = true) ||
+                font.name.contains(query, ignoreCase = true)
+            }
+        }
+        
+        fontAdapter.updateFonts(filtered)
     }
 }
