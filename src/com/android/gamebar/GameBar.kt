@@ -834,13 +834,9 @@ class GameBar private constructor(context: Context) {
 
     fun updateFont(fontPath: String) {
         loadCustomFont(fontPath)
-        // Force refresh by recreating the overlay if it's showing
+        // Apply new typeface in-place to avoid overlay flicker
         if (isShowing) {
-            val wasShowing = isShowing
-            hide()
-            if (wasShowing) {
-                show()
-            }
+            applyTypefaceToOverlay()
         }
     }
 
@@ -871,6 +867,34 @@ class GameBar private constructor(context: Context) {
         val typeface = customTypeface ?: Typeface.DEFAULT
         android.util.Log.d("GameBar", "getTypeface returning: $typeface (isCustom: ${customTypeface != null})")
         return typeface
+    }
+
+    private fun applyTypefaceToOverlay() {
+        val root = rootLayout ?: return
+        val targetTypeface = getTypeface()
+        fun traverse(view: View) {
+            when (view) {
+                is TextView -> view.setTypeface(targetTypeface, Typeface.NORMAL)
+                is ViewGroup -> {
+                    for (i in 0 until view.childCount) {
+                        traverse(view.getChildAt(i))
+                    }
+                }
+            }
+        }
+        try {
+            traverse(root)
+            // Ensure layout is refreshed without rebuilding
+            layoutParams?.let { lp ->
+                overlayView?.let { view ->
+                    try {
+                        windowManager.updateViewLayout(view, lp)
+                    } catch (_: Exception) { }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("GameBar", "Error applying typeface to overlay: ${e.message}")
+        }
     }
 
     fun updateOverlayFormat(format: String) {
