@@ -39,9 +39,12 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private var gpuUsageSwitch: SwitchPreferenceCompat? = null
     private var gpuClockSwitch: SwitchPreferenceCompat? = null
     private var gpuTempSwitch: SwitchPreferenceCompat? = null
-    private var doubleTapCapturePref: SwitchPreferenceCompat? = null
-    private var singleTapTogglePref: SwitchPreferenceCompat? = null
+    private var singleTapEnablePref: SwitchPreferenceCompat? = null
+    private var singleTapFunctionPref: ListPreference? = null
+    private var doubleTapEnablePref: SwitchPreferenceCompat? = null
+    private var doubleTapFunctionPref: ListPreference? = null
     private var longPressEnablePref: SwitchPreferenceCompat? = null
+    private var longPressFunctionPref: ListPreference? = null
     private var longPressTimeoutPref: ListPreference? = null
     private var textSizePref: PartsCustomSeekBarPreference? = null
     private var bgAlphaPref: PartsCustomSeekBarPreference? = null
@@ -81,9 +84,12 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
         ramSpeedSwitch = findPreference("game_bar_ram_speed_enable")
         ramTempSwitch = findPreference("game_bar_ram_temp_enable")
 
-        doubleTapCapturePref = findPreference("game_bar_doubletap_capture")
-        singleTapTogglePref = findPreference("game_bar_single_tap_toggle")
+        singleTapEnablePref = findPreference("game_bar_single_tap_enable")
+        singleTapFunctionPref = findPreference("game_bar_single_tap_function")
+        doubleTapEnablePref = findPreference("game_bar_doubletap_enable")
+        doubleTapFunctionPref = findPreference("game_bar_doubletap_function")
         longPressEnablePref = findPreference("game_bar_longpress_enable")
+        longPressFunctionPref = findPreference("game_bar_longpress_function")
         longPressTimeoutPref = findPreference("game_bar_longpress_timeout")
 
         textSizePref = findPreference("game_bar_text_size")
@@ -106,6 +112,12 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
         setupFeatureSwitchListeners()
         
         fpsDisplayModePref?.isVisible = fpsSwitch?.isChecked ?: true
+        
+        // Set initial visibility of gesture function selectors
+        singleTapFunctionPref?.isVisible = singleTapEnablePref?.isChecked ?: true
+        doubleTapFunctionPref?.isVisible = doubleTapEnablePref?.isChecked ?: true
+        longPressFunctionPref?.isVisible = longPressEnablePref?.isChecked ?: true
+        longPressTimeoutPref?.isVisible = longPressEnablePref?.isChecked ?: true
         
         setupGesturePrefListeners()
         setupStylePrefListeners()
@@ -259,18 +271,29 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     }
 
     private fun setupGesturePrefListeners() {
-        doubleTapCapturePref?.setOnPreferenceChangeListener { _, newValue ->
-            gameBar?.setDoubleTapCaptureEnabled(newValue as Boolean)
+        // Single tap enable/disable and visibility
+        singleTapEnablePref?.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            singleTapFunctionPref?.isVisible = enabled
             true
         }
-        singleTapTogglePref?.setOnPreferenceChangeListener { _, newValue ->
-            gameBar?.setSingleTapToggleEnabled(newValue as Boolean)
+        
+        // Double tap enable/disable and visibility
+        doubleTapEnablePref?.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            doubleTapFunctionPref?.isVisible = enabled
             true
         }
+        
+        // Long press enable/disable and visibility
         longPressEnablePref?.setOnPreferenceChangeListener { _, newValue ->
-            gameBar?.setLongPressEnabled(newValue as Boolean)
+            val enabled = newValue as Boolean
+            longPressFunctionPref?.isVisible = enabled
+            longPressTimeoutPref?.isVisible = enabled
             true
         }
+        
+        // Long press timeout
         longPressTimeoutPref?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue is String) {
                 val ms = newValue.toLong()

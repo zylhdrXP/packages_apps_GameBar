@@ -78,18 +78,30 @@
         <item>stacked</item>
     </string-array>
 
+    <!-- Gesture Functions -->
+    <string-array name="gesture_function_entries">
+        <item>Toggle Full/Minimal Format</item>
+        <item>Start/Stop Log Capture</item>
+        <item>Open GameBar Settings</item>
+    </string-array>
+    <string-array name="gesture_function_values">
+        <item>toggle_format</item>
+        <item>capture_logs</item>
+        <item>open_settings</item>
+    </string-array>
+
     <!-- Long press timeouts -->
     <string-array name="game_bar_longpress_entries">
+        <item>0.5 seconds</item>
         <item>1 second</item>
+        <item>2 seconds</item>
         <item>3 seconds</item>
-        <item>5 seconds</item>
-        <item>10 seconds</item>
     </string-array>
     <string-array name="game_bar_longpress_values">
+        <item>500</item>
         <item>1000</item>
+        <item>2000</item>
         <item>3000</item>
-        <item>5000</item>
-        <item>10000</item>
     </string-array>
 
     <!-- Color presets for GameBar -->

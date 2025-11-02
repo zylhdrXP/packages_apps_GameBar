@@ -124,8 +124,11 @@ class GameBar private constructor(context: Context) {
     private var downY = 0f
 
     private var gestureDetector: GestureDetector? = null
-    private var doubleTapCaptureEnabled = true
-    private var singleTapToggleEnabled = true
+    private var singleTapEnabled = true
+    private var singleTapFunction = "toggle_format"
+    private var doubleTapEnabled = true
+    private var doubleTapFunction = "capture_logs"
+    private var longPressFunction = "open_settings"
     private var bgDrawable: GradientDrawable? = null
 
     private var itemSpacingDp = 8
@@ -143,33 +146,49 @@ class GameBar private constructor(context: Context) {
         
         gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                if (doubleTapCaptureEnabled) {
-                    val dataExport = GameDataExport.getInstance()
-                    val perAppLogManager = dataExport.getPerAppLogManager()
-                    val currentPackage = ForegroundAppDetector.getForegroundPackageName(context)
-                    
-                    if (dataExport.getLoggingMode() == GameDataExport.LoggingMode.PER_APP) {
-                        // Per-app mode: Handle double-tap for manual logging
-                        
-                        // Check if this app already has auto-logging enabled
-                        if (perAppLogManager.isAppLoggingEnabled(context, currentPackage)) {
-                            Toast.makeText(context, "This app has auto-logging enabled. Logs are saved automatically.", Toast.LENGTH_SHORT).show()
-                            return true
-                        }
-                        
-                        // Check if manually logging for this app
-                        if (perAppLogManager.isAppLoggingActive(currentPackage)) {
-                            // Stop manual logging
-                            perAppLogManager.stopManualLoggingForApp(currentPackage)
-                            Toast.makeText(context, "Manual logging stopped and saved", Toast.LENGTH_SHORT).show()
-                        } else {
-                            // Start manual logging
-                            perAppLogManager.startManualLoggingForApp(currentPackage)
-                        }
-                        return true
+                if (doubleTapEnabled) {
+                    executeGestureFunction(doubleTapFunction)
+                    return true
+                }
+                return super.onDoubleTap(e)
+            }
+
+            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+                if (singleTapEnabled) {
+                    executeGestureFunction(singleTapFunction)
+                    return true
+                }
+                return super.onSingleTapConfirmed(e)
+            }
+        })
+    }
+
+    private fun executeGestureFunction(function: String) {
+        when (function) {
+            "toggle_format" -> {
+                overlayFormat = if (overlayFormat == "full") "minimal" else "full"
+                PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putString("game_bar_format", overlayFormat)
+                    .apply()
+                Toast.makeText(context, "Overlay Format: $overlayFormat", Toast.LENGTH_SHORT).show()
+                updateStats()
+            }
+            "capture_logs" -> {
+                val dataExport = GameDataExport.getInstance()
+                val perAppLogManager = dataExport.getPerAppLogManager()
+                val currentPackage = ForegroundAppDetector.getForegroundPackageName(context)
+                
+                if (dataExport.getLoggingMode() == GameDataExport.LoggingMode.PER_APP) {
+                    if (perAppLogManager.isAppLoggingEnabled(context, currentPackage)) {
+                        Toast.makeText(context, "This app has auto-logging enabled. Logs are saved automatically.", Toast.LENGTH_SHORT).show()
+                    } else if (perAppLogManager.isAppLoggingActive(currentPackage)) {
+                        perAppLogManager.stopManualLoggingForApp(currentPackage)
+                        Toast.makeText(context, "Manual logging stopped and saved", Toast.LENGTH_SHORT).show()
+                    } else {
+                        perAppLogManager.startManualLoggingForApp(currentPackage)
                     }
-                    
-                    // Global mode: Original behavior
+                } else {
                     if (dataExport.isCapturing()) {
                         dataExport.stopCapture()
                         dataExport.exportDataToCsv()
@@ -178,31 +197,18 @@ class GameBar private constructor(context: Context) {
                         dataExport.startCapture()
                         Toast.makeText(context, "Capture Started", Toast.LENGTH_SHORT).show()
                     }
-                    return true
                 }
-                return super.onDoubleTap(e)
             }
-
-            override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                if (singleTapToggleEnabled) {
-                    overlayFormat = if (overlayFormat == "full") "minimal" else "full"
-                    PreferenceManager.getDefaultSharedPreferences(context)
-                        .edit()
-                        .putString("game_bar_format", overlayFormat)
-                        .apply()
-                    Toast.makeText(context, "Overlay Format: $overlayFormat", Toast.LENGTH_SHORT).show()
-                    updateStats()
-                    return true
-                }
-                return super.onSingleTapConfirmed(e)
+            "open_settings" -> {
+                openOverlaySettings()
             }
-        })
+        }
     }
 
     // Long press runnable
     private val longPressRunnable = Runnable {
         if (pressActive) {
-            openOverlaySettings()
+            executeGestureFunction(longPressFunction)
             pressActive = false
         }
     }
@@ -236,8 +242,11 @@ class GameBar private constructor(context: Context) {
         showRamSpeed = prefs.getBoolean("game_bar_ram_speed_enable", false)
         showRamTemp = prefs.getBoolean("game_bar_ram_temp_enable", false)
 
-        doubleTapCaptureEnabled = prefs.getBoolean("game_bar_doubletap_capture", true)
-        singleTapToggleEnabled = prefs.getBoolean("game_bar_single_tap_toggle", true)
+        singleTapEnabled = prefs.getBoolean("game_bar_single_tap_enable", true)
+        singleTapFunction = prefs.getString("game_bar_single_tap_function", "toggle_format") ?: "toggle_format"
+        doubleTapEnabled = prefs.getBoolean("game_bar_doubletap_enable", true)
+        doubleTapFunction = prefs.getString("game_bar_doubletap_function", "capture_logs") ?: "capture_logs"
+        longPressFunction = prefs.getString("game_bar_longpress_function", "open_settings") ?: "open_settings"
 
         updateSplitMode(prefs.getString("game_bar_split_mode", "side_by_side") ?: "side_by_side")
         updateTextSize(prefs.getInt("game_bar_text_size", 12))
@@ -1039,13 +1048,6 @@ class GameBar private constructor(context: Context) {
         longPressThresholdMs = ms
     }
 
-    fun setDoubleTapCaptureEnabled(enabled: Boolean) {
-        doubleTapCaptureEnabled = enabled
-    }
-
-    fun setSingleTapToggleEnabled(enabled: Boolean) {
-        singleTapToggleEnabled = enabled
-    }
     
     fun isCurrentlyShowing(): Boolean {
         return isShowing
