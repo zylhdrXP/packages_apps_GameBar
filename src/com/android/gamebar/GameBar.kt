@@ -108,6 +108,7 @@ class GameBar private constructor(context: Context) {
     private var showCpuTemp = false
     private var showRam = false
     private var showFps = true
+    private var fpsDisplayMode = "basic"
     private var showFrameTime = false
     private var showGpuUsage = true
     private var showGpuClock = false
@@ -220,6 +221,7 @@ class GameBar private constructor(context: Context) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
         showFps = prefs.getBoolean("game_bar_fps_enable", true)
+        fpsDisplayMode = prefs.getString("game_bar_fps_display_mode", "basic") ?: "basic"
         showFrameTime = prefs.getBoolean("game_bar_frame_time_enable", false)
         showBatteryTemp = prefs.getBoolean("game_bar_temp_enable", false)
         showCpuUsage = prefs.getBoolean("game_bar_cpu_usage_enable", true)
@@ -460,10 +462,36 @@ class GameBar private constructor(context: Context) {
         val statViews = mutableListOf<View>()
 
         // 1) FPS - Always collect for logging
-        val fpsVal = GameBarFpsMeter.getInstance(context).getFps()
+        val fpsMeter = GameBarFpsMeter.getInstance(context)
+        val fpsVal = fpsMeter.getFps()
         val fpsStr = if (fpsVal >= 0) String.format(Locale.getDefault(), "%.0f", fpsVal) else "N/A"
+        
         if (showFps) {
-            statViews.add(createStatLine("FPS", fpsStr))
+            if (fpsDisplayMode == "advanced") {
+                // Advanced mode
+                val fps1PercentLow = fpsMeter.get1PercentLowFps()
+                val fps01PercentLow = fpsMeter.get01PercentLowFps()
+                
+                val fpsStats = mutableListOf<String>()
+                fpsStats.add("FPS: $fpsStr")
+                
+                if (fps1PercentLow >= 0) {
+                    fpsStats.add("1% Low: ${String.format(Locale.getDefault(), "%.0f", fps1PercentLow)}")
+                } else {
+                    fpsStats.add("1% Low: Collecting...")
+                }
+                
+                if (fps01PercentLow >= 0) {
+                    fpsStats.add("0.1% Low: ${String.format(Locale.getDefault(), "%.0f", fps01PercentLow)}")
+                } else {
+                    fpsStats.add("0.1% Low: Collecting...")
+                }
+                
+                statViews.add(buildFpsView(fpsStats))
+            } else {
+                // Basic mode
+                statViews.add(createStatLine("FPS", fpsStr))
+            }
         }
 
         // 1.1) Frame Time - Calculate from FPS
@@ -716,6 +744,71 @@ class GameBar private constructor(context: Context) {
 
         freqContainer.addView(verticalFreqs)
         return freqContainer
+    }
+
+    private fun buildFpsView(fpsStats: List<String>): View {
+        val fpsContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
+        val spacingPx = dpToPx(context, itemSpacingDp)
+        val outerLp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(spacingPx, spacingPx / 2, spacingPx, spacingPx / 2)
+        }
+        fpsContainer.layoutParams = outerLp
+
+        if (overlayFormat == "full") {
+            val labelTv = TextView(context).apply {
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeSp.toFloat())
+                try {
+                    setTextColor(Color.parseColor(titleColorHex))
+                } catch (e: Exception) {
+                    setTextColor(Color.WHITE)
+                }
+                setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
+                text = "FPS Stats "
+            }
+            fpsContainer.addView(labelTv)
+        }
+
+        val verticalStats = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
+        for (statLine in fpsStats) {
+            val lineLayout = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+            }
+
+            val statTv = TextView(context).apply {
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeSp.toFloat())
+                try {
+                    setTextColor(Color.parseColor(valueColorHex))
+                } catch (e: Exception) {
+                    setTextColor(Color.WHITE)
+                }
+                setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
+                text = statLine
+            }
+
+            lineLayout.addView(statTv)
+
+            val lineLp = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(spacingPx, spacingPx / 4, spacingPx, spacingPx / 4)
+            }
+            lineLayout.layoutParams = lineLp
+
+            verticalStats.addView(lineLayout)
+        }
+
+        fpsContainer.addView(verticalStats)
+        return fpsContainer
     }
 
     private fun createStatLine(title: String, rawValue: String): LinearLayout {

@@ -29,6 +29,7 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private var masterSwitch: MainSwitchPreference? = null
     private var autoEnableSwitch: SwitchPreferenceCompat? = null
     private var fpsSwitch: SwitchPreferenceCompat? = null
+    private var fpsDisplayModePref: ListPreference? = null
     private var frameTimeSwitch: SwitchPreferenceCompat? = null
     private var batteryTempSwitch: SwitchPreferenceCompat? = null
     private var cpuUsageSwitch: SwitchPreferenceCompat? = null
@@ -67,6 +68,7 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
         masterSwitch = findPreference("game_bar_enable")
         autoEnableSwitch = findPreference("game_bar_auto_enable")
         fpsSwitch = findPreference("game_bar_fps_enable")
+        fpsDisplayModePref = findPreference("game_bar_fps_display_mode")
         frameTimeSwitch = findPreference("game_bar_frame_time_enable")
         batteryTempSwitch = findPreference("game_bar_temp_enable")
         cpuUsageSwitch = findPreference("game_bar_cpu_usage_enable")
@@ -101,8 +103,10 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
 
         setupPerAppConfig()
         setupMasterSwitchListener()
-        setupAutoEnableSwitchListener()
         setupFeatureSwitchListeners()
+        
+        fpsDisplayModePref?.isVisible = fpsSwitch?.isChecked ?: true
+        
         setupGesturePrefListeners()
         setupStylePrefListeners()
         setupExpandableCategories()
@@ -191,7 +195,21 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
 
     private fun setupFeatureSwitchListeners() {
         fpsSwitch?.setOnPreferenceChangeListener { _, newValue ->
-            gameBar?.setShowFps(newValue as Boolean)
+            val enabled = newValue as Boolean
+            gameBar?.setShowFps(enabled)
+            fpsDisplayModePref?.isVisible = enabled
+            true
+        }
+        fpsDisplayModePref?.setOnPreferenceChangeListener { _, newValue ->
+            if (newValue is String) {
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    gameBar?.applyPreferences()
+                    if (GameBar.isShowing()) {
+                        gameBar?.hide()
+                        gameBar?.show()
+                    }
+                }
+            }
             true
         }
         frameTimeSwitch?.setOnPreferenceChangeListener { _, newValue ->

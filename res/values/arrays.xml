@@ -13,6 +13,16 @@
         <item>new</item>
         <item>legacy</item>
     </string-array>
+
+    <!-- FPS Display Mode -->
+    <string-array name="fps_display_mode_entries">
+        <item>Basic (Current FPS only)</item>
+        <item>Advanced (Current + 1% + 0.1% Low)</item>
+    </string-array>
+    <string-array name="fps_display_mode_values">
+        <item>basic</item>
+        <item>advanced</item>
+    </string-array>
     
     <!-- Update Interval -->
     <string-array name="fps_overlay_update_interval_entries">

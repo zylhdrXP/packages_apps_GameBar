@@ -24,6 +24,14 @@
             android:summary="Show current FPS on screen"
             android:defaultValue="true" />
 
+        <ListPreference
+            android:key="game_bar_fps_display_mode"
+            android:title="FPS Display Mode"
+            android:summary="Choose what FPS statistics to display"
+            android:entries="@array/fps_display_mode_entries"
+            android:entryValues="@array/fps_display_mode_values"
+            android:defaultValue="basic" />
+
         <SwitchPreferenceCompat
             android:key="game_bar_frame_time_enable"
             android:title="Frame Time"
