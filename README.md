@@ -94,18 +94,7 @@ GameBar is a comprehensive real-time performance monitoring overlay for Android 
    $(call inherit-product, packages/apps/GameBar/gamebar.mk)
    ```
 
-3. **Create device-specific overlay** (IMPORTANT):
-   
-   Create the overlay directory structure:
-   ```bash
-   mkdir -p device/<vendor>/<device>/overlay/packages/apps/GameBar/res/values
-   ```
-   
-   Create `device/<vendor>/<device>/overlay/packages/apps/GameBar/res/values/config.xml`:
-   
-   **Example overlay configuration:** [View config.xml example](LINK_HERE)
-
-4. **Configure hardware paths**:
+3. **Configure hardware paths**:
    
    Edit your device overlay `config.xml`:
    
@@ -125,12 +114,12 @@ GameBar is a comprehensive real-time performance monitoring overlay for Android 
    </resources>
    ```
 
-5. **Customize init.rc** (if needed):
+4. **Customize init.rc** (if needed):
    
    Edit `packages/apps/GameBar/init/init.gamebar.rc` to match your device's hardware paths.
    Ensure permissions are set for all sysfs nodes used by GameBar.
 
-6. **Build**:
+5. **Build**:
    ```bash
    # Clean build (recommended for first build)
    m clean
