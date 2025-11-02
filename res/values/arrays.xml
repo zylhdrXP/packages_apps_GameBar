@@ -85,6 +85,7 @@
         <item>Start/Stop Log Capture</item>
         <item>Open GameBar Settings</item>
         <item>Take Screenshot</item>
+        <item>Start/Stop Screen Record</item>
     </string-array>
     <string-array name="gesture_function_values">
         <item>no_action</item>
@@ -92,6 +93,7 @@
         <item>capture_logs</item>
         <item>open_settings</item>
         <item>take_screenshot</item>
+        <item>screen_record</item>
     </string-array>
 
     <!-- Long press timeouts -->

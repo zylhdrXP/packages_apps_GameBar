@@ -35,6 +35,13 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
+import android.os.UserHandle
+import com.android.systemui.screenrecord.IRemoteRecording
+import com.android.systemui.screenrecord.IRecordingCallback
+
 class GameBar private constructor(context: Context) {
 
     companion object {
@@ -131,6 +138,17 @@ class GameBar private constructor(context: Context) {
     private var longPressFunction = "open_settings"
     private var bgDrawable: GradientDrawable? = null
     
+    private var isRecorderBound = false
+    private var remoteRecording: IRemoteRecording? = null
+    private val recorderConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            remoteRecording = IRemoteRecording.Stub.asInterface(service)
+        }
+        override fun onServiceDisconnected(name: ComponentName?) {
+            remoteRecording = null
+        }
+    }
+
     private var itemSpacingDp = 8
     private var layoutChanged = false
 
@@ -207,6 +225,9 @@ class GameBar private constructor(context: Context) {
             }
             "take_screenshot" -> {
                 takeScreenshot()
+            }
+            "screen_record" -> {
+                toggleScreenRecording()
             }
         }
     }
@@ -302,7 +323,9 @@ class GameBar private constructor(context: Context) {
             }
             overlayView = null
         }
-        
+
+        bindScreenRecorder()
+
         applyPreferences()
 
         layoutParams = WindowManager.LayoutParams(
@@ -433,6 +456,8 @@ class GameBar private constructor(context: Context) {
         rootLayout = null
         layoutParams = null
         layoutChanged = true // Mark layout as changed
+        
+        unbindScreenRecorder()
     }
     
     fun cleanup() {
@@ -1165,6 +1190,59 @@ class GameBar private constructor(context: Context) {
             Toast.makeText(context, "Screenshot taken", Toast.LENGTH_SHORT).show()
         } catch (e: Exception) {
             Toast.makeText(context, "Failed to take screenshot", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun bindScreenRecorder() {
+        try {
+            isRecorderBound = context.bindServiceAsUser(Intent().apply {
+                component = ComponentName(
+                    "com.android.systemui",
+                    "com.android.systemui.screenrecord.RecordingService"
+                )
+            }, recorderConnection, Context.BIND_AUTO_CREATE, UserHandle.CURRENT)
+        } catch (e: Exception) {
+            android.util.Log.e("GameBar", "Failed to bind screen recorder: ${e.message}")
+            isRecorderBound = false
+        }
+    }
+    
+    private fun unbindScreenRecorder() {
+        if (isRecorderBound) {
+            try {
+                context.unbindService(recorderConnection)
+            } catch (e: Exception) {
+                android.util.Log.w("GameBar", "Failed to unbind screen recorder: ${e.message}")
+            } finally {
+                isRecorderBound = false
+                remoteRecording = null
+            }
+        }
+    }
+    
+    private fun toggleScreenRecording() {
+        val recorder = remoteRecording
+        if (recorder == null) {
+            Toast.makeText(context, "Screen recorder not available", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        try {
+            val isStarting = try { recorder.isStarting } catch (e: Exception) { false }
+            val isRecording = try { recorder.isRecording } catch (e: Exception) { false }
+            
+            if (!isStarting) {
+                if (!isRecording) {
+                    recorder.startRecording()
+                    Toast.makeText(context, "Screen recording started", Toast.LENGTH_SHORT).show()
+                } else {
+                    recorder.stopRecording()
+                    Toast.makeText(context, "Screen recording stopped", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, "Failed to toggle screen recording", Toast.LENGTH_SHORT).show()
+            android.util.Log.e("GameBar", "Screen recording error: ${e.message}")
         }
     }
 
