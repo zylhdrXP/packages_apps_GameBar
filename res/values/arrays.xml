@@ -83,11 +83,13 @@
         <item>Toggle Full/Minimal Format</item>
         <item>Start/Stop Log Capture</item>
         <item>Open GameBar Settings</item>
+        <item>Take Screenshot</item>
     </string-array>
     <string-array name="gesture_function_values">
         <item>toggle_format</item>
         <item>capture_logs</item>
         <item>open_settings</item>
+        <item>take_screenshot</item>
     </string-array>
 
     <!-- Long press timeouts -->

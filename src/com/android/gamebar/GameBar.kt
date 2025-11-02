@@ -202,6 +202,9 @@ class GameBar private constructor(context: Context) {
             "open_settings" -> {
                 openOverlaySettings()
             }
+            "take_screenshot" -> {
+                takeScreenshot()
+            }
         }
     }
 
@@ -1149,6 +1152,16 @@ class GameBar private constructor(context: Context) {
             BufferedReader(FileReader(path)).use { it.readLine() }
         } catch (e: IOException) {
             null
+        }
+    }
+
+    private fun takeScreenshot() {
+        try {
+            // Trigger system screenshot using shell command
+            Runtime.getRuntime().exec("input keyevent KEYCODE_SYSRQ")
+            Toast.makeText(context, "Screenshot taken", Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(context, "Failed to take screenshot", Toast.LENGTH_SHORT).show()
         }
     }
 

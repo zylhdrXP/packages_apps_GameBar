@@ -278,10 +278,28 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             true
         }
         
+        // Single tap function change
+        singleTapFunctionPref?.setOnPreferenceChangeListener { _, _ ->
+            // Reload preferences to apply new function
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                gameBar?.applyPreferences()
+            }
+            true
+        }
+        
         // Double tap enable/disable and visibility
         doubleTapEnablePref?.setOnPreferenceChangeListener { _, newValue ->
             val enabled = newValue as Boolean
             doubleTapFunctionPref?.isVisible = enabled
+            true
+        }
+        
+        // Double tap function change
+        doubleTapFunctionPref?.setOnPreferenceChangeListener { _, _ ->
+            // Reload preferences to apply new function
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                gameBar?.applyPreferences()
+            }
             true
         }
         
@@ -290,6 +308,15 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             val enabled = newValue as Boolean
             longPressFunctionPref?.isVisible = enabled
             longPressTimeoutPref?.isVisible = enabled
+            true
+        }
+        
+        // Long press function change
+        longPressFunctionPref?.setOnPreferenceChangeListener { _, _ ->
+            // Reload preferences to apply new function
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                gameBar?.applyPreferences()
+            }
             true
         }
         
