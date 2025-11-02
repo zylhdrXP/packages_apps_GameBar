@@ -842,32 +842,20 @@ class GameBar private constructor(context: Context) {
     }
 
     private fun loadCustomFont(fontPath: String) {
-        android.util.Log.d("GameBar", "Loading font: $fontPath")
         customTypeface = if (fontPath == "default" || fontPath.isEmpty()) {
-            android.util.Log.d("GameBar", "Using default font")
             null
         } else {
             try {
-                // Load font from assets
-                val typeface = Typeface.createFromAsset(context.assets, fontPath)
-                android.util.Log.d("GameBar", "Font loaded successfully: $fontPath")
-                android.util.Log.d("GameBar", "Typeface object: $typeface")
-                android.util.Log.d("GameBar", "Typeface is default: ${typeface == Typeface.DEFAULT}")
-                typeface
+                Typeface.createFromAsset(context.assets, fontPath)
             } catch (e: Exception) {
-                android.util.Log.e("GameBar", "Failed to load font from assets: $fontPath - ${e.message}")
-                e.printStackTrace()
+                android.util.Log.e("GameBar", "Failed to load font: $fontPath - ${e.message}")
                 null
             }
         }
-        android.util.Log.d("GameBar", "customTypeface set to: $customTypeface")
     }
 
     private fun getTypeface(): Typeface {
-        android.util.Log.d("GameBar", "getTypeface called - customTypeface: $customTypeface")
-        val typeface = customTypeface ?: Typeface.DEFAULT
-        android.util.Log.d("GameBar", "getTypeface returning: $typeface (isCustom: ${customTypeface != null})")
-        return typeface
+        return customTypeface ?: Typeface.DEFAULT
     }
 
     private fun applyTypefaceToOverlay() {
