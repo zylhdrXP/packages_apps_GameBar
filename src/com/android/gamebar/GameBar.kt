@@ -130,7 +130,7 @@ class GameBar private constructor(context: Context) {
     private var doubleTapFunction = "capture_logs"
     private var longPressFunction = "open_settings"
     private var bgDrawable: GradientDrawable? = null
-
+    
     private var itemSpacingDp = 8
     private var layoutChanged = false
 
@@ -165,6 +165,9 @@ class GameBar private constructor(context: Context) {
 
     private fun executeGestureFunction(function: String) {
         when (function) {
+            "no_action" -> {
+                // Do nothing
+            }
             "toggle_format" -> {
                 overlayFormat = if (overlayFormat == "full") "minimal" else "full"
                 PreferenceManager.getDefaultSharedPreferences(context)
