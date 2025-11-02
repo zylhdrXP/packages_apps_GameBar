@@ -114,6 +114,9 @@ GameBar is a comprehensive real-time performance monitoring overlay for Android 
        <!-- Find your device's thermal zones -->
        <!-- Run: adb shell "ls /sys/class/thermal/thermal_zone*/type" -->
        
+       <!-- CPU temperature path -->
+       <string name="config_cpu_temp_path">/sys/class/thermal/thermal_zone19/temp</string>
+       
        <!-- GPU temperature path -->
        <string name="config_gpu_temp_path">/sys/class/kgsl/kgsl-3d0/temp</string>
        
