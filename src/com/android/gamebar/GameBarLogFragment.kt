@@ -92,7 +92,7 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
             initializeUIState() // Initialize UI based on saved mode
             updateButtonStates()
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Error initializing log monitor: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), getString(R.string.toast_error_initializing, e.message), Toast.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }
@@ -218,9 +218,9 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
                 manualLogsButton.visibility = View.GONE
                 
                 if (isCapturing) {
-                    startCaptureButton.text = "Capturing..."
+                    startCaptureButton.text = getString(R.string.button_capturing)
                 } else {
-                    startCaptureButton.text = "Start Capture"
+                    startCaptureButton.text = getString(R.string.button_start_capture)
                 }
             }
             GameDataExport.LoggingMode.PER_APP -> {
@@ -232,9 +232,9 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
                 manualLogsButton.visibility = if (hasManualLogs) View.VISIBLE else View.GONE
                 
                 if (isCapturing) {
-                    startCaptureButton.text = "Per-app Logging Active"
+                    startCaptureButton.text = getString(R.string.button_per_app_active)
                 } else {
-                    startCaptureButton.text = if (hasEnabledApps) "Enable Per-app Logging" else "No Apps Enabled"
+                    startCaptureButton.text = if (hasEnabledApps) getString(R.string.button_enable_per_app) else getString(R.string.button_no_apps_enabled)
                 }
             }
         }
@@ -254,7 +254,7 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
         val manualLogPackages = getManualLogPackages()
         
         if (manualLogPackages.isEmpty()) {
-            Toast.makeText(requireContext(), "No manual logs found", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.toast_no_manual_logs, Toast.LENGTH_SHORT).show()
             return
         }
         
@@ -269,7 +269,7 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
         }.toTypedArray()
         
         AlertDialog.Builder(requireContext())
-            .setTitle("Manual Logs")
+            .setTitle(R.string.dialog_title_manual_logs)
             .setItems(items) { _, which ->
                 val packageName = manualLogPackages[which]
                 val appName = items[which]
@@ -281,7 +281,7 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
                 }
                 startActivity(intent)
             }
-            .setNegativeButton("Close", null)
+            .setNegativeButton(R.string.button_close, null)
             .show()
     }
 
@@ -348,8 +348,8 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
     private fun showLogAnalyticsDialog(logFile: LogFile) {
         // Show loading message
         val loadingDialog = AlertDialog.Builder(requireContext())
-            .setTitle("Analyzing Log...")
-            .setMessage("Please wait while we analyze the session data.")
+            .setTitle(R.string.dialog_title_analyzing_log)
+            .setMessage(R.string.dialog_message_analyzing)
             .setCancelable(false)
             .create()
         loadingDialog.show()
@@ -366,7 +366,7 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
                 if (analytics != null) {
                     showAnalyticsInDialog(logFile, analytics)
                 } else {
-                    Toast.makeText(requireContext(), "Failed to analyze log file", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), R.string.toast_failed_analyze_log, Toast.LENGTH_SHORT).show()
                 }
             }
         }.start()
@@ -395,11 +395,11 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
             
             intent.type = "text/csv"
             intent.putExtra(Intent.EXTRA_STREAM, uri)
-            intent.putExtra(Intent.EXTRA_SUBJECT, "GameBar Performance Log")
-            intent.putExtra(Intent.EXTRA_TEXT, "GameBar performance log file: ${logFile.name}")
+            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.intent_extra_subject))
+            intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.intent_extra_text, logFile.name))
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             
-            val chooser = Intent.createChooser(intent, "Share log file")
+            val chooser = Intent.createChooser(intent, getString(R.string.chooser_share_log))
             startActivity(chooser)
         } catch (e: Exception) {
             // Fallback with generic type if CSV doesn't work
@@ -415,40 +415,40 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
                 
                 intent.type = "text/plain"
                 intent.putExtra(Intent.EXTRA_STREAM, uri)
-                intent.putExtra(Intent.EXTRA_SUBJECT, "GameBar Performance Log")
-                intent.putExtra(Intent.EXTRA_TEXT, "GameBar performance log file: ${logFile.name}")
+                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.intent_extra_subject))
+                intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.intent_extra_text, logFile.name))
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 
-                val chooser = Intent.createChooser(intent, "Share log file")
+                val chooser = Intent.createChooser(intent, getString(R.string.chooser_share_log))
                 startActivity(chooser)
             } catch (e2: Exception) {
-                Toast.makeText(requireContext(), "File location: ${logFile.path}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), getString(R.string.toast_file_location, logFile.path), Toast.LENGTH_LONG).show()
             }
         }
     }
 
     private fun exportLogFile(logFile: LogFile) {
-        Toast.makeText(requireContext(), "File saved at: ${logFile.path}", Toast.LENGTH_LONG).show()
+        Toast.makeText(requireContext(), getString(R.string.toast_file_saved_at, logFile.path), Toast.LENGTH_LONG).show()
     }
 
     private fun deleteLogFile(logFile: LogFile) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Delete Log File")
-            .setMessage("Are you sure you want to delete this log file?\n\n${logFile.name}")
-            .setPositiveButton("Delete") { _, _ ->
+            .setTitle(R.string.dialog_title_delete_log)
+            .setMessage(getString(R.string.dialog_message_delete_log, logFile.name))
+            .setPositiveButton(R.string.button_delete) { _, _ ->
                 try {
                     val file = File(logFile.path)
                     if (file.delete()) {
-                        Toast.makeText(requireContext(), "Log file deleted", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), R.string.toast_log_deleted, Toast.LENGTH_SHORT).show()
                         loadLogHistory() // Refresh the list
                     } else {
-                        Toast.makeText(requireContext(), "Failed to delete log file", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), R.string.toast_log_delete_failed, Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Error deleting file: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), getString(R.string.toast_error_deleting_file, e.message), Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.button_cancel, null)
             .show()
     }
 
@@ -535,7 +535,7 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
             filteredApps.clear()
             filteredApps.addAll(installedApps)
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Error loading apps: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), getString(R.string.toast_error_loading_apps, e.message), Toast.LENGTH_SHORT).show()
         }
     }
     
@@ -564,13 +564,13 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
             GameDataExport.LoggingMode.GLOBAL -> {
                 globalLoggingRadio.isChecked = true
                 logHistoryRecyclerView.adapter = logHistoryAdapter
-                searchBar.hint = "Search logs..."
+                searchBar.hint = getString(R.string.hint_search_logs)
                 loadLogHistory()
             }
             GameDataExport.LoggingMode.PER_APP -> {
                 perAppLoggingRadio.isChecked = true
                 logHistoryRecyclerView.adapter = perAppLogAdapter
-                searchBar.hint = "Search apps..."
+                searchBar.hint = getString(R.string.hint_search_apps)
                 updatePerAppAdapterStates()
             }
         }
@@ -585,7 +585,7 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
         
         // Switch to global log history adapter
         logHistoryRecyclerView.adapter = logHistoryAdapter
-        searchBar.hint = "Search logs..."
+        searchBar.hint = getString(R.string.hint_search_logs)
         searchBar.setText("") // Clear search when switching modes
         
         loadLogHistory()
@@ -601,7 +601,7 @@ class GameBarLogFragment : Fragment(), GameDataExport.CaptureStateListener, PerA
         
         // Switch to per-app adapter
         logHistoryRecyclerView.adapter = perAppLogAdapter
-        searchBar.hint = "Search apps..."
+        searchBar.hint = getString(R.string.hint_search_apps)
         searchBar.setText("") // Clear search when switching modes
         
         updatePerAppAdapterStates()

@@ -369,9 +369,9 @@ class PerAppLogManager private constructor() {
                     try {
                         val appInfo = pm.getApplicationInfo(packageName, 0)
                         val appName = pm.getApplicationLabel(appInfo).toString()
-                        android.widget.Toast.makeText(it, "$appName: Manual logging started", android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(it, it.getString(R.string.toast_manual_logging_started, appName), android.widget.Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
-                        android.widget.Toast.makeText(it, "Manual logging started for $packageName", android.widget.Toast.LENGTH_SHORT).show()
+                        android.widget.Toast.makeText(it, it.getString(R.string.toast_manual_logging_started_pkg, packageName), android.widget.Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
