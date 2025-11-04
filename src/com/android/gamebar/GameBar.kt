@@ -1097,7 +1097,7 @@ class GameBar private constructor(context: Context) {
         
         // Use backgroundAlpha for transparency control
         val color = Color.argb(
-            Math.max(backgroundAlpha, 16), // Minimum alpha of 16 to prevent invisible overlays
+            backgroundAlpha,
             red, green, blue
         )
         bgDrawable?.setColor(color)
