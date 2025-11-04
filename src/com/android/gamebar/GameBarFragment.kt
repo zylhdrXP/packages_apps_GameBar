@@ -189,6 +189,13 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             startActivity(Intent(requireContext(), PresetManagementActivity::class.java))
             true
         }
+        
+        // Reset to defaults
+        val resetDefaultPref: Preference? = findPreference("preset_reset_default")
+        resetDefaultPref?.setOnPreferenceClickListener {
+            showResetDefaultDialog(presetManager)
+            true
+        }
     }
     
     private fun showSavePresetDialog(presetManager: PresetManager) {
@@ -215,6 +222,32 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
                     } else {
                         android.widget.Toast.makeText(requireContext(), R.string.toast_preset_save_failed, android.widget.Toast.LENGTH_SHORT).show()
                     }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+    
+    private fun showResetDefaultDialog(presetManager: PresetManager) {
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle(R.string.preset_reset_default)
+            .setMessage(R.string.dialog_message_reset_default)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                if (presetManager.resetToDefaults()) {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        R.string.toast_preset_reset_success,
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    
+                    // Refresh UI to show default values
+                    activity?.recreate()
+                } else {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        "Failed to reset settings",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
             .setNegativeButton(android.R.string.cancel, null)

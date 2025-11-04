@@ -333,6 +333,11 @@
             android:key="preset_manage"
             android:title="@string/preset_saved_presets"
             android:summary="View and manage your saved presets" />
+
+        <Preference
+            android:key="preset_reset_default"
+            android:title="@string/preset_reset_default"
+            android:summary="@string/preset_reset_default_summary" />
     </com.android.gamebar.ExpandablePreferenceCategory>
 
 </PreferenceScreen>
