@@ -6,8 +6,10 @@
 
 package com.android.gamebar
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
@@ -28,6 +30,14 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private var gameBar: GameBar? = null
     private var masterSwitch: MainSwitchPreference? = null
     private var autoEnableSwitch: SwitchPreferenceCompat? = null
+    
+    private val presetLoadedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == "com.android.gamebar.PRESET_LOADED") {
+                refreshPreferences()
+            }
+        }
+    }
     private var fpsSwitch: SwitchPreferenceCompat? = null
     private var fpsDisplayModePref: ListPreference? = null
     private var frameTimeSwitch: SwitchPreferenceCompat? = null
@@ -150,6 +160,65 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             startActivity(Intent(requireContext(), GameBarFontSelectorActivity::class.java))
             true
         }
+        
+        // Preset management preferences
+        setupPresetPreferences()
+    }
+    
+    private fun setupPresetPreferences() {
+        val presetManager = PresetManager.getInstance(requireContext())
+        
+        // Save current configuration
+        val savePresetPref: Preference? = findPreference("preset_save_current")
+        savePresetPref?.setOnPreferenceClickListener {
+            showSavePresetDialog(presetManager)
+            true
+        }
+        
+        // Import preset
+        val importPresetPref: Preference? = findPreference("preset_import")
+        importPresetPref?.setOnPreferenceClickListener {
+            // TODO: Implement file picker for import
+            android.widget.Toast.makeText(requireContext(), "Import feature coming soon", android.widget.Toast.LENGTH_SHORT).show()
+            true
+        }
+        
+        // Manage presets
+        val managePresetsPref: Preference? = findPreference("preset_manage")
+        managePresetsPref?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), PresetManagementActivity::class.java))
+            true
+        }
+    }
+    
+    private fun showSavePresetDialog(presetManager: PresetManager) {
+        val input = android.widget.EditText(requireContext()).apply {
+            hint = getString(R.string.hint_preset_name)
+            setPadding(50, 30, 50, 30)
+        }
+        
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle(R.string.dialog_title_save_preset)
+            .setMessage(R.string.dialog_message_preset_name)
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val name = input.text.toString().trim()
+                if (name.isEmpty()) {
+                    android.widget.Toast.makeText(requireContext(), R.string.toast_preset_name_empty, android.widget.Toast.LENGTH_SHORT).show()
+                } else {
+                    if (presetManager.savePreset(name)) {
+                        android.widget.Toast.makeText(
+                            requireContext(),
+                            getString(R.string.toast_preset_saved, name),
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        android.widget.Toast.makeText(requireContext(), R.string.toast_preset_save_failed, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun setupMasterSwitchListener() {
@@ -412,6 +481,10 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
 
     override fun onResume() {
         super.onResume()
+        
+        val filter = IntentFilter("com.android.gamebar.PRESET_LOADED")
+        requireContext().registerReceiver(presetLoadedReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        
         if (!hasUsageStatsPermission(requireContext())) {
             requestUsageStatsPermission()
         }
@@ -421,6 +494,16 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             } else {
                 context.stopService(Intent(context, GameBarMonitorService::class.java))
             }
+        }
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        // Unregister broadcast receiver
+        try {
+            requireContext().unregisterReceiver(presetLoadedReceiver)
+        } catch (e: Exception) {
+            // Receiver not registered
         }
     }
 
@@ -438,5 +521,9 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private fun requestUsageStatsPermission() {
         val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
         startActivity(intent)
+    }
+    
+    private fun refreshPreferences() {
+        activity?.recreate()
     }
 }
