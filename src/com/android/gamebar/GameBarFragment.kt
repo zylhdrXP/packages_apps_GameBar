@@ -10,9 +10,11 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import com.android.gamebar.utils.PartsCustomSeekBarPreference
@@ -30,6 +32,12 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private var gameBar: GameBar? = null
     private var masterSwitch: MainSwitchPreference? = null
     private var autoEnableSwitch: SwitchPreferenceCompat? = null
+    
+    private val importPresetLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { importPresetFromUri(it) }
+    }
     
     private val presetLoadedReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -178,8 +186,7 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
         // Import preset
         val importPresetPref: Preference? = findPreference("preset_import")
         importPresetPref?.setOnPreferenceClickListener {
-            // TODO: Implement file picker for import
-            android.widget.Toast.makeText(requireContext(), "Import feature coming soon", android.widget.Toast.LENGTH_SHORT).show()
+            importPresetLauncher.launch("application/json")
             true
         }
         
@@ -252,6 +259,51 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
+    }
+    
+    private fun importPresetFromUri(uri: Uri) {
+        try {
+            val presetManager = PresetManager.getInstance(requireContext())
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            
+            if (inputStream != null) {
+                val file = java.io.File(requireContext().cacheDir, "temp_preset.json")
+                file.outputStream().use { output ->
+                    inputStream.copyTo(output)
+                }
+                inputStream.close()
+                
+                if (presetManager.importPreset(file)) {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        R.string.toast_preset_imported,
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    
+                    // Clean up temp file
+                    file.delete()
+                } else {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        R.string.toast_preset_import_failed,
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    R.string.toast_preset_import_failed,
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("GameBarFragment", "Failed to import preset", e)
+            android.widget.Toast.makeText(
+                requireContext(),
+                R.string.toast_preset_import_failed,
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     private fun setupMasterSwitchListener() {
