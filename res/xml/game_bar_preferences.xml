@@ -315,4 +315,24 @@
             android:summary="Choose which apps will auto-enable GameBar" />
     </com.android.gamebar.ExpandablePreferenceCategory>
 
+    <com.android.gamebar.ExpandablePreferenceCategory
+        android:key="category_presets"
+        android:title="@string/preset_category_title">
+
+        <Preference
+            android:key="preset_save_current"
+            android:title="@string/preset_save_current"
+            android:summary="@string/preset_save_current_summary" />
+
+        <Preference
+            android:key="preset_import"
+            android:title="@string/preset_import"
+            android:summary="@string/preset_import_summary" />
+
+        <Preference
+            android:key="preset_manage"
+            android:title="@string/preset_saved_presets"
+            android:summary="View and manage your saved presets" />
+    </com.android.gamebar.ExpandablePreferenceCategory>
+
 </PreferenceScreen>
