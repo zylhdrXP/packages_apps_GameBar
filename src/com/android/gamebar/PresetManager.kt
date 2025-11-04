@@ -274,6 +274,32 @@ class PresetManager private constructor(private val context: Context) {
         }
     }
 
+    /**
+     * Reset all GameBar settings to factory defaults
+     */
+    fun resetToDefaults(): Boolean {
+        try {
+            val editor = prefs.edit()
+            
+            // Clear all preset-related settings
+            for (key in PRESET_KEYS) {
+                editor.remove(key)
+            }
+            
+            editor.apply()
+            
+            // Reload GameBar to apply defaults
+            if (GameBar.isInstanceCreated()) {
+                GameBar.getInstance(context).applyPreferences()
+            }
+            
+            return true
+        } catch (e: Exception) {
+            android.util.Log.e("PresetManager", "Failed to reset to defaults", e)
+            return false
+        }
+    }
+
     private fun getPresetIds(): Set<String> {
         val idsJson = prefs.getString(PREF_PRESET_LIST, null) ?: return emptySet()
         return try {
