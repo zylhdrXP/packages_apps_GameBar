@@ -39,4 +39,69 @@
     <string name="gamebar_select">Select</string>
     <string name="gamebar_transparency">Transparency</string>
 
+    <!-- Toast Messages - Overlay -->
+    <string name="toast_overlay_format">Overlay Format: %s</string>
+    <string name="toast_auto_logging_enabled">This app has auto-logging enabled. Logs are saved automatically.</string>
+    <string name="toast_manual_logging_stopped">Manual logging stopped and saved</string>
+    <string name="toast_capture_stopped">Capture Stopped and Data Exported</string>
+    <string name="toast_capture_started">Capture Started</string>
+    <string name="toast_screenshot_taken">Screenshot taken</string>
+    <string name="toast_screenshot_failed">Failed to take screenshot</string>
+    <string name="toast_screen_recorder_unavailable">Screen recorder not available</string>
+    <string name="toast_screen_recording_started">Screen recording started</string>
+    <string name="toast_screen_recording_stopped">Screen recording stopped</string>
+    <string name="toast_screen_recording_failed">Failed to toggle screen recording</string>
+    <string name="toast_manual_logging_started">%s: Manual logging started</string>
+    <string name="toast_manual_logging_started_pkg">Manual logging started for %s</string>
+
+    <!-- Toast Messages - Logs -->
+    <string name="toast_error_initializing">Error initializing log monitor: %s</string>
+    <string name="toast_no_manual_logs">No manual logs found</string>
+    <string name="toast_failed_analyze_log">Failed to analyze log file</string>
+    <string name="toast_file_location">File location: %s</string>
+    <string name="toast_file_saved_at">File saved at: %s</string>
+    <string name="toast_log_deleted">Log file deleted</string>
+    <string name="toast_log_delete_failed">Failed to delete log file</string>
+    <string name="toast_error_deleting_file">Error deleting file: %s</string>
+    <string name="toast_error_loading_apps">Error loading apps: %s</string>
+    <string name="toast_error_loading_logs">Error loading logs: %s</string>
+    <string name="toast_saved_file">Saved: %s</string>
+    <string name="toast_failed_save">Failed to save: %s</string>
+    <string name="toast_error_generic">Error: %s</string>
+    <string name="toast_graphics_ready">Graphics ready to share!</string>
+    <string name="toast_failed_share">Failed to share: %s</string>
+
+    <!-- Dialog Titles -->
+    <string name="dialog_title_manual_logs">Manual Logs</string>
+    <string name="dialog_title_analyzing_log">Analyzing Log...</string>
+    <string name="dialog_title_delete_log">Delete Log File</string>
+    <string name="dialog_title_session_analytics">📊 Session Analytics</string>
+
+    <!-- Dialog Messages -->
+    <string name="dialog_message_analyzing">Please wait while we analyze the session data.</string>
+    <string name="dialog_message_delete_log">Are you sure you want to delete this log file?\n\n%s</string>
+
+    <!-- Button Labels -->
+    <string name="button_close">Close</string>
+    <string name="button_delete">Delete</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_actions">⋮ Actions</string>
+    <string name="button_capturing">Capturing...</string>
+    <string name="button_start_capture">Start Capture</string>
+    <string name="button_enable_per_app">Enable Per-app Logging</string>
+    <string name="button_no_apps_enabled">No Apps Enabled</string>
+    <string name="button_per_app_active">Per-app Logging Active</string>
+
+    <!-- Intent Chooser Titles -->
+    <string name="chooser_share_log">Share log file</string>
+    <string name="chooser_share_graphics">Share Graphics</string>
+
+    <!-- Intent Extras -->
+    <string name="intent_extra_subject">GameBar Performance Log</string>
+    <string name="intent_extra_text">GameBar performance log file: %s</string>
+
+    <!-- Search Hints -->
+    <string name="hint_search_logs">Search logs...</string>
+    <string name="hint_search_apps">Search apps...</string>
+
 </resources>
