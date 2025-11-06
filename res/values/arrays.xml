@@ -86,6 +86,7 @@
         <item>Open GameBar Settings</item>
         <item>Take Screenshot</item>
         <item>Start/Stop Screen Record</item>
+        <item>Load Preset (Quick)</item>
     </string-array>
     <string-array name="gesture_function_values">
         <item>no_action</item>
@@ -94,6 +95,7 @@
         <item>open_settings</item>
         <item>take_screenshot</item>
         <item>screen_record</item>
+        <item>load_preset</item>
     </string-array>
 
     <!-- Long press timeouts -->
