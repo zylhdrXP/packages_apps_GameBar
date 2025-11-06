@@ -286,6 +286,9 @@ class PresetManager private constructor(private val context: Context) {
                 editor.remove(key)
             }
             
+            // Clear warning dialog preference
+            editor.remove("dont_show_longpress_warning")
+            
             editor.apply()
             
             // Reload GameBar to apply defaults
