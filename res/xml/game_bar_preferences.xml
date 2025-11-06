@@ -288,7 +288,7 @@
             android:summary="Choose what happens on long press"
             android:entries="@array/gesture_function_entries"
             android:entryValues="@array/gesture_function_values"
-            android:defaultValue="open_settings" />
+            android:defaultValue="load_preset" />
 
         <ListPreference
             android:key="game_bar_longpress_timeout"
