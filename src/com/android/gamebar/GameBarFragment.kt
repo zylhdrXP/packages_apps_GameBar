@@ -466,7 +466,16 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
         }
         
         // Long press function change
-        longPressFunctionPref?.setOnPreferenceChangeListener { _, _ ->
+        longPressFunctionPref?.setOnPreferenceChangeListener { _, newValue ->
+            val newFunction = newValue as? String ?: return@setOnPreferenceChangeListener true
+            val currentFunction = longPressFunctionPref?.value ?: "load_preset"
+            
+            // Show warning if changing from load_preset to something else
+            if (currentFunction == "load_preset" && newFunction != "load_preset") {
+                showLongPressChangeWarning(newFunction)
+                return@setOnPreferenceChangeListener false // Prevent change until user confirms
+            }
+            
             // Reload preferences to apply new function
             android.os.Handler(android.os.Looper.getMainLooper()).post {
                 gameBar?.applyPreferences()
@@ -597,5 +606,62 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     
     private fun refreshPreferences() {
         activity?.recreate()
+    }
+    
+    private fun showLongPressChangeWarning(newFunction: String) {
+        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext())
+        
+        // Check if user has chosen to not show this warning again
+        if (prefs.getBoolean("dont_show_longpress_warning", false)) {
+            // User understands, apply the change directly
+            longPressFunctionPref?.value = newFunction
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                gameBar?.applyPreferences()
+            }
+            return
+        }
+        
+        // Create custom view with checkbox
+        val dialogView = android.view.LayoutInflater.from(requireContext())
+            .inflate(android.R.layout.select_dialog_multichoice, null)
+        
+        val container = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(60, 40, 60, 20)
+        }
+        
+        val messageText = android.widget.TextView(requireContext()).apply {
+            text = getString(R.string.warning_longpress_change_title) + "\n\n" +
+                   getString(R.string.warning_longpress_change_message)
+            textSize = 15f
+            setPadding(0, 0, 0, 30)
+        }
+        container.addView(messageText)
+        
+        val checkBox = android.widget.CheckBox(requireContext()).apply {
+            text = getString(R.string.warning_longpress_checkbox)
+            setPadding(0, 10, 0, 0)
+        }
+        container.addView(checkBox)
+        
+        android.app.AlertDialog.Builder(requireContext())
+            .setView(container)
+            .setPositiveButton(R.string.warning_proceed) { _, _ ->
+                // Save preference if checkbox is checked
+                if (checkBox.isChecked) {
+                    prefs.edit()
+                        .putBoolean("dont_show_longpress_warning", true)
+                        .apply()
+                }
+                
+                // Apply the change
+                longPressFunctionPref?.value = newFunction
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    gameBar?.applyPreferences()
+                }
+            }
+            .setNegativeButton(R.string.warning_cancel, null)
+            .setCancelable(true)
+            .show()
     }
 }
