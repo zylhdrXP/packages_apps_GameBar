@@ -229,6 +229,9 @@ class GameBar private constructor(context: Context) {
             "screen_record" -> {
                 toggleScreenRecording()
             }
+            "load_preset" -> {
+                showPresetQuickLoader()
+            }
         }
     }
 
@@ -1245,7 +1248,11 @@ class GameBar private constructor(context: Context) {
             android.util.Log.e("GameBar", "Screen recording error: ${e.message}")
         }
     }
-
+    
+    private fun showPresetQuickLoader() {
+        PresetQuickLoaderOverlay.getInstance(context).show()
+    }
+    
     private fun openOverlaySettings() {
         try {
             val intent = Intent(context, GameBarSettingsActivity::class.java)
