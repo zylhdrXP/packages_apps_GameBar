@@ -135,7 +135,7 @@ class GameBar private constructor(context: Context) {
     private var singleTapFunction = "toggle_format"
     private var doubleTapEnabled = true
     private var doubleTapFunction = "capture_logs"
-    private var longPressFunction = "open_settings"
+    private var longPressFunction = "load_preset"
     private var bgDrawable: GradientDrawable? = null
     
     private var isRecorderBound = false
@@ -276,7 +276,7 @@ class GameBar private constructor(context: Context) {
         singleTapFunction = prefs.getString("game_bar_single_tap_function", "toggle_format") ?: "toggle_format"
         doubleTapEnabled = prefs.getBoolean("game_bar_doubletap_enable", true)
         doubleTapFunction = prefs.getString("game_bar_doubletap_function", "capture_logs") ?: "capture_logs"
-        longPressFunction = prefs.getString("game_bar_longpress_function", "open_settings") ?: "open_settings"
+        longPressFunction = prefs.getString("game_bar_longpress_function", "load_preset") ?: "load_preset"
 
         updateSplitMode(prefs.getString("game_bar_split_mode", "side_by_side") ?: "side_by_side")
         updateTextSize(prefs.getInt("game_bar_text_size", 12))
