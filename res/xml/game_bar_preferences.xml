@@ -24,6 +24,14 @@
             android:summary="Show current FPS on screen"
             android:defaultValue="true" />
 
+        <ListPreference
+            android:key="game_bar_fps_display_mode"
+            android:title="FPS Display Mode"
+            android:summary="Choose what FPS statistics to display"
+            android:entries="@array/fps_display_mode_entries"
+            android:entryValues="@array/fps_display_mode_values"
+            android:defaultValue="basic" />
+
         <SwitchPreferenceCompat
             android:key="game_bar_frame_time_enable"
             android:title="Frame Time"
@@ -241,31 +249,54 @@
         android:dependency="game_bar_enable">
 
         <SwitchPreferenceCompat
-            android:key="game_bar_single_tap_toggle"
-            android:title="Enable Single Tap to Toggle"
-            android:summary="Tap once to switch between full and minimal overlay formats"
+            android:key="game_bar_single_tap_enable"
+            android:title="Enable Single Tap"
+            android:summary="Tap once to perform an action"
             android:defaultValue="true" />
 
+        <ListPreference
+            android:key="game_bar_single_tap_function"
+            android:title="Single Tap Function"
+            android:summary="Choose what happens on single tap"
+            android:entries="@array/gesture_function_entries"
+            android:entryValues="@array/gesture_function_values"
+            android:defaultValue="toggle_format" />
+
         <SwitchPreferenceCompat
-            android:key="game_bar_doubletap_capture"
-            android:title="Enable Double Tap to Capture"
-            android:summary="Double-tap overlay to start/stop capture logs"
+            android:key="game_bar_doubletap_enable"
+            android:title="Enable Double Tap"
+            android:summary="Double-tap to perform an action"
             android:defaultValue="true" />
+
+        <ListPreference
+            android:key="game_bar_doubletap_function"
+            android:title="Double Tap Function"
+            android:summary="Choose what happens on double tap"
+            android:entries="@array/gesture_function_entries"
+            android:entryValues="@array/gesture_function_values"
+            android:defaultValue="capture_logs" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_longpress_enable"
             android:title="Enable Long Press"
-            android:summary="Long-press overlay to access GameBar settings"
+            android:summary="Long-press to perform an action"
             android:defaultValue="true" />
+
+        <ListPreference
+            android:key="game_bar_longpress_function"
+            android:title="Long Press Function"
+            android:summary="Choose what happens on long press"
+            android:entries="@array/gesture_function_entries"
+            android:entryValues="@array/gesture_function_values"
+            android:defaultValue="load_preset" />
 
         <ListPreference
             android:key="game_bar_longpress_timeout"
             android:title="Long Press Duration"
-            android:summary="Set the duration required to long-press the overlay"
+            android:summary="Set the duration required to trigger long press"
             android:defaultValue="500"
             android:entries="@array/game_bar_longpress_entries"
-            android:entryValues="@array/game_bar_longpress_values"
-            android:dependency="game_bar_longpress_enable" />
+            android:entryValues="@array/game_bar_longpress_values" />
     </com.android.gamebar.ExpandablePreferenceCategory>
 
     <com.android.gamebar.ExpandablePreferenceCategory
@@ -282,6 +313,31 @@
             android:key="game_bar_per_app_config"
             android:title="Configure Apps"
             android:summary="Choose which apps will auto-enable GameBar" />
+    </com.android.gamebar.ExpandablePreferenceCategory>
+
+    <com.android.gamebar.ExpandablePreferenceCategory
+        android:key="category_presets"
+        android:title="@string/preset_category_title">
+
+        <Preference
+            android:key="preset_save_current"
+            android:title="@string/preset_save_current"
+            android:summary="@string/preset_save_current_summary" />
+
+        <Preference
+            android:key="preset_import"
+            android:title="@string/preset_import"
+            android:summary="@string/preset_import_summary" />
+
+        <Preference
+            android:key="preset_manage"
+            android:title="@string/preset_saved_presets"
+            android:summary="View and manage your saved presets" />
+
+        <Preference
+            android:key="preset_reset_default"
+            android:title="@string/preset_reset_default"
+            android:summary="@string/preset_reset_default_summary" />
     </com.android.gamebar.ExpandablePreferenceCategory>
 
 </PreferenceScreen>

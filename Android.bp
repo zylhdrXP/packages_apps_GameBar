@@ -11,7 +11,8 @@ android_app {
 
     srcs: [
         "src/**/*.kt",
-        "src/**/*.java"
+        "src/**/*.java",
+        "src/**/*.aidl"
     ],
 
     certificate: "platform",

@@ -47,6 +47,10 @@ class GameBarFpsMeter private constructor(context: Context) {
     private var currentTaskId = -1
     private var lastFpsUpdateTime = System.currentTimeMillis()
     private val handler = Handler()
+    
+    // FPS history for percentile calculations
+    private val fpsHistory = mutableListOf<Float>()
+    private val maxHistorySize = 100
 
     init {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -55,6 +59,13 @@ class GameBarFpsMeter private constructor(context: Context) {
                     if (fps > 0) {
                         currentFps = fps
                         lastFpsUpdateTime = System.currentTimeMillis()
+                        
+                        synchronized(fpsHistory) {
+                            fpsHistory.add(fps)
+                            if (fpsHistory.size > maxHistorySize) {
+                                fpsHistory.removeAt(0)
+                            }
+                        }
                     }
                 }
             }
@@ -105,10 +116,57 @@ class GameBarFpsMeter private constructor(context: Context) {
 
     fun getFps(): Float {
         val method = prefs.getString("game_bar_fps_method", "new")
-        return if (method == "legacy") {
+        val fps = if (method == "legacy") {
             readLegacyFps()
         } else {
             currentFps
+        }
+        
+        // Add to history for legacy method
+        if (method == "legacy" && fps > 0) {
+            synchronized(fpsHistory) {
+                fpsHistory.add(fps)
+                if (fpsHistory.size > maxHistorySize) {
+                    fpsHistory.removeAt(0)
+                }
+            }
+        }
+        
+        return fps
+    }
+    
+    /**
+     * Updates dynamically every frame after initial 100 samples
+     */
+    fun get1PercentLowFps(): Float {
+        synchronized(fpsHistory) {
+            if (fpsHistory.size < 100) return -1f
+            
+            val sorted = fpsHistory.sorted()
+            val index = (sorted.size * 0.01).toInt().coerceAtLeast(0)
+            return sorted[index]
+        }
+    }
+    
+    /**
+     * Updates dynamically every frame after initial 100 samples
+     */
+    fun get01PercentLowFps(): Float {
+        synchronized(fpsHistory) {
+            if (fpsHistory.size < 100) return -1f
+            
+            val sorted = fpsHistory.sorted()
+            val index = (sorted.size * 0.001).toInt().coerceAtLeast(0)
+            return sorted[index]
+        }
+    }
+    
+    /**
+     * Clear FPS history
+     */
+    fun clearHistory() {
+        synchronized(fpsHistory) {
+            fpsHistory.clear()
         }
     }
 

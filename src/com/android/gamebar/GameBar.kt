@@ -35,6 +35,13 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
+import android.os.UserHandle
+import com.android.systemui.screenrecord.IRemoteRecording
+import com.android.systemui.screenrecord.IRecordingCallback
+
 class GameBar private constructor(context: Context) {
 
     companion object {
@@ -108,6 +115,7 @@ class GameBar private constructor(context: Context) {
     private var showCpuTemp = false
     private var showRam = false
     private var showFps = true
+    private var fpsDisplayMode = "basic"
     private var showFrameTime = false
     private var showGpuUsage = true
     private var showGpuClock = false
@@ -123,9 +131,23 @@ class GameBar private constructor(context: Context) {
     private var downY = 0f
 
     private var gestureDetector: GestureDetector? = null
-    private var doubleTapCaptureEnabled = true
-    private var singleTapToggleEnabled = true
+    private var singleTapEnabled = true
+    private var singleTapFunction = "toggle_format"
+    private var doubleTapEnabled = true
+    private var doubleTapFunction = "capture_logs"
+    private var longPressFunction = "load_preset"
     private var bgDrawable: GradientDrawable? = null
+    
+    private var isRecorderBound = false
+    private var remoteRecording: IRemoteRecording? = null
+    private val recorderConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            remoteRecording = IRemoteRecording.Stub.asInterface(service)
+        }
+        override fun onServiceDisconnected(name: ComponentName?) {
+            remoteRecording = null
+        }
+    }
 
     private var itemSpacingDp = 8
     private var layoutChanged = false
@@ -142,55 +164,16 @@ class GameBar private constructor(context: Context) {
         
         gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                if (doubleTapCaptureEnabled) {
-                    val dataExport = GameDataExport.getInstance()
-                    val perAppLogManager = dataExport.getPerAppLogManager()
-                    val currentPackage = ForegroundAppDetector.getForegroundPackageName(context)
-                    
-                    if (dataExport.getLoggingMode() == GameDataExport.LoggingMode.PER_APP) {
-                        // Per-app mode: Handle double-tap for manual logging
-                        
-                        // Check if this app already has auto-logging enabled
-                        if (perAppLogManager.isAppLoggingEnabled(context, currentPackage)) {
-                            Toast.makeText(context, "This app has auto-logging enabled. Logs are saved automatically.", Toast.LENGTH_SHORT).show()
-                            return true
-                        }
-                        
-                        // Check if manually logging for this app
-                        if (perAppLogManager.isAppLoggingActive(currentPackage)) {
-                            // Stop manual logging
-                            perAppLogManager.stopManualLoggingForApp(currentPackage)
-                            Toast.makeText(context, "Manual logging stopped and saved", Toast.LENGTH_SHORT).show()
-                        } else {
-                            // Start manual logging
-                            perAppLogManager.startManualLoggingForApp(currentPackage)
-                        }
-                        return true
-                    }
-                    
-                    // Global mode: Original behavior
-                    if (dataExport.isCapturing()) {
-                        dataExport.stopCapture()
-                        dataExport.exportDataToCsv()
-                        Toast.makeText(context, "Capture Stopped and Data Exported", Toast.LENGTH_SHORT).show()
-                    } else {
-                        dataExport.startCapture()
-                        Toast.makeText(context, "Capture Started", Toast.LENGTH_SHORT).show()
-                    }
+                if (doubleTapEnabled) {
+                    executeGestureFunction(doubleTapFunction)
                     return true
                 }
                 return super.onDoubleTap(e)
             }
 
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
-                if (singleTapToggleEnabled) {
-                    overlayFormat = if (overlayFormat == "full") "minimal" else "full"
-                    PreferenceManager.getDefaultSharedPreferences(context)
-                        .edit()
-                        .putString("game_bar_format", overlayFormat)
-                        .apply()
-                    Toast.makeText(context, "Overlay Format: $overlayFormat", Toast.LENGTH_SHORT).show()
-                    updateStats()
+                if (singleTapEnabled) {
+                    executeGestureFunction(singleTapFunction)
                     return true
                 }
                 return super.onSingleTapConfirmed(e)
@@ -198,10 +181,64 @@ class GameBar private constructor(context: Context) {
         })
     }
 
+    private fun executeGestureFunction(function: String) {
+        when (function) {
+            "no_action" -> {
+                // Do nothing
+            }
+            "toggle_format" -> {
+                overlayFormat = if (overlayFormat == "full") "minimal" else "full"
+                PreferenceManager.getDefaultSharedPreferences(context)
+                    .edit()
+                    .putString("game_bar_format", overlayFormat)
+                    .apply()
+                Toast.makeText(context, context.getString(R.string.toast_overlay_format, overlayFormat), Toast.LENGTH_SHORT).show()
+                updateStats()
+            }
+            "capture_logs" -> {
+                val dataExport = GameDataExport.getInstance()
+                val perAppLogManager = dataExport.getPerAppLogManager()
+                val currentPackage = ForegroundAppDetector.getForegroundPackageName(context)
+                
+                if (dataExport.getLoggingMode() == GameDataExport.LoggingMode.PER_APP) {
+                    if (perAppLogManager.isAppLoggingEnabled(context, currentPackage)) {
+                        Toast.makeText(context, R.string.toast_auto_logging_enabled, Toast.LENGTH_SHORT).show()
+                    } else if (perAppLogManager.isAppLoggingActive(currentPackage)) {
+                        perAppLogManager.stopManualLoggingForApp(currentPackage)
+                        Toast.makeText(context, R.string.toast_manual_logging_stopped, Toast.LENGTH_SHORT).show()
+                    } else {
+                        perAppLogManager.startManualLoggingForApp(currentPackage)
+                    }
+                } else {
+                    if (dataExport.isCapturing()) {
+                        dataExport.stopCapture()
+                        dataExport.exportDataToCsv()
+                        Toast.makeText(context, R.string.toast_capture_stopped, Toast.LENGTH_SHORT).show()
+                    } else {
+                        dataExport.startCapture()
+                        Toast.makeText(context, R.string.toast_capture_started, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            "open_settings" -> {
+                openOverlaySettings()
+            }
+            "take_screenshot" -> {
+                takeScreenshot()
+            }
+            "screen_record" -> {
+                toggleScreenRecording()
+            }
+            "load_preset" -> {
+                showPresetQuickLoader()
+            }
+        }
+    }
+
     // Long press runnable
     private val longPressRunnable = Runnable {
         if (pressActive) {
-            openOverlaySettings()
+            executeGestureFunction(longPressFunction)
             pressActive = false
         }
     }
@@ -220,6 +257,7 @@ class GameBar private constructor(context: Context) {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
         showFps = prefs.getBoolean("game_bar_fps_enable", true)
+        fpsDisplayMode = prefs.getString("game_bar_fps_display_mode", "basic") ?: "basic"
         showFrameTime = prefs.getBoolean("game_bar_frame_time_enable", false)
         showBatteryTemp = prefs.getBoolean("game_bar_temp_enable", false)
         showCpuUsage = prefs.getBoolean("game_bar_cpu_usage_enable", true)
@@ -234,8 +272,11 @@ class GameBar private constructor(context: Context) {
         showRamSpeed = prefs.getBoolean("game_bar_ram_speed_enable", false)
         showRamTemp = prefs.getBoolean("game_bar_ram_temp_enable", false)
 
-        doubleTapCaptureEnabled = prefs.getBoolean("game_bar_doubletap_capture", true)
-        singleTapToggleEnabled = prefs.getBoolean("game_bar_single_tap_toggle", true)
+        singleTapEnabled = prefs.getBoolean("game_bar_single_tap_enable", true)
+        singleTapFunction = prefs.getString("game_bar_single_tap_function", "toggle_format") ?: "toggle_format"
+        doubleTapEnabled = prefs.getBoolean("game_bar_doubletap_enable", true)
+        doubleTapFunction = prefs.getString("game_bar_doubletap_function", "capture_logs") ?: "capture_logs"
+        longPressFunction = prefs.getString("game_bar_longpress_function", "load_preset") ?: "load_preset"
 
         updateSplitMode(prefs.getString("game_bar_split_mode", "side_by_side") ?: "side_by_side")
         updateTextSize(prefs.getInt("game_bar_text_size", 12))
@@ -285,7 +326,9 @@ class GameBar private constructor(context: Context) {
             }
             overlayView = null
         }
-        
+
+        bindScreenRecorder()
+
         applyPreferences()
 
         layoutParams = WindowManager.LayoutParams(
@@ -416,6 +459,8 @@ class GameBar private constructor(context: Context) {
         rootLayout = null
         layoutParams = null
         layoutChanged = true // Mark layout as changed
+        
+        unbindScreenRecorder()
     }
     
     fun cleanup() {
@@ -460,10 +505,36 @@ class GameBar private constructor(context: Context) {
         val statViews = mutableListOf<View>()
 
         // 1) FPS - Always collect for logging
-        val fpsVal = GameBarFpsMeter.getInstance(context).getFps()
+        val fpsMeter = GameBarFpsMeter.getInstance(context)
+        val fpsVal = fpsMeter.getFps()
         val fpsStr = if (fpsVal >= 0) String.format(Locale.getDefault(), "%.0f", fpsVal) else "N/A"
+        
         if (showFps) {
-            statViews.add(createStatLine("FPS", fpsStr))
+            if (fpsDisplayMode == "advanced") {
+                // Advanced mode
+                val fps1PercentLow = fpsMeter.get1PercentLowFps()
+                val fps01PercentLow = fpsMeter.get01PercentLowFps()
+                
+                val fpsStats = mutableListOf<String>()
+                fpsStats.add("FPS: $fpsStr")
+                
+                if (fps1PercentLow >= 0) {
+                    fpsStats.add("1% Low: ${String.format(Locale.getDefault(), "%.0f", fps1PercentLow)}")
+                } else {
+                    fpsStats.add("1% Low: Collecting...")
+                }
+                
+                if (fps01PercentLow >= 0) {
+                    fpsStats.add("0.1% Low: ${String.format(Locale.getDefault(), "%.0f", fps01PercentLow)}")
+                } else {
+                    fpsStats.add("0.1% Low: Collecting...")
+                }
+                
+                statViews.add(buildFpsView(fpsStats))
+            } else {
+                // Basic mode
+                statViews.add(createStatLine("FPS", fpsStr))
+            }
         }
 
         // 1.1) Frame Time - Calculate from FPS
@@ -718,6 +789,71 @@ class GameBar private constructor(context: Context) {
         return freqContainer
     }
 
+    private fun buildFpsView(fpsStats: List<String>): View {
+        val fpsContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+        }
+
+        val spacingPx = dpToPx(context, itemSpacingDp)
+        val outerLp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(spacingPx, spacingPx / 2, spacingPx, spacingPx / 2)
+        }
+        fpsContainer.layoutParams = outerLp
+
+        if (overlayFormat == "full") {
+            val labelTv = TextView(context).apply {
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeSp.toFloat())
+                try {
+                    setTextColor(Color.parseColor(titleColorHex))
+                } catch (e: Exception) {
+                    setTextColor(Color.WHITE)
+                }
+                setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
+                text = "FPS Stats "
+            }
+            fpsContainer.addView(labelTv)
+        }
+
+        val verticalStats = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+        }
+
+        for (statLine in fpsStats) {
+            val lineLayout = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+            }
+
+            val statTv = TextView(context).apply {
+                setTextSize(TypedValue.COMPLEX_UNIT_SP, textSizeSp.toFloat())
+                try {
+                    setTextColor(Color.parseColor(valueColorHex))
+                } catch (e: Exception) {
+                    setTextColor(Color.WHITE)
+                }
+                setTypeface(this@GameBar.getTypeface(), Typeface.NORMAL)
+                text = statLine
+            }
+
+            lineLayout.addView(statTv)
+
+            val lineLp = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(spacingPx, spacingPx / 4, spacingPx, spacingPx / 4)
+            }
+            lineLayout.layoutParams = lineLp
+
+            verticalStats.addView(lineLayout)
+        }
+
+        fpsContainer.addView(verticalStats)
+        return fpsContainer
+    }
+
     private fun createStatLine(title: String, rawValue: String): LinearLayout {
         val lineLayout = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -842,32 +978,20 @@ class GameBar private constructor(context: Context) {
     }
 
     private fun loadCustomFont(fontPath: String) {
-        android.util.Log.d("GameBar", "Loading font: $fontPath")
         customTypeface = if (fontPath == "default" || fontPath.isEmpty()) {
-            android.util.Log.d("GameBar", "Using default font")
             null
         } else {
             try {
-                // Load font from assets
-                val typeface = Typeface.createFromAsset(context.assets, fontPath)
-                android.util.Log.d("GameBar", "Font loaded successfully: $fontPath")
-                android.util.Log.d("GameBar", "Typeface object: $typeface")
-                android.util.Log.d("GameBar", "Typeface is default: ${typeface == Typeface.DEFAULT}")
-                typeface
+                Typeface.createFromAsset(context.assets, fontPath)
             } catch (e: Exception) {
-                android.util.Log.e("GameBar", "Failed to load font from assets: $fontPath - ${e.message}")
-                e.printStackTrace()
+                android.util.Log.e("GameBar", "Failed to load font: $fontPath - ${e.message}")
                 null
             }
         }
-        android.util.Log.d("GameBar", "customTypeface set to: $customTypeface")
     }
 
     private fun getTypeface(): Typeface {
-        android.util.Log.d("GameBar", "getTypeface called - customTypeface: $customTypeface")
-        val typeface = customTypeface ?: Typeface.DEFAULT
-        android.util.Log.d("GameBar", "getTypeface returning: $typeface (isCustom: ${customTypeface != null})")
-        return typeface
+        return customTypeface ?: Typeface.DEFAULT
     }
 
     private fun applyTypefaceToOverlay() {
@@ -958,13 +1082,6 @@ class GameBar private constructor(context: Context) {
         longPressThresholdMs = ms
     }
 
-    fun setDoubleTapCaptureEnabled(enabled: Boolean) {
-        doubleTapCaptureEnabled = enabled
-    }
-
-    fun setSingleTapToggleEnabled(enabled: Boolean) {
-        singleTapToggleEnabled = enabled
-    }
     
     fun isCurrentlyShowing(): Boolean {
         return isShowing
@@ -983,7 +1100,7 @@ class GameBar private constructor(context: Context) {
         
         // Use backgroundAlpha for transparency control
         val color = Color.argb(
-            Math.max(backgroundAlpha, 16), // Minimum alpha of 16 to prevent invisible overlays
+            backgroundAlpha,
             red, green, blue
         )
         bgDrawable?.setColor(color)
@@ -1069,6 +1186,73 @@ class GameBar private constructor(context: Context) {
         }
     }
 
+    private fun takeScreenshot() {
+        try {
+            // Trigger system screenshot using shell command
+            Runtime.getRuntime().exec("input keyevent KEYCODE_SYSRQ")
+            Toast.makeText(context, R.string.toast_screenshot_taken, Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(context, R.string.toast_screenshot_failed, Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun bindScreenRecorder() {
+        try {
+            isRecorderBound = context.bindServiceAsUser(Intent().apply {
+                component = ComponentName(
+                    "com.android.systemui",
+                    "com.android.systemui.screenrecord.RecordingService"
+                )
+            }, recorderConnection, Context.BIND_AUTO_CREATE, UserHandle.CURRENT)
+        } catch (e: Exception) {
+            android.util.Log.e("GameBar", "Failed to bind screen recorder: ${e.message}")
+            isRecorderBound = false
+        }
+    }
+    
+    private fun unbindScreenRecorder() {
+        if (isRecorderBound) {
+            try {
+                context.unbindService(recorderConnection)
+            } catch (e: Exception) {
+                android.util.Log.w("GameBar", "Failed to unbind screen recorder: ${e.message}")
+            } finally {
+                isRecorderBound = false
+                remoteRecording = null
+            }
+        }
+    }
+    
+    private fun toggleScreenRecording() {
+        val recorder = remoteRecording
+        if (recorder == null) {
+            Toast.makeText(context, R.string.toast_screen_recorder_unavailable, Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        try {
+            val isStarting = try { recorder.isStarting } catch (e: Exception) { false }
+            val isRecording = try { recorder.isRecording } catch (e: Exception) { false }
+            
+            if (!isStarting) {
+                if (!isRecording) {
+                    recorder.startRecording()
+                    Toast.makeText(context, R.string.toast_screen_recording_started, Toast.LENGTH_SHORT).show()
+                } else {
+                    recorder.stopRecording()
+                    Toast.makeText(context, R.string.toast_screen_recording_stopped, Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (e: Exception) {
+            Toast.makeText(context, R.string.toast_screen_recording_failed, Toast.LENGTH_SHORT).show()
+            android.util.Log.e("GameBar", "Screen recording error: ${e.message}")
+        }
+    }
+    
+    private fun showPresetQuickLoader() {
+        PresetQuickLoaderOverlay.getInstance(context).show()
+    }
+    
     private fun openOverlaySettings() {
         try {
             val intent = Intent(context, GameBarSettingsActivity::class.java)

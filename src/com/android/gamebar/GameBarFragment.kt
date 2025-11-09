@@ -8,9 +8,11 @@ package com.android.gamebar
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import com.android.gamebar.utils.PartsCustomSeekBarPreference
@@ -28,7 +30,23 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private var gameBar: GameBar? = null
     private var masterSwitch: MainSwitchPreference? = null
     private var autoEnableSwitch: SwitchPreferenceCompat? = null
+    
+    private val importPresetLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let { importPresetFromUri(it) }
+    }
+    
+    private val presetManagementLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            // Preset was loaded, refresh UI
+            refreshPreferences()
+        }
+    }
     private var fpsSwitch: SwitchPreferenceCompat? = null
+    private var fpsDisplayModePref: ListPreference? = null
     private var frameTimeSwitch: SwitchPreferenceCompat? = null
     private var batteryTempSwitch: SwitchPreferenceCompat? = null
     private var cpuUsageSwitch: SwitchPreferenceCompat? = null
@@ -38,9 +56,12 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private var gpuUsageSwitch: SwitchPreferenceCompat? = null
     private var gpuClockSwitch: SwitchPreferenceCompat? = null
     private var gpuTempSwitch: SwitchPreferenceCompat? = null
-    private var doubleTapCapturePref: SwitchPreferenceCompat? = null
-    private var singleTapTogglePref: SwitchPreferenceCompat? = null
+    private var singleTapEnablePref: SwitchPreferenceCompat? = null
+    private var singleTapFunctionPref: ListPreference? = null
+    private var doubleTapEnablePref: SwitchPreferenceCompat? = null
+    private var doubleTapFunctionPref: ListPreference? = null
     private var longPressEnablePref: SwitchPreferenceCompat? = null
+    private var longPressFunctionPref: ListPreference? = null
     private var longPressTimeoutPref: ListPreference? = null
     private var textSizePref: PartsCustomSeekBarPreference? = null
     private var bgAlphaPref: PartsCustomSeekBarPreference? = null
@@ -67,6 +88,7 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
         masterSwitch = findPreference("game_bar_enable")
         autoEnableSwitch = findPreference("game_bar_auto_enable")
         fpsSwitch = findPreference("game_bar_fps_enable")
+        fpsDisplayModePref = findPreference("game_bar_fps_display_mode")
         frameTimeSwitch = findPreference("game_bar_frame_time_enable")
         batteryTempSwitch = findPreference("game_bar_temp_enable")
         cpuUsageSwitch = findPreference("game_bar_cpu_usage_enable")
@@ -79,9 +101,12 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
         ramSpeedSwitch = findPreference("game_bar_ram_speed_enable")
         ramTempSwitch = findPreference("game_bar_ram_temp_enable")
 
-        doubleTapCapturePref = findPreference("game_bar_doubletap_capture")
-        singleTapTogglePref = findPreference("game_bar_single_tap_toggle")
+        singleTapEnablePref = findPreference("game_bar_single_tap_enable")
+        singleTapFunctionPref = findPreference("game_bar_single_tap_function")
+        doubleTapEnablePref = findPreference("game_bar_doubletap_enable")
+        doubleTapFunctionPref = findPreference("game_bar_doubletap_function")
         longPressEnablePref = findPreference("game_bar_longpress_enable")
+        longPressFunctionPref = findPreference("game_bar_longpress_function")
         longPressTimeoutPref = findPreference("game_bar_longpress_timeout")
 
         textSizePref = findPreference("game_bar_text_size")
@@ -101,8 +126,16 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
 
         setupPerAppConfig()
         setupMasterSwitchListener()
-        setupAutoEnableSwitchListener()
         setupFeatureSwitchListeners()
+        
+        fpsDisplayModePref?.isVisible = fpsSwitch?.isChecked ?: true
+        
+        // Set initial visibility of gesture function selectors
+        singleTapFunctionPref?.isVisible = singleTapEnablePref?.isChecked ?: true
+        doubleTapFunctionPref?.isVisible = doubleTapEnablePref?.isChecked ?: true
+        longPressFunctionPref?.isVisible = longPressEnablePref?.isChecked ?: true
+        longPressTimeoutPref?.isVisible = longPressEnablePref?.isChecked ?: true
+        
         setupGesturePrefListeners()
         setupStylePrefListeners()
         setupExpandableCategories()
@@ -133,6 +166,143 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
         fontSelectorPref?.setOnPreferenceClickListener {
             startActivity(Intent(requireContext(), GameBarFontSelectorActivity::class.java))
             true
+        }
+        
+        // Preset management preferences
+        setupPresetPreferences()
+    }
+    
+    private fun setupPresetPreferences() {
+        val presetManager = PresetManager.getInstance(requireContext())
+        
+        // Save current configuration
+        val savePresetPref: Preference? = findPreference("preset_save_current")
+        savePresetPref?.setOnPreferenceClickListener {
+            showSavePresetDialog(presetManager)
+            true
+        }
+        
+        // Import preset
+        val importPresetPref: Preference? = findPreference("preset_import")
+        importPresetPref?.setOnPreferenceClickListener {
+            importPresetLauncher.launch("application/json")
+            true
+        }
+        
+        // Manage presets
+        val managePresetsPref: Preference? = findPreference("preset_manage")
+        managePresetsPref?.setOnPreferenceClickListener {
+            val intent = Intent(requireContext(), PresetManagementActivity::class.java)
+            presetManagementLauncher.launch(intent)
+            true
+        }
+        
+        // Reset to defaults
+        val resetDefaultPref: Preference? = findPreference("preset_reset_default")
+        resetDefaultPref?.setOnPreferenceClickListener {
+            showResetDefaultDialog(presetManager)
+            true
+        }
+    }
+    
+    private fun showSavePresetDialog(presetManager: PresetManager) {
+        val input = android.widget.EditText(requireContext()).apply {
+            hint = getString(R.string.hint_preset_name)
+            setPadding(50, 30, 50, 30)
+        }
+        
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle(R.string.dialog_title_save_preset)
+            .setMessage(R.string.dialog_message_preset_name)
+            .setView(input)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                val name = input.text.toString().trim()
+                if (name.isEmpty()) {
+                    android.widget.Toast.makeText(requireContext(), R.string.toast_preset_name_empty, android.widget.Toast.LENGTH_SHORT).show()
+                } else {
+                    if (presetManager.savePreset(name)) {
+                        android.widget.Toast.makeText(
+                            requireContext(),
+                            getString(R.string.toast_preset_saved, name),
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        android.widget.Toast.makeText(requireContext(), R.string.toast_preset_save_failed, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+    
+    private fun showResetDefaultDialog(presetManager: PresetManager) {
+        android.app.AlertDialog.Builder(requireContext())
+            .setTitle(R.string.preset_reset_default)
+            .setMessage(R.string.dialog_message_reset_default)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                if (presetManager.resetToDefaults()) {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        R.string.toast_preset_reset_success,
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    
+                    // Refresh UI to show default values
+                    activity?.recreate()
+                } else {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        "Failed to reset settings",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+    
+    private fun importPresetFromUri(uri: Uri) {
+        try {
+            val presetManager = PresetManager.getInstance(requireContext())
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            
+            if (inputStream != null) {
+                val file = java.io.File(requireContext().cacheDir, "temp_preset.json")
+                file.outputStream().use { output ->
+                    inputStream.copyTo(output)
+                }
+                inputStream.close()
+                
+                if (presetManager.importPreset(file)) {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        R.string.toast_preset_imported,
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    
+                    // Clean up temp file
+                    file.delete()
+                } else {
+                    android.widget.Toast.makeText(
+                        requireContext(),
+                        R.string.toast_preset_import_failed,
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                android.widget.Toast.makeText(
+                    requireContext(),
+                    R.string.toast_preset_import_failed,
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("GameBarFragment", "Failed to import preset", e)
+            android.widget.Toast.makeText(
+                requireContext(),
+                R.string.toast_preset_import_failed,
+                android.widget.Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -191,7 +361,21 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
 
     private fun setupFeatureSwitchListeners() {
         fpsSwitch?.setOnPreferenceChangeListener { _, newValue ->
-            gameBar?.setShowFps(newValue as Boolean)
+            val enabled = newValue as Boolean
+            gameBar?.setShowFps(enabled)
+            fpsDisplayModePref?.isVisible = enabled
+            true
+        }
+        fpsDisplayModePref?.setOnPreferenceChangeListener { _, newValue ->
+            if (newValue is String) {
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    gameBar?.applyPreferences()
+                    if (GameBar.isShowing()) {
+                        gameBar?.hide()
+                        gameBar?.show()
+                    }
+                }
+            }
             true
         }
         frameTimeSwitch?.setOnPreferenceChangeListener { _, newValue ->
@@ -241,18 +425,65 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     }
 
     private fun setupGesturePrefListeners() {
-        doubleTapCapturePref?.setOnPreferenceChangeListener { _, newValue ->
-            gameBar?.setDoubleTapCaptureEnabled(newValue as Boolean)
+        // Single tap enable/disable and visibility
+        singleTapEnablePref?.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            singleTapFunctionPref?.isVisible = enabled
             true
         }
-        singleTapTogglePref?.setOnPreferenceChangeListener { _, newValue ->
-            gameBar?.setSingleTapToggleEnabled(newValue as Boolean)
+        
+        // Single tap function change
+        singleTapFunctionPref?.setOnPreferenceChangeListener { _, _ ->
+            // Reload preferences to apply new function
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                gameBar?.applyPreferences()
+            }
             true
         }
+        
+        // Double tap enable/disable and visibility
+        doubleTapEnablePref?.setOnPreferenceChangeListener { _, newValue ->
+            val enabled = newValue as Boolean
+            doubleTapFunctionPref?.isVisible = enabled
+            true
+        }
+        
+        // Double tap function change
+        doubleTapFunctionPref?.setOnPreferenceChangeListener { _, _ ->
+            // Reload preferences to apply new function
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                gameBar?.applyPreferences()
+            }
+            true
+        }
+        
+        // Long press enable/disable and visibility
         longPressEnablePref?.setOnPreferenceChangeListener { _, newValue ->
-            gameBar?.setLongPressEnabled(newValue as Boolean)
+            val enabled = newValue as Boolean
+            longPressFunctionPref?.isVisible = enabled
+            longPressTimeoutPref?.isVisible = enabled
             true
         }
+        
+        // Long press function change
+        longPressFunctionPref?.setOnPreferenceChangeListener { _, newValue ->
+            val newFunction = newValue as? String ?: return@setOnPreferenceChangeListener true
+            val currentFunction = longPressFunctionPref?.value ?: "load_preset"
+            
+            // Show warning if changing from load_preset to something else
+            if (currentFunction == "load_preset" && newFunction != "load_preset") {
+                showLongPressChangeWarning(newFunction)
+                return@setOnPreferenceChangeListener false // Prevent change until user confirms
+            }
+            
+            // Reload preferences to apply new function
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                gameBar?.applyPreferences()
+            }
+            true
+        }
+        
+        // Long press timeout
         longPressTimeoutPref?.setOnPreferenceChangeListener { _, newValue ->
             if (newValue is String) {
                 val ms = newValue.toLong()
@@ -344,6 +575,7 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
 
     override fun onResume() {
         super.onResume()
+        
         if (!hasUsageStatsPermission(requireContext())) {
             requestUsageStatsPermission()
         }
@@ -370,5 +602,66 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
     private fun requestUsageStatsPermission() {
         val intent = Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
         startActivity(intent)
+    }
+    
+    private fun refreshPreferences() {
+        activity?.recreate()
+    }
+    
+    private fun showLongPressChangeWarning(newFunction: String) {
+        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(requireContext())
+        
+        // Check if user has chosen to not show this warning again
+        if (prefs.getBoolean("dont_show_longpress_warning", false)) {
+            // User understands, apply the change directly
+            longPressFunctionPref?.value = newFunction
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                gameBar?.applyPreferences()
+            }
+            return
+        }
+        
+        // Create custom view with checkbox
+        val dialogView = android.view.LayoutInflater.from(requireContext())
+            .inflate(android.R.layout.select_dialog_multichoice, null)
+        
+        val container = android.widget.LinearLayout(requireContext()).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            setPadding(60, 40, 60, 20)
+        }
+        
+        val messageText = android.widget.TextView(requireContext()).apply {
+            text = getString(R.string.warning_longpress_change_title) + "\n\n" +
+                   getString(R.string.warning_longpress_change_message)
+            textSize = 15f
+            setPadding(0, 0, 0, 30)
+        }
+        container.addView(messageText)
+        
+        val checkBox = android.widget.CheckBox(requireContext()).apply {
+            text = getString(R.string.warning_longpress_checkbox)
+            setPadding(0, 10, 0, 0)
+        }
+        container.addView(checkBox)
+        
+        android.app.AlertDialog.Builder(requireContext())
+            .setView(container)
+            .setPositiveButton(R.string.warning_proceed) { _, _ ->
+                // Save preference if checkbox is checked
+                if (checkBox.isChecked) {
+                    prefs.edit()
+                        .putBoolean("dont_show_longpress_warning", true)
+                        .apply()
+                }
+                
+                // Apply the change
+                longPressFunctionPref?.value = newFunction
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    gameBar?.applyPreferences()
+                }
+            }
+            .setNegativeButton(R.string.warning_cancel, null)
+            .setCancelable(true)
+            .show()
     }
 }
