@@ -12,4 +12,3 @@ allow gamebar_app vendor_sysfs_kgsl_gpuclk:file { read open getattr };
 allow zygote gamebar_app:process dyntransition;
 
 allow gamebar_app hal_graphics_mapper_hwservice:hwservice_manager find;
-allow gamebar_app default_prop:file read;
