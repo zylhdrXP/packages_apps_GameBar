@@ -127,10 +127,6 @@ public class PartsCustomSeekBarPreference extends Preference implements Slider.O
             mValue = mMinValue;
         }
 
-        Context materialContext = new ContextThemeWrapper(context,
-                com.google.android.material.R.style.Theme_MaterialComponents_DayNight);
-        mSlider = new Slider(materialContext, attrs);
-
         setLayoutResource(R.layout.preference_custom_seekbar);
     }
 
@@ -151,25 +147,8 @@ public class PartsCustomSeekBarPreference extends Preference implements Slider.O
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
-        try
-        {
-            // move our seekbar to the new view we've been given
-            ViewParent oldContainer = mSlider.getParent();
-            ViewGroup newContainer = (ViewGroup) holder.findViewById(R.id.seekbar);
-            if (oldContainer != newContainer) {
-                // remove the seekbar from the old view
-                if (oldContainer != null) {
-                    ((ViewGroup) oldContainer).removeView(mSlider);
-                }
-                // remove the existing seekbar (there may not be one) and add ours
-                newContainer.removeAllViews();
-                newContainer.addView(mSlider, ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT);
-            }
-        } catch (Exception ex) {
-            Log.e(TAG, "Error binding view", ex);
-        }
 
+        mSlider = (Slider) holder.findViewById(R.id.slider);
         mSlider.setValueTo(mMaxValue);
         mSlider.setValueFrom(mMinValue);
         mSlider.setValue(mValue);
@@ -181,26 +160,6 @@ public class PartsCustomSeekBarPreference extends Preference implements Slider.O
         } else {
             Log.w(TAG, "Step size is zero or invalid: " + mInterval);
         }
-
-        // Set up slider color
-        mSlider.setTrackActiveTintList(getContext().getColorStateList(
-                com.android.settingslib.widget.preference.slider.R.color
-                .settingslib_expressive_color_slider_track_active));
-        mSlider.setTrackInactiveTintList(getContext().getColorStateList(
-                com.android.settingslib.widget.preference.slider.R.color
-                .settingslib_expressive_color_slider_track_inactive));
-        mSlider.setThumbTintList(getContext().getColorStateList(
-                com.android.settingslib.widget.preference.slider.R.color
-                .settingslib_expressive_color_slider_thumb));
-        mSlider.setHaloTintList(getContext().getColorStateList(
-                com.android.settingslib.widget.preference.slider.R.color
-                .settingslib_expressive_color_slider_halo));
-        mSlider.setTickActiveTintList(getContext().getColorStateList(
-                com.android.settingslib.widget.preference.slider.R.color
-                .settingslib_expressive_color_slider_track_active));
-        mSlider.setTickInactiveTintList(getContext().getColorStateList(
-                com.android.settingslib.widget.preference.slider.R.color
-                .settingslib_expressive_color_slider_track_inactive));
 
         // Set up slider size
         if (SettingsThemeHelper.isExpressiveTheme(getContext())) {
