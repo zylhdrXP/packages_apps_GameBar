@@ -1,31 +1,43 @@
-# GameBar init script
-# NOTE: Customize these paths for your device's hardware
+# GameBar init script - Xiaomi garnet (SM7435)
 
 on boot
-    # FPS measurement path (adjust paths)
+    # ===================== FPS (DRM / CRTC) =====================
     chown system graphics /sys/class/drm/sde-crtc-0/measured_fps
     chmod 0660 /sys/class/drm/sde-crtc-0/measured_fps
 
-    # Battery temperature path (adjust paths)
-    chown system system /sys/class/power_supply/battery/temp
-    chmod 0660 /sys/class/power_supply/battery/temp
-    
-    # CPU temperature path (adjust thermal zone number)
-    chown system system /sys/class/thermal/thermal_zone48/temp
-    chmod 0660 /sys/class/thermal/thermal_zone48/temp
-    
-    # GPU paths (adjust paths)
+    chown system graphics /sys/class/drm/sde-crtc-1/measured_fps
+    chmod 0660 /sys/class/drm/sde-crtc-1/measured_fps
+
+    chown system graphics /sys/class/drm/sde-crtc-2/measured_fps
+    chmod 0660 /sys/class/drm/sde-crtc-2/measured_fps
+
+    # ===================== Battery temperature =====================
+    # thermal_zone74 -> type: battery
+    chown system system /sys/class/thermal/thermal_zone74/temp
+    chmod 0660 /sys/class/thermal/thermal_zone74/temp
+
+    # ===================== CPU temperature =====================
+    # thermal_zone67 -> type: cpu_therm
+    chown system system /sys/class/thermal/thermal_zone67/temp
+    chmod 0660 /sys/class/thermal/thermal_zone67/temp
+
+    # ===================== GPU temperature =====================
+    # thermal_zone31 -> type: gpuss-0
+    chown system system /sys/class/thermal/thermal_zone31/temp
+    chmod 0660 /sys/class/thermal/thermal_zone31/temp
+
+    # ===================== RAM / DDR temperature =====================
+    # thermal_zone43 -> type: ddr
+    chown system system /sys/class/thermal/thermal_zone43/temp
+    chmod 0660 /sys/class/thermal/thermal_zone43/temp
+
+    # ===================== GPU usage & clock =====================
     chown system system /sys/class/kgsl/kgsl-3d0/gpu_busy_percentage
     chmod 0660 /sys/class/kgsl/kgsl-3d0/gpu_busy_percentage
+
     chown system system /sys/class/kgsl/kgsl-3d0/gpuclk
     chmod 0660 /sys/class/kgsl/kgsl-3d0/gpuclk
-    chown system system /sys/class/kgsl/kgsl-3d0/temp
-    chmod 0660 /sys/class/kgsl/kgsl-3d0/temp
-    
-    # RAM frequency path (adjust paths)
+
+    # ===================== RAM frequency =====================
     chown system system /sys/devices/system/cpu/bus_dcvs/DDR/cur_freq
     chmod 0660 /sys/devices/system/cpu/bus_dcvs/DDR/cur_freq
-    
-    # RAM temperature path (adjust thermal zone number)
-    chown system system /sys/class/thermal/thermal_zone27/temp
-    chmod 0660 /sys/class/thermal/thermal_zone27/temp
