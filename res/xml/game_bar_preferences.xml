@@ -8,6 +8,10 @@
     xmlns:settings="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <com.android.settingslib.widget.IllustrationPreference
+        android:key="gamebar_logo"
+        app:lottie_rawRes="@raw/gamebar" />
+
     <com.android.settingslib.widget.MainSwitchPreference
         android:key="game_bar_enable"
         android:title="Enable GameBar Overlay"
