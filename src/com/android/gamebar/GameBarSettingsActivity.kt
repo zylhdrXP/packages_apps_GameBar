@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-
 package com.android.gamebar
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -17,10 +19,14 @@ import com.android.settingslib.collapsingtoolbar.CollapsingToolbarBaseActivity
 import com.android.gamebar.R
 
 class GameBarSettingsActivity : CollapsingToolbarBaseActivity() {
+
+    private val LAUNCHER_ALIAS_NAME = "com.android.gamebar.GameBarLauncher"
     
     companion object {
         private const val OVERLAY_PERMISSION_REQUEST_CODE = 1234
         private const val REQUEST_CODE_OPEN_CSV = 1001
+        private const val PREFS_NAME = "GameBarSettings"
+        private const val KEY_SHOW_LAUNCHER_ICON = "show_launcher_icon"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,11 +66,22 @@ class GameBarSettingsActivity : CollapsingToolbarBaseActivity() {
     
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.gamebar_settings_menu, menu)
+        val showLauncherIconItem = menu.findItem(R.id.menu_show_launcher_icon)
+        val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        showLauncherIconItem.isChecked = prefs.getBoolean(KEY_SHOW_LAUNCHER_ICON, true)
         return true
     }
     
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.menu_show_launcher_icon -> {
+                val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+                val isChecked = !item.isChecked
+                item.isChecked = isChecked
+                prefs.edit().putBoolean(KEY_SHOW_LAUNCHER_ICON, isChecked).apply()
+                setLauncherIconEnabled(isChecked)
+                true
+            }
             R.id.menu_log_monitor -> {
                 try {
                     startActivity(Intent(this, GameBarLogActivity::class.java))
@@ -91,6 +108,16 @@ class GameBarSettingsActivity : CollapsingToolbarBaseActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun setLauncherIconEnabled(enabled: Boolean) {
+        val componentName = ComponentName(this, LAUNCHER_ALIAS_NAME)
+        val state = if (enabled) {
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        } else {
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+        }
+        packageManager.setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP)
     }
     
     private fun openExternalLogFile() {

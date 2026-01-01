@@ -161,4 +161,7 @@
     <string name="warning_proceed">Proceed</string>
     <string name="warning_cancel">Cancel</string>
 
+    <!-- Show/Hide Launcher Icon -->
+    <string name="show_launcher_icon">Show launcher icon</string>
+
 </resources>
