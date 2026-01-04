@@ -68,10 +68,6 @@
             android:theme="@style/Theme.SubSettingsBase.Expressive"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="com.android.settings.action.IA_SETTINGS" />
             </intent-filter>
             <meta-data
@@ -81,6 +77,18 @@
                 android:name="com.android.settings.icon"
                 android:resource="@drawable/ic_gamebar" />    
         </activity>
+
+        <activity-alias
+            android:name="com.android.gamebar.GameBarLauncher"
+            android:targetActivity=".GameBarSettingsActivity"
+            android:label="@string/app_title"
+            android:icon="@mipmap/ic_gamebar_launcher"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- GameBar Overlay Tile Service -->
         <service
