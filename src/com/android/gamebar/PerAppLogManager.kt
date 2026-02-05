@@ -142,12 +142,16 @@ class PerAppLogManager private constructor() {
                         try {
                             val appInfo = pm.getApplicationInfo(packageName, 0)
                             val appName = pm.getApplicationLabel(appInfo).toString()
-                            android.widget.Toast.makeText(it, 
-                                "$appName: GameBar logging enabled but GameBar overlay is OFF. Turn ON GameBar to collect logs.", 
+                            android.widget.Toast.makeText(it,
+
+                                it.getString(R.string.gb_logging_enabled_overlay_off_app, appName),
+
                                 android.widget.Toast.LENGTH_LONG).show()
                         } catch (e: Exception) {
-                            android.widget.Toast.makeText(it, 
-                                "GameBar logging enabled but GameBar overlay is OFF. Turn ON GameBar to collect logs.", 
+                            android.widget.Toast.makeText(it,
+
+                                it.getString(R.string.gb_logging_enabled_overlay_off),
+
                                 android.widget.Toast.LENGTH_LONG).show()
                         }
                     }

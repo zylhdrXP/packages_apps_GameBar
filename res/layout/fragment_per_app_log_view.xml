@@ -53,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="No logs available"
+                android:text="@string/gb_no_logs_available"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="16sp" />
 
@@ -62,7 +62,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Enable per-app logging and use the app to generate logs"
+                android:text="@string/gb_enable_per_app_logging_and_use_the_app_to_generate"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="14sp" />
 

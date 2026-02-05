@@ -10,103 +10,103 @@
 
     <com.android.settingslib.widget.MainSwitchPreference
         android:key="game_bar_enable"
-        android:title="Enable GameBar Overlay"
+        android:title="@string/gb_enable_gamebar_overlay"
         android:defaultValue="false" />
 
     <com.android.gamebar.ExpandablePreferenceCategory
         android:key="category_overlay_features"
-        android:title="Overlay Features"
+        android:title="@string/gb_overlay_features"
         android:dependency="game_bar_enable">
 
         <SwitchPreferenceCompat
             android:key="game_bar_fps_enable"
-            android:title="FPS Overlay"
-            android:summary="Show current FPS on screen"
+            android:title="@string/gb_fps_overlay"
+            android:summary="@string/gb_show_current_fps_on_screen"
             android:defaultValue="true" />
 
         <ListPreference
             android:key="game_bar_fps_display_mode"
-            android:title="FPS Display Mode"
-            android:summary="Choose what FPS statistics to display"
+            android:title="@string/gb_fps_display_mode"
+            android:summary="@string/gb_choose_what_fps_statistics_to_display"
             android:entries="@array/fps_display_mode_entries"
             android:entryValues="@array/fps_display_mode_values"
             android:defaultValue="basic" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_frame_time_enable"
-            android:title="Frame Time"
-            android:summary="Show frame time in milliseconds"
+            android:title="@string/gb_frame_time"
+            android:summary="@string/gb_show_frame_time_in_milliseconds"
             android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_temp_enable"
-            android:title="Device Temperature"
-            android:summary="Show device temperature"
+            android:title="@string/gb_device_temperature"
+            android:summary="@string/gb_show_device_temperature"
             android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_cpu_usage_enable"
-            android:title="CPU Usage"
-            android:summary="Show current CPU usage percentage"
+            android:title="@string/gb_cpu_usage"
+            android:summary="@string/gb_show_current_cpu_usage_percentage"
             android:defaultValue="true" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_cpu_clock_enable"
-            android:title="CPU Clock Speeds"
-            android:summary="Show current CPU clock speeds for each core"
+            android:title="@string/gb_cpu_clock_speeds"
+            android:summary="@string/gb_show_current_cpu_clock_speeds_for_each_core"
             android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_cpu_temp_enable"
-            android:title="CPU Temperature"
-            android:summary="Show CPU temperature"
+            android:title="@string/gb_cpu_temperature"
+            android:summary="@string/gb_show_cpu_temperature"
             android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_ram_enable"
-            android:title="RAM Usage"
-            android:summary="Show current RAM usage in MB"
+            android:title="@string/gb_ram_usage"
+            android:summary="@string/gb_show_current_ram_usage_in_mb"
             android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_ram_speed_enable"
-            android:title="RAM Frequency"
-            android:summary="Show current RAM frequency(bus) in GHz"
+            android:title="@string/gb_ram_frequency"
+            android:summary="@string/gb_show_current_ram_frequency_bus_in_ghz"
             android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_ram_temp_enable"
-            android:title="RAM Temperature"
-            android:summary="Show current RAM temperature"
+            android:title="@string/gb_ram_temperature"
+            android:summary="@string/gb_show_current_ram_temperature"
             android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_gpu_usage_enable"
-            android:title="GPU Usage"
-            android:summary="Show GPU usage percentage"
+            android:title="@string/gb_gpu_usage"
+            android:summary="@string/gb_show_gpu_usage_percentage"
             android:defaultValue="true" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_gpu_clock_enable"
-            android:title="GPU Clock Speed"
-            android:summary="Show current GPU clock frequency"
+            android:title="@string/gb_gpu_clock_speed"
+            android:summary="@string/gb_show_current_gpu_clock_frequency"
             android:defaultValue="false" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_gpu_temp_enable"
-            android:title="GPU Temperature"
-            android:summary="Show current GPU temperature"
+            android:title="@string/gb_gpu_temperature"
+            android:summary="@string/gb_show_current_gpu_temperature"
             android:defaultValue="false" />
     </com.android.gamebar.ExpandablePreferenceCategory>
 
     <com.android.gamebar.ExpandablePreferenceCategory
         android:key="category_fps_method"
-        android:title="FPS Measurement Method"
+        android:title="@string/gb_fps_measurement_method"
         android:dependency="game_bar_fps_enable">
         <ListPreference
             android:key="game_bar_fps_method"
-            android:title="Select FPS Method"
-            android:summary="Choose between the New API method (default) and Legacy Sysfs"
+            android:title="@string/gb_select_fps_method"
+            android:summary="@string/gb_choose_between_the_new_api_method_default_and_lega"
             android:defaultValue="new"
             android:entries="@array/game_bar_fps_method_entries"
             android:entryValues="@array/game_bar_fps_method_values" />
@@ -114,21 +114,21 @@
 
     <com.android.gamebar.ExpandablePreferenceCategory
         android:key="category_customization"
-        android:title="Customization"
+        android:title="@string/gb_customization"
         android:dependency="game_bar_enable">
 
         <com.android.gamebar.utils.PartsCustomSeekBarPreference
             android:key="game_bar_text_size"
-            android:title="Text Size"
-            android:summary="Adjust the size of overlay text"
+            android:title="@string/gb_text_size"
+            android:summary="@string/gb_adjust_the_size_of_overlay_text"
             android:defaultValue="12"
             android:max="50"
             android:min="5"
             settings:units="" />
         <com.android.gamebar.utils.PartsCustomSeekBarPreference
             android:key="game_bar_background_alpha"
-            android:title="Background Transparency"
-            android:summary="Adjust the transparency of the background"
+            android:title="@string/gb_background_transparency"
+            android:summary="@string/gb_adjust_the_transparency_of_the_background"
             android:defaultValue="95"
             android:max="255"
             android:min="0"
@@ -136,8 +136,8 @@
 
         <com.android.gamebar.colorpicker.ColorPreferenceCompat
             android:key="game_bar_background_color"
-            android:title="Overlay Background Color"
-            android:summary="Color for the overlay background"
+            android:title="@string/gb_overlay_background_color"
+            android:summary="@string/gb_color_for_the_overlay_background"
             android:defaultValue="0xFF000000"
             app:gamebar_dialogType="custom"
             app:gamebar_showAlphaSlider="true"
@@ -149,16 +149,16 @@
 
         <com.android.gamebar.utils.PartsCustomSeekBarPreference
             android:key="game_bar_corner_radius"
-            android:title="Overlay Corner Radius"
-            android:summary="Adjust how rounded the overlay corners should be"
+            android:title="@string/gb_overlay_corner_radius"
+            android:summary="@string/gb_adjust_how_rounded_the_overlay_corners_should_be"
             android:defaultValue="100"
             android:max="100"
             android:min="0"
             settings:units="" />
         <com.android.gamebar.utils.PartsCustomSeekBarPreference
             android:key="game_bar_padding"
-            android:title="Overlay Padding"
-            android:summary="Adjust the space around the stats"
+            android:title="@string/gb_overlay_padding"
+            android:summary="@string/gb_adjust_the_space_around_the_stats"
             android:defaultValue="4"
             android:max="64"
             android:min="0"
@@ -166,8 +166,8 @@
 
         <com.android.gamebar.utils.PartsCustomSeekBarPreference
             android:key="game_bar_item_spacing"
-            android:title="Item Spacing"
-            android:summary="Adjust spacing between overlay lines"
+            android:title="@string/gb_item_spacing"
+            android:summary="@string/gb_adjust_spacing_between_overlay_lines"
             android:defaultValue="8"
             android:max="50"
             android:min="0"
@@ -175,16 +175,16 @@
 
         <ListPreference
             android:key="game_bar_update_interval"
-            android:title="Update Interval"
-            android:summary="Set how often the overlay values update"
+            android:title="@string/gb_update_interval"
+            android:summary="@string/gb_set_how_often_the_overlay_values_update"
             android:defaultValue="1000"
             android:entries="@array/fps_overlay_update_interval_entries"
             android:entryValues="@array/fps_overlay_update_interval_values" />
 
         <com.android.gamebar.colorpicker.ColorPreferenceCompat
             android:key="game_bar_title_color"
-            android:title="Stat Title Color"
-            android:summary="Color for 'FPS', 'Temp', 'CPU', etc. text"
+            android:title="@string/gb_stat_title_color"
+            android:summary="@string/gb_color_for_fps_temp_cpu_etc_text"
             android:defaultValue="@color/gamebar_default_title_color"
             app:gamebar_dialogType="custom"
             app:gamebar_showAlphaSlider="false"
@@ -196,8 +196,8 @@
 
         <com.android.gamebar.colorpicker.ColorPreferenceCompat
             android:key="game_bar_value_color"
-            android:title="Stat Value Color"
-            android:summary="Color for numeric stats (e.g., '29', '32.0°C')"
+            android:title="@string/gb_stat_value_color"
+            android:summary="@string/gb_color_for_numeric_stats_e_g_29_32_0_c"
             android:defaultValue="@color/gamebar_default_value_color"
             app:gamebar_dialogType="custom"
             app:gamebar_showAlphaSlider="false"
@@ -209,21 +209,21 @@
 
         <Preference
             android:key="game_bar_font_selector"
-            android:title="Overlay Font Style"
-            android:summary="Choose custom font for overlay text" />
+            android:title="@string/gb_overlay_font_style"
+            android:summary="@string/gb_choose_custom_font_for_overlay_text" />
 
         <ListPreference
             android:key="game_bar_position"
-            android:title="Overlay Position"
-            android:summary="Select the position of the overlay on screen"
+            android:title="@string/gb_overlay_position"
+            android:summary="@string/gb_select_the_position_of_the_overlay_on_screen"
             android:defaultValue="draggable"
             android:entries="@array/fps_overlay_position_entries"
             android:entryValues="@array/fps_overlay_position_values" />
 
         <ListPreference
             android:key="game_bar_format"
-            android:title="Overlay Format"
-            android:summary="Choose between Full or Minimal display"
+            android:title="@string/gb_overlay_format"
+            android:summary="@string/gb_choose_between_full_or_minimal_display"
             android:defaultValue="full"
             android:entries="@array/game_bar_format_entries"
             android:entryValues="@array/game_bar_format_values" />
@@ -231,13 +231,13 @@
 
     <com.android.gamebar.ExpandablePreferenceCategory
         android:key="category_split_config"
-        android:title="Split Config"
+        android:title="@string/gb_split_config"
         android:dependency="game_bar_enable">
 
         <ListPreference
             android:key="game_bar_split_mode"
-            android:title="Split Mode"
-            android:summary="Choose Side-by-Side or Stacked arrangement"
+            android:title="@string/gb_split_mode"
+            android:summary="@string/gb_choose_side_by_side_or_stacked_arrangement"
             android:defaultValue="side_by_side"
             android:entries="@array/game_bar_split_mode_entries"
             android:entryValues="@array/game_bar_split_mode_values" />
@@ -245,55 +245,55 @@
 
     <com.android.gamebar.ExpandablePreferenceCategory
         android:key="category_gesture_controls"
-        android:title="Overlay Gesture Controls"
+        android:title="@string/gb_overlay_gesture_controls"
         android:dependency="game_bar_enable">
 
         <SwitchPreferenceCompat
             android:key="game_bar_single_tap_enable"
-            android:title="Enable Single Tap"
-            android:summary="Tap once to perform an action"
+            android:title="@string/gb_enable_single_tap"
+            android:summary="@string/gb_tap_once_to_perform_an_action"
             android:defaultValue="true" />
 
         <ListPreference
             android:key="game_bar_single_tap_function"
-            android:title="Single Tap Function"
-            android:summary="Choose what happens on single tap"
+            android:title="@string/gb_single_tap_function"
+            android:summary="@string/gb_choose_what_happens_on_single_tap"
             android:entries="@array/gesture_function_entries"
             android:entryValues="@array/gesture_function_values"
             android:defaultValue="toggle_format" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_doubletap_enable"
-            android:title="Enable Double Tap"
-            android:summary="Double-tap to perform an action"
+            android:title="@string/gb_enable_double_tap"
+            android:summary="@string/gb_double_tap_to_perform_an_action"
             android:defaultValue="true" />
 
         <ListPreference
             android:key="game_bar_doubletap_function"
-            android:title="Double Tap Function"
-            android:summary="Choose what happens on double tap"
+            android:title="@string/gb_double_tap_function"
+            android:summary="@string/gb_choose_what_happens_on_double_tap"
             android:entries="@array/gesture_function_entries"
             android:entryValues="@array/gesture_function_values"
             android:defaultValue="capture_logs" />
 
         <SwitchPreferenceCompat
             android:key="game_bar_longpress_enable"
-            android:title="Enable Long Press"
-            android:summary="Long-press to perform an action"
+            android:title="@string/gb_enable_long_press"
+            android:summary="@string/gb_long_press_to_perform_an_action"
             android:defaultValue="true" />
 
         <ListPreference
             android:key="game_bar_longpress_function"
-            android:title="Long Press Function"
-            android:summary="Choose what happens on long press"
+            android:title="@string/gb_long_press_function"
+            android:summary="@string/gb_choose_what_happens_on_long_press"
             android:entries="@array/gesture_function_entries"
             android:entryValues="@array/gesture_function_values"
             android:defaultValue="load_preset" />
 
         <ListPreference
             android:key="game_bar_longpress_timeout"
-            android:title="Long Press Duration"
-            android:summary="Set the duration required to trigger long press"
+            android:title="@string/gb_long_press_duration"
+            android:summary="@string/gb_set_the_duration_required_to_trigger_long_press"
             android:defaultValue="500"
             android:entries="@array/game_bar_longpress_entries"
             android:entryValues="@array/game_bar_longpress_values" />
@@ -301,18 +301,18 @@
 
     <com.android.gamebar.ExpandablePreferenceCategory
         android:key="category_per_app"
-        android:title="Per-App GameBar">
+        android:title="@string/gb_per_app_gamebar">
 
         <SwitchPreferenceCompat
             android:key="game_bar_auto_enable"
-            android:title="Auto-Enable GameBar for Selected Apps"
-            android:summary="If turned on, selected apps will auto-enable GameBar even if the main switch is off"
+            android:title="@string/gb_auto_enable_gamebar_for_selected_apps"
+            android:summary="@string/gb_if_turned_on_selected_apps_will_auto_enable_gameba"
             android:defaultValue="false" />
 
         <Preference
             android:key="game_bar_per_app_config"
-            android:title="Configure Apps"
-            android:summary="Choose which apps will auto-enable GameBar" />
+            android:title="@string/gb_configure_apps"
+            android:summary="@string/gb_choose_which_apps_will_auto_enable_gamebar" />
     </com.android.gamebar.ExpandablePreferenceCategory>
 
     <com.android.gamebar.ExpandablePreferenceCategory
@@ -332,7 +332,7 @@
         <Preference
             android:key="preset_manage"
             android:title="@string/preset_saved_presets"
-            android:summary="View and manage your saved presets" />
+            android:summary="@string/gb_view_and_manage_your_saved_presets" />
 
         <Preference
             android:key="preset_reset_default"

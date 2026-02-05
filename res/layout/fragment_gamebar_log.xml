@@ -35,7 +35,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Global"
+            android:text="@string/gb_global"
             android:textColor="@color/app_name_text_selector"
             android:checked="true"/>
 
@@ -44,7 +44,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Per App"
+            android:text="@string/gb_per_app"
             android:textColor="@color/app_name_text_selector"/>
     </RadioGroup>
 
@@ -59,7 +59,7 @@
             android:id="@+id/btn_manual_logs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Manual Logs"
+            android:text="@string/gb_manual_logs"
             android:background="@drawable/bg_button_rounded"
             android:textColor="@color/button_text_selector"
             android:paddingLeft="16dp"
@@ -83,7 +83,7 @@
                 android:id="@+id/btn_start_capture"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Start Capture"
+                android:text="@string/gb_start_capture"
                 android:background="@drawable/bg_button_rounded"
                 android:textColor="@color/button_text_selector"
                 android:paddingLeft="24dp"
@@ -96,7 +96,7 @@
                 android:id="@+id/btn_stop_capture"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Stop Capture"
+                android:text="@string/gb_stop_capture"
                 android:background="@drawable/bg_button_rounded"
                 android:textColor="@color/button_text_selector"
                 android:paddingLeft="24dp"

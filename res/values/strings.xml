@@ -1,12 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-     SPDX-FileCopyrightText: 2025 kenway214
-     SPDX-License-Identifier: Apache-2.0
--->
-
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
-    <!-- GameBar -->
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:ns0="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_title">GameBar</string>
     <string name="tile_add">Add tile</string>
     <string name="tile_added">Tile added</string>
@@ -14,14 +7,10 @@
     <string name="tile_already_added">Tile already added</string>
     <string name="tile_on">On</string>
     <string name="tile_off">Off</string>
-
-    <!-- Custom seekbar -->
-    <string name="custom_seekbar_value">Value: <xliff:g id="v">%s</xliff:g></string>
+    <string name="custom_seekbar_value">Value: <ns0:g id="v">%s</ns0:g>    </string>
     <string name="custom_seekbar_default_value">by default</string>
-    <string name="custom_seekbar_default_value_to_set">Default value: <xliff:g id="v">%s</xliff:g>\nLong tap to set</string>
+    <string name="custom_seekbar_default_value_to_set">Default value: <ns0:g id="v">%s</ns0:g>\nLong tap to set</string>
     <string name="custom_seekbar_default_value_is_set">Default value is set</string>
-
-    <!-- GameBar Overlay -->
     <string name="game_bar_title">GameBar</string>
     <string name="game_bar_summary">Enable the system overlay (FPS, Temp, etc.)</string>
     <string name="overlay_permission_required">Overlay permission is required</string>
@@ -31,15 +20,11 @@
     <string name="game_bar_tile_description">Toggle the game overlay</string>
     <string name="game_bar_user_guide">User Guide</string>
     <string name="game_bar_user_guide_url">https://github.com/kenway214/packages_apps_GameBar/blob/main/GAMEBAR_USER_GUIDE.md</string>
-
-    <!-- ColorPicker -->
     <string name="gamebar_default_title">Select a Color</string>
     <string name="gamebar_presets">Presets</string>
     <string name="gamebar_custom">Custom</string>
     <string name="gamebar_select">Select</string>
     <string name="gamebar_transparency">Transparency</string>
-
-    <!-- Toast Messages - Overlay -->
     <string name="toast_overlay_format">Overlay Format: %s</string>
     <string name="toast_auto_logging_enabled">This app has auto-logging enabled. Logs are saved automatically.</string>
     <string name="toast_manual_logging_stopped">Manual logging stopped and saved</string>
@@ -53,8 +38,6 @@
     <string name="toast_screen_recording_failed">Failed to toggle screen recording</string>
     <string name="toast_manual_logging_started">%s: Manual logging started</string>
     <string name="toast_manual_logging_started_pkg">Manual logging started for %s</string>
-
-    <!-- Toast Messages - Logs -->
     <string name="toast_error_initializing">Error initializing log monitor: %s</string>
     <string name="toast_no_manual_logs">No manual logs found</string>
     <string name="toast_failed_analyze_log">Failed to analyze log file</string>
@@ -70,18 +53,12 @@
     <string name="toast_error_generic">Error: %s</string>
     <string name="toast_graphics_ready">Graphics ready to share!</string>
     <string name="toast_failed_share">Failed to share: %s</string>
-
-    <!-- Dialog Titles -->
     <string name="dialog_title_manual_logs">Manual Logs</string>
     <string name="dialog_title_analyzing_log">Analyzing Log...</string>
     <string name="dialog_title_delete_log">Delete Log File</string>
     <string name="dialog_title_session_analytics">📊 Session Analytics</string>
-
-    <!-- Dialog Messages -->
     <string name="dialog_message_analyzing">Please wait while we analyze the session data.</string>
     <string name="dialog_message_delete_log">Are you sure you want to delete this log file?\n\n%s</string>
-
-    <!-- Button Labels -->
     <string name="button_close">Close</string>
     <string name="button_delete">Delete</string>
     <string name="button_cancel">Cancel</string>
@@ -91,20 +68,12 @@
     <string name="button_enable_per_app">Enable Per-app Logging</string>
     <string name="button_no_apps_enabled">No Apps Enabled</string>
     <string name="button_per_app_active">Per-app Logging Active</string>
-
-    <!-- Intent Chooser Titles -->
     <string name="chooser_share_log">Share log file</string>
     <string name="chooser_share_graphics">Share Graphics</string>
-
-    <!-- Intent Extras -->
     <string name="intent_extra_subject">GameBar Performance Log</string>
     <string name="intent_extra_text">GameBar performance log file: %s</string>
-
-    <!-- Search Hints -->
     <string name="hint_search_logs">Search logs...</string>
     <string name="hint_search_apps">Search apps...</string>
-
-    <!-- Preset Management -->
     <string name="preset_category_title">Configuration Presets</string>
     <string name="preset_category_summary">Save and manage your GameBar configurations</string>
     <string name="preset_save_current">Save Current Configuration</string>
@@ -116,26 +85,18 @@
     <string name="preset_saved_presets">Saved Presets</string>
     <string name="preset_no_presets">No presets saved yet</string>
     <string name="preset_no_presets_desc">Save your current configuration to create your first preset</string>
-    
-    <!-- Preset Dialog Titles -->
     <string name="dialog_title_save_preset">Save Preset</string>
     <string name="dialog_title_rename_preset">Rename Preset</string>
     <string name="dialog_title_delete_preset">Delete Preset</string>
     <string name="dialog_title_preset_options">Preset Options</string>
-    
-    <!-- Preset Dialog Messages -->
     <string name="dialog_message_preset_name">Enter a name for this preset:</string>
     <string name="dialog_message_delete_preset">Are you sure you want to delete this preset?\n\n%s</string>
     <string name="dialog_message_load_preset">Load this preset? Current settings will be replaced.</string>
     <string name="dialog_message_reset_default">Reset all GameBar settings to factory defaults?\n\nThis will restore all toggles, colors, sizes, and other settings to their original values. This action cannot be undone.</string>
-    
-    <!-- Preset Actions -->
     <string name="preset_action_load">Load</string>
     <string name="preset_action_export">Export</string>
     <string name="preset_action_rename">Rename</string>
     <string name="preset_action_delete">Delete</string>
-    
-    <!-- Preset Toast Messages -->
     <string name="toast_preset_saved">Preset saved: %s</string>
     <string name="toast_preset_loaded">Preset loaded: %s</string>
     <string name="toast_preset_deleted">Preset deleted</string>
@@ -164,4 +125,141 @@
     <!-- Show/Hide Launcher Icon -->
     <string name="show_launcher_icon">Show launcher icon</string>
 
+    <string name="gb_text">#</string>
+    <string name="gb_global">Global</string>
+    <string name="gb_per_app">Per App</string>
+    <string name="gb_cpu_usage">CPU Usage</string>
+    <string name="gb_font_name">Font Name</string>
+    <string name="gb_gpu_usage">GPU Usage</string>
+    <string name="gb_ram_usage">RAM Usage</string>
+    <string name="gb_text_size">Text Size</string>
+    <string name="gb_aabbcc_123">AaBbCc 123</string>
+    <string name="gb_frame_time">Frame Time</string>
+    <string name="gb_split_mode">Split Mode</string>
+    <string name="gb_cpu_summary">CPU SUMMARY</string>
+    <string name="gb_fps_overlay">FPS Overlay</string>
+    <string name="gb_gpu_summary">GPU SUMMARY</string>
+    <string name="gb_manual_logs">Manual Logs</string>
+    <string name="gb_item_spacing">Item Spacing</string>
+    <string name="gb_split_config">Split Config</string>
+    <string name="gb_stop_capture">Stop Capture</string>
+    <string name="gb_customization">Customization</string>
+    <string name="gb_ram_frequency">RAM Frequency</string>
+    <string name="gb_start_capture">Start Capture</string>
+    <string name="gb_cpu_statistics">CPU STATISTICS</string>
+    <string name="gb_configure_apps">Configure Apps</string>
+    <string name="gb_fps_statistics">FPS STATISTICS</string>
+    <string name="gb_gpu_statistics">GPU STATISTICS</string>
+    <string name="gb_overlay_format">Overlay Format</string>
+    <string name="gb_avg_temp_0_0_c">Avg Temp: 0.0°C</string>
+    <string name="gb_cpu_temperature">CPU Temperature</string>
+    <string name="gb_gpu_clock_speed">GPU Clock Speed</string>
+    <string name="gb_gpu_temperature">GPU Temperature</string>
+    <string name="gb_max_temp_0_0_c">Max Temp: 0.0°C</string>
+    <string name="gb_min_temp_0_0_c">Min Temp: 0.0°C</string>
+    <string name="gb_overlay_padding">Overlay Padding</string>
+    <string name="gb_per_app_gamebar">Per-App GameBar</string>
+    <string name="gb_ram_temperature">RAM Temperature</string>
+    <string name="gb_update_interval">Update Interval</string>
+    <string name="gb_avg_usage_0">Avg Usage:    0%</string>
+    <string name="gb_cpu_clock_speeds">CPU Clock Speeds</string>
+    <string name="gb_fps_display_mode">FPS Display Mode</string>
+    <string name="gb_max_usage_0">Max Usage:    0%</string>
+    <string name="gb_min_usage_0">Min Usage:    0%</string>
+    <string name="gb_overlay_features">Overlay Features</string>
+    <string name="gb_overlay_position">Overlay Position</string>
+    <string name="gb_stat_title_color">Stat Title Color</string>
+    <string name="gb_stat_value_color">Stat Value Color</string>
+    <string name="gb_avg_fps_0_0">Avg FPS:      0.0</string>
+    <string name="gb_enable_double_tap">Enable Double Tap</string>
+    <string name="gb_enable_long_press">Enable Long Press</string>
+    <string name="gb_enable_single_tap">Enable Single Tap</string>
+    <string name="gb_max_fps_0_0">Max FPS:      0.0</string>
+    <string name="gb_min_fps_0_0">Min FPS:      0.0</string>
+    <string name="gb_no_logs_available">No logs available</string>
+    <string name="gb_select_fps_method">Select FPS Method</string>
+    <string name="gb_device_temperature">Device Temperature</string>
+    <string name="gb_overlay_font_style">Overlay Font Style</string>
+    <string name="gb_smoothness_0_0">Smoothness:   0.0%</string>
+    <string name="gb_std_dev_0_00">Std Dev:      0.00</string>
+    <string name="gb_variance_0_00">Variance:     0.00</string>
+    <string name="gb_avg_clock_0_mhz">Avg Clock:    0 MHz</string>
+    <string name="gb_avg_temp_0_0_c_2">Avg Temp:     0.0°C</string>
+    <string name="gb_double_tap_function">Double Tap Function</string>
+    <string name="gb_long_press_duration">Long Press Duration</string>
+    <string name="gb_long_press_function">Long Press Function</string>
+    <string name="gb_max_clock_0_mhz">Max Clock:    0 MHz</string>
+    <string name="gb_max_temp_0_0_c_2">Max Temp:     0.0°C</string>
+    <string name="gb_min_clock_0_mhz">Min Clock:    0 MHz</string>
+    <string name="gb_min_temp_0_0_c_2">Min Temp:     0.0°C</string>
+    <string name="gb_session_information">Session Information</string>
+    <string name="gb_single_tap_function">Single Tap Function</string>
+    <string name="gb_show_cpu_temperature">Show CPU temperature</string>
+    <string name="gb_n_0_1_low_0_0_fps">0.1% Low:     0.0 FPS</string>
+    <string name="gb_n_1_low_0_0_fps">1% Low:       0.0 FPS</string>
+    <string name="gb_overlay_corner_radius">Overlay Corner Radius</string>
+    <string name="gb_enable_gamebar_overlay">Enable GameBar Overlay</string>
+    <string name="gb_fps_measurement_method">FPS Measurement Method</string>
+    <string name="gb_background_transparency">Background Transparency</string>
+    <string name="gb_show_device_temperature">Show device temperature</string>
+    <string name="gb_overlay_background_color">Overlay Background Color</string>
+    <string name="gb_overlay_gesture_controls">Overlay Gesture Controls</string>
+    <string name="gb_show_gpu_usage_percentage">Show GPU usage percentage</string>
+    <string name="gb_show_current_fps_on_screen">Show current FPS on screen</string>
+    <string name="gb_show_current_gpu_temperature">Show current GPU temperature</string>
+    <string name="gb_show_current_ram_temperature">Show current RAM temperature</string>
+    <string name="gb_show_current_ram_usage_in_mb">Show current RAM usage in MB</string>
+    <string name="gb_tap_once_to_perform_an_action">Tap once to perform an action</string>
+    <string name="gb_adjust_the_size_of_overlay_text">Adjust the size of overlay text</string>
+    <string name="gb_double_tap_to_perform_an_action">Double-tap to perform an action</string>
+    <string name="gb_long_press_to_perform_an_action">Long-press to perform an action</string>
+    <string name="gb_show_frame_time_in_milliseconds">Show frame time in milliseconds</string>
+    <string name="gb_color_for_the_overlay_background">Color for the overlay background</string>
+    <string name="gb_show_current_gpu_clock_frequency">Show current GPU clock frequency</string>
+    <string name="gb_adjust_the_space_around_the_stats">Adjust the space around the stats</string>
+    <string name="gb_choose_what_happens_on_double_tap">Choose what happens on double tap</string>
+    <string name="gb_choose_what_happens_on_long_press">Choose what happens on long press</string>
+    <string name="gb_choose_what_happens_on_single_tap">Choose what happens on single tap</string>
+    <string name="gb_show_current_cpu_usage_percentage">Show current CPU usage percentage</string>
+    <string name="gb_view_and_manage_your_saved_presets">View and manage your saved presets</string>
+    <string name="gb_choose_custom_font_for_overlay_text">Choose custom font for overlay text</string>
+    <string name="gb_adjust_spacing_between_overlay_lines">Adjust spacing between overlay lines</string>
+    <string name="gb_auto_enable_gamebar_for_selected_apps">Auto-Enable GameBar for Selected Apps</string>
+    <string name="gb_choose_what_fps_statistics_to_display">Choose what FPS statistics to display</string>
+    <string name="gb_choose_between_full_or_minimal_display">Choose between Full or Minimal display</string>
+    <string name="gb_show_current_ram_frequency_bus_in_ghz">Show current RAM frequency(bus) in GHz</string>
+    <string name="gb_set_how_often_the_overlay_values_update">Set how often the overlay values update</string>
+    <string name="gb_adjust_the_transparency_of_the_background">Adjust the transparency of the background</string>
+    <string name="gb_color_for_fps_temp_cpu_etc_text">Color for \'FPS\', \'Temp\', \'CPU\', etc. text</string>
+    <string name="gb_choose_side_by_side_or_stacked_arrangement">Choose Side-by-Side or Stacked arrangement</string>
+    <string name="gb_choose_which_apps_will_auto_enable_gamebar">Choose which apps will auto-enable GameBar</string>
+    <string name="gb_show_current_cpu_clock_speeds_for_each_core">Show current CPU clock speeds for each core</string>
+    <string name="gb_select_the_position_of_the_overlay_on_screen">Select the position of the overlay on screen</string>
+    <string name="gb_color_for_numeric_stats_e_g_29_32_0_c">Color for numeric stats (e.g., \'29\', \'32.0°C\')</string>
+    <string name="gb_set_the_duration_required_to_trigger_long_press">Set the duration required to trigger long press</string>
+    <string name="gb_adjust_how_rounded_the_overlay_corners_should_be">Adjust how rounded the overlay corners should be</string>
+    <string name="gb_enable_per_app_logging_and_use_the_app_to_generate">Enable per-app logging and use the app to generate logs</string>
+    <string name="gb_choose_between_the_new_api_method_default_and_lega">Choose between the New API method (default) and Legacy Sysfs</string>
+    <string name="gb_if_turned_on_selected_apps_will_auto_enable_gameba">If turned on, selected apps will auto-enable GameBar even if the main switch is off</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+
+    <string name="config_proc_stat_path">/proc/stat</string>
+    <string name="config_proc_meminfo_path">/proc/meminfo</string>
+    <string name="config_ram_freq_path">/sys/class/devfreq/*/cur_freq</string>
+    <string name="config_ram_temp_path">/sys/class/thermal/thermal_zone*/temp</string>
+    <string name="config_gpu_usage_path">/sys/class/kgsl/kgsl-3d0/gpu_busy_percentage</string>
+    <string name="config_gpu_clock_path">/sys/class/kgsl/kgsl-3d0/devfreq/cur_freq</string>
+    <string name="config_gpu_temp_path">/sys/class/thermal/thermal_zone*/temp</string>
+
+    <string name="gb_na">N/A</string>
+    <string name="gb_temp">Temp</string>
+    <string name="gb_ram">RAM</string>
+    <string name="gb_ram_freq">RAM Freq</string>
+    <string name="gb_ram_temp">RAM Temp</string>
+    <string name="gb_gpu_freq">GPU Freq</string>
+    <string name="gb_gpu_temp">GPU Temp</string>
+    <string name="gb_analyzing_log">Analyzing Log…</string>
+    <string name="gb_logging_enabled_overlay_off">GameBar logging enabled but GameBar overlay is OFF. Turn ON GameBar to collect logs.</string>
+    <string name="gb_logging_enabled_overlay_off_app">%1: GameBar logging enabled but GameBar overlay is OFF. Turn ON GameBar to collect logs.</string>
 </resources>

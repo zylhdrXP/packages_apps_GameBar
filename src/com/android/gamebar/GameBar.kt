@@ -507,7 +507,7 @@ class GameBar private constructor(context: Context) {
         // 1) FPS - Always collect for logging
         val fpsMeter = GameBarFpsMeter.getInstance(context)
         val fpsVal = fpsMeter.getFps()
-        val fpsStr = if (fpsVal >= 0) String.format(Locale.getDefault(), "%.0f", fpsVal) else "N/A"
+        val fpsStr = if (fpsVal >= 0) String.format(Locale.getDefault(), "%.0f", fpsVal) else context.getString(R.string.gb_na)
         
         if (showFps) {
             if (fpsDisplayMode == "advanced") {
@@ -538,17 +538,17 @@ class GameBar private constructor(context: Context) {
         }
 
         // 1.1) Frame Time - Calculate from FPS
-        var frameTimeStr = "N/A"
+        var frameTimeStr = context.getString(R.string.gb_na)
         if (fpsVal > 0) {
             val frameTime = 1000.0 / fpsVal
             frameTimeStr = String.format(Locale.getDefault(), "%.2f", frameTime)
         }
         if (showFrameTime) {
-            statViews.add(createStatLine("Frame Time", if (frameTimeStr == "N/A") "N/A" else "${frameTimeStr}ms"))
+            statViews.add(createStatLine("Frame Time", if (frameTimeStr == context.getString(R.string.gb_na)) context.getString(R.string.gb_na) else "${frameTimeStr}ms"))
         }
 
         // 2) Battery temp - Always collect for logging
-        var batteryTempStr = "N/A"
+        var batteryTempStr = context.getString(R.string.gb_na)
         val (path, divider) = GameBarConfig.getBatteryTempConfig()
         if (path != null) {
             val tmp = readLine(path)
@@ -563,19 +563,19 @@ class GameBar private constructor(context: Context) {
             }
         }
         if (showBatteryTemp) {
-            statViews.add(createStatLine("Temp", "${batteryTempStr}°C"))
+            statViews.add(createStatLine(context.getString(R.string.gb_temp), "${batteryTempStr}°C"))
         }
 
         // 3) CPU usage - Always collect for logging
-        var cpuUsageStr = "N/A"
+        var cpuUsageStr = context.getString(R.string.gb_na)
         cpuUsageStr = GameBarCpuInfo.getCpuUsage()
         if (showCpuUsage) {
-            val display = if (cpuUsageStr == "N/A") "N/A" else "${cpuUsageStr}%"
+            val display = if (cpuUsageStr == context.getString(R.string.gb_na)) context.getString(R.string.gb_na) else "${cpuUsageStr}%"
             statViews.add(createStatLine("CPU", display))
         }
 
         // 4) CPU freq - Always collect for logging
-        var cpuClockStr = "N/A"
+        var cpuClockStr = context.getString(R.string.gb_na)
         if (showCpuClock) {
             val freqs = GameBarCpuInfo.getCpuFrequencies()
             if (freqs.isNotEmpty()) {
@@ -591,64 +591,64 @@ class GameBar private constructor(context: Context) {
         }
 
         // 5) CPU temp
-        var cpuTempStr = "N/A"
+        var cpuTempStr = context.getString(R.string.gb_na)
         if (showCpuTemp) {
             cpuTempStr = GameBarCpuInfo.getCpuTemp()
-            statViews.add(createStatLine("CPU Temp", if (cpuTempStr == "N/A") "N/A" else "${cpuTempStr}°C"))
+            statViews.add(createStatLine("CPU Temp", if (cpuTempStr == context.getString(R.string.gb_na)) context.getString(R.string.gb_na) else "${cpuTempStr}°C"))
         } else {
             // Still collect even if not shown
             cpuTempStr = GameBarCpuInfo.getCpuTemp()
         }
 
         // 6) RAM usage
-        var ramStr = "N/A"
+        var ramStr = context.getString(R.string.gb_na)
         if (showRam) {
             ramStr = GameBarMemInfo.getRamUsage()
-            statViews.add(createStatLine("RAM", if (ramStr == "N/A") "N/A" else "$ramStr MB"))
+            statViews.add(createStatLine(context.getString(R.string.gb_ram), if (ramStr == context.getString(R.string.gb_na)) context.getString(R.string.gb_na) else "$ramStr MB"))
         } else {
             // Still collect even if not shown
             ramStr = GameBarMemInfo.getRamUsage()
         }
 
         // 6.1) RAM speed
-        var ramSpeedStr = "N/A"
+        var ramSpeedStr = context.getString(R.string.gb_na)
         if (showRamSpeed) {
             ramSpeedStr = GameBarMemInfo.getRamSpeed()
-            statViews.add(createStatLine("RAM Freq", ramSpeedStr))
+            statViews.add(createStatLine(context.getString(R.string.gb_ram_freq), ramSpeedStr))
         } else {
             // Still collect even if not shown
             ramSpeedStr = GameBarMemInfo.getRamSpeed()
         }
 
         // 6.2) RAM temp
-        var ramTempStr = "N/A"
+        var ramTempStr = context.getString(R.string.gb_na)
         if (showRamTemp) {
             ramTempStr = GameBarMemInfo.getRamTemp()
-            statViews.add(createStatLine("RAM Temp", ramTempStr))
+            statViews.add(createStatLine(context.getString(R.string.gb_ram_temp), ramTempStr))
         } else {
             // Still collect even if not shown
             ramTempStr = GameBarMemInfo.getRamTemp()
         }
 
         // 7) GPU usage - Always collect for logging
-        var gpuUsageStr = "N/A"
+        var gpuUsageStr = context.getString(R.string.gb_na)
         gpuUsageStr = GameBarGpuInfo.getGpuUsage()
         if (showGpuUsage) {
-            statViews.add(createStatLine("GPU", if (gpuUsageStr == "N/A") "N/A" else "${gpuUsageStr}%"))
+            statViews.add(createStatLine("GPU", if (gpuUsageStr == context.getString(R.string.gb_na)) context.getString(R.string.gb_na) else "${gpuUsageStr}%"))
         }
 
         // 8) GPU clock - Always collect for logging
-        var gpuClockStr = "N/A"
+        var gpuClockStr = context.getString(R.string.gb_na)
         gpuClockStr = GameBarGpuInfo.getGpuClock()
         if (showGpuClock) {
-            statViews.add(createStatLine("GPU Freq", if (gpuClockStr == "N/A") "N/A" else "${gpuClockStr}MHz"))
+            statViews.add(createStatLine(context.getString(R.string.gb_gpu_freq), if (gpuClockStr == context.getString(R.string.gb_na)) context.getString(R.string.gb_na) else "${gpuClockStr}MHz"))
         }
 
         // 9) GPU temp - Always collect for logging
-        var gpuTempStr = "N/A"
+        var gpuTempStr = context.getString(R.string.gb_na)
         gpuTempStr = GameBarGpuInfo.getGpuTemp()
         if (showGpuTemp) {
-            statViews.add(createStatLine("GPU Temp", if (gpuTempStr == "N/A") "N/A" else "${gpuTempStr}°C"))
+            statViews.add(createStatLine(context.getString(R.string.gb_gpu_temp), if (gpuTempStr == context.getString(R.string.gb_na)) context.getString(R.string.gb_na) else "${gpuTempStr}°C"))
         }
 
         if (splitMode == "side_by_side") {
@@ -678,18 +678,18 @@ class GameBar private constructor(context: Context) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             
             // Check logging parameters and use N/A if disabled
-            val logFps = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_FPS, true)) fpsStr else "N/A"
-            val logFrameTime = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_FRAME_TIME, true)) frameTimeStr else "N/A"
-            val logBatteryTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_BATTERY_TEMP, true)) batteryTempStr else "N/A"
-            val logCpuUsage = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_CPU_USAGE, true)) cpuUsageStr else "N/A"
-            val logCpuClock = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_CPU_CLOCK, true)) cpuClockStr else "N/A"
-            val logCpuTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_CPU_TEMP, true)) cpuTempStr else "N/A"
-            val logRam = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_RAM, true)) ramStr else "N/A"
-            val logRamSpeed = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_RAM_SPEED, true)) ramSpeedStr else "N/A"
-            val logRamTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_RAM_TEMP, true)) ramTempStr else "N/A"
-            val logGpuUsage = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_GPU_USAGE, true)) gpuUsageStr else "N/A"
-            val logGpuClock = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_GPU_CLOCK, true)) gpuClockStr else "N/A"
-            val logGpuTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_GPU_TEMP, true)) gpuTempStr else "N/A"
+            val logFps = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_FPS, true)) fpsStr else context.getString(R.string.gb_na)
+            val logFrameTime = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_FRAME_TIME, true)) frameTimeStr else context.getString(R.string.gb_na)
+            val logBatteryTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_BATTERY_TEMP, true)) batteryTempStr else context.getString(R.string.gb_na)
+            val logCpuUsage = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_CPU_USAGE, true)) cpuUsageStr else context.getString(R.string.gb_na)
+            val logCpuClock = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_CPU_CLOCK, true)) cpuClockStr else context.getString(R.string.gb_na)
+            val logCpuTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_CPU_TEMP, true)) cpuTempStr else context.getString(R.string.gb_na)
+            val logRam = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_RAM, true)) ramStr else context.getString(R.string.gb_na)
+            val logRamSpeed = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_RAM_SPEED, true)) ramSpeedStr else context.getString(R.string.gb_na)
+            val logRamTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_RAM_TEMP, true)) ramTempStr else context.getString(R.string.gb_na)
+            val logGpuUsage = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_GPU_USAGE, true)) gpuUsageStr else context.getString(R.string.gb_na)
+            val logGpuClock = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_GPU_CLOCK, true)) gpuClockStr else context.getString(R.string.gb_na)
+            val logGpuTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_GPU_TEMP, true)) gpuTempStr else context.getString(R.string.gb_na)
 
             GameDataExport.getInstance().addOverlayData(
                     dateTime,

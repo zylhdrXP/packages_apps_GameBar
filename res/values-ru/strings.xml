@@ -1,0 +1,372 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:ns0="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_title">GameBar</string>
+    <string name="tile_add">Добавить плитку</string>
+    <string name="tile_added">Плитка добавлена</string>
+    <string name="tile_not_added">Плитка не добавлена</string>
+    <string name="tile_already_added">Плитка уже добавлена</string>
+    <string name="tile_on">Вкл</string>
+    <string name="tile_off">Выкл</string>
+    <string name="custom_seekbar_value">Значение: <ns0:g id="v">%s</ns0:g>
+    </string>
+    <string name="custom_seekbar_default_value">по умолчанию</string>
+    <string name="custom_seekbar_default_value_to_set">
+        Значение по умолчанию: <ns0:g id="v">%s</ns0:g>\nДолгий тап — установить
+    </string>
+    <string name="custom_seekbar_default_value_is_set">Значение по умолчанию установлено</string>
+    <string name="game_bar_title">GameBar</string>
+    <string name="game_bar_summary">Включить системный оверлей (FPS, температура и т.д.)</string>
+    <string name="overlay_permission_required">Требуется разрешение на наложение</string>
+    <string name="overlay_permission_granted">Разрешение на наложение предоставлено</string>
+    <string name="overlay_permission_denied">Разрешение на наложение отклонено</string>
+    <string name="game_bar_tile_label">GameBar</string>
+    <string name="game_bar_tile_description">Переключить игровой оверлей</string>
+    <string name="game_bar_user_guide">Руководство пользователя</string>
+    <string name="game_bar_user_guide_url">
+        https://github.com/kenway214/packages_apps_GameBar/blob/main/GAMEBAR_USER_GUIDE.md
+    </string>
+    <string name="gamebar_default_title">Выбор цвета</string>
+    <string name="gamebar_presets">Предустановки</string>
+    <string name="gamebar_custom">Пользовательский</string>
+    <string name="gamebar_select">Выбрать</string>
+    <string name="gamebar_transparency">Прозрачность</string>
+    <string name="toast_overlay_format">Формат оверлея: %s</string>
+    <string name="toast_auto_logging_enabled">
+        В приложении включено авто-логирование. Логи сохраняются автоматически.
+    </string>
+    <string name="toast_manual_logging_stopped">
+        Ручное логирование остановлено и сохранено
+    </string>
+    <string name="toast_capture_stopped">Запись остановлена, данные экспортированы</string>
+    <string name="toast_capture_started">Запись начата</string>
+    <string name="toast_screenshot_taken">Скриншот сделан</string>
+    <string name="toast_screenshot_failed">Не удалось сделать скриншот</string>
+    <string name="toast_screen_recorder_unavailable">
+        Запись экрана недоступна
+    </string>
+    <string name="toast_screen_recording_started">
+        Запись экрана начата
+    </string>
+    <string name="toast_screen_recording_stopped">
+        Запись экрана остановлена
+    </string>
+    <string name="toast_screen_recording_failed">
+        Не удалось переключить запись экрана
+    </string>
+    <string name="toast_manual_logging_started">
+        %s: ручное логирование начато
+    </string>
+    <string name="toast_manual_logging_started_pkg">
+        Ручное логирование начато для %s
+    </string>
+    <string name="toast_error_initializing">
+        Ошибка инициализации мониторинга логов: %s
+    </string>
+    <string name="toast_no_manual_logs">Ручные логи не найдены</string>
+    <string name="toast_failed_analyze_log">
+        Не удалось проанализировать файл лога
+    </string>
+    <string name="toast_file_location">Расположение файла: %s</string>
+    <string name="toast_file_saved_at">Файл сохранён: %s</string>
+    <string name="toast_log_deleted">Файл лога удалён</string>
+    <string name="toast_log_delete_failed">
+        Не удалось удалить файл лога
+    </string>
+    <string name="toast_error_deleting_file">
+        Ошибка при удалении файла: %s
+    </string>
+    <string name="toast_error_loading_apps">
+        Ошибка загрузки приложений: %s
+    </string>
+    <string name="toast_error_loading_logs">
+        Ошибка загрузки логов: %s
+    </string>
+    <string name="toast_saved_file">Сохранено: %s</string>
+    <string name="toast_failed_save">Не удалось сохранить: %s</string>
+    <string name="toast_error_generic">Ошибка: %s</string>
+    <string name="toast_graphics_ready">
+        Графика готова к отправке!
+    </string>
+    <string name="toast_failed_share">
+        Не удалось поделиться: %s
+    </string>
+    <string name="dialog_title_manual_logs">Ручные логи</string>
+    <string name="dialog_title_analyzing_log">
+        Анализ лога…
+    </string>
+    <string name="dialog_title_delete_log">
+        Удалить файл лога
+    </string>
+    <string name="dialog_title_session_analytics">
+        📊 Аналитика сессии
+    </string>
+    <string name="dialog_message_analyzing">
+        Пожалуйста, подождите — идёт анализ данных сессии.
+    </string>
+    <string name="dialog_message_delete_log">
+        Вы уверены, что хотите удалить этот файл лога?\n\n%s
+    </string>
+    <string name="button_close">Закрыть</string>
+    <string name="button_delete">Удалить</string>
+    <string name="button_cancel">Отмена</string>
+    <string name="button_actions">⋮ Действия</string>
+    <string name="button_capturing">Запись…</string>
+    <string name="button_start_capture">Начать запись</string>
+    <string name="button_enable_per_app">
+        Включить логирование для приложений
+    </string>
+    <string name="button_no_apps_enabled">
+        Нет включённых приложений
+    </string>
+    <string name="button_per_app_active">
+        Логирование по приложениям активно
+    </string>
+    <string name="chooser_share_log">
+        Поделиться файлом лога
+    </string>
+    <string name="chooser_share_graphics">
+        Поделиться графикой
+    </string>
+    <string name="intent_extra_subject">
+        Лог производительности GameBar
+    </string>
+    <string name="intent_extra_text">
+        Файл лога производительности GameBar: %s
+    </string>
+    <string name="hint_search_logs">Поиск логов…</string>
+    <string name="hint_search_apps">Поиск приложений…</string>
+    <string name="preset_category_title">
+        Конфигурационные пресеты
+    </string>
+    <string name="preset_category_summary">
+        Сохранение и управление настройками GameBar
+    </string>
+    <string name="preset_save_current">
+        Сохранить текущую конфигурацию
+    </string>
+    <string name="preset_save_current_summary">
+        Создать новый пресет из текущих настроек
+    </string>
+    <string name="preset_import">
+        Импортировать пресет из резервной копии
+    </string>
+    <string name="preset_import_summary">
+        Загрузить пресет из экспортированного JSON-файла
+    </string>
+    <string name="preset_reset_default">
+        Сбросить к настройкам по умолчанию
+    </string>
+    <string name="preset_reset_default_summary">
+        Восстановить заводские настройки GameBar
+    </string>
+    <string name="preset_saved_presets">
+        Сохранённые пресеты
+    </string>
+    <string name="preset_no_presets">
+        Пресеты пока не сохранены
+    </string>
+    <string name="preset_no_presets_desc">
+        Сохраните текущую конфигурацию, чтобы создать первый пресет
+    </string>
+    <string name="dialog_title_save_preset">
+        Сохранить пресет
+    </string>
+    <string name="dialog_title_rename_preset">
+        Переименовать пресет
+    </string>
+    <string name="dialog_title_delete_preset">
+        Удалить пресет
+    </string>
+    <string name="dialog_title_preset_options">
+        Параметры пресета
+    </string>
+    <string name="dialog_message_preset_name">
+        Введите имя для этого пресета:
+    </string>
+    <string name="dialog_message_delete_preset">
+        Вы уверены, что хотите удалить этот пресет?\n\n%s
+    </string>
+    <string name="dialog_message_load_preset">
+        Загрузить этот пресет? Текущие настройки будут заменены.
+    </string>
+    <string name="dialog_message_reset_default">
+        Сбросить все настройки GameBar к заводским?\n\n
+        Все переключатели, цвета, размеры и другие параметры будут восстановлены.
+        Это действие нельзя отменить.
+    </string>
+    <string name="preset_action_load">Загрузить</string>
+    <string name="preset_action_export">Экспорт</string>
+    <string name="preset_action_rename">Переименовать</string>
+    <string name="preset_action_delete">Удалить</string>
+    <string name="toast_preset_saved">
+        Пресет сохранён: %s
+    </string>
+    <string name="toast_preset_loaded">
+        Пресет загружен: %s
+    </string>
+    <string name="toast_preset_deleted">Пресет удалён</string>
+    <string name="toast_preset_renamed">
+        Пресет переименован
+    </string>
+    <string name="toast_preset_exported">
+        Пресет экспортирован в: %s
+    </string>
+    <string name="toast_preset_imported">
+        Пресет успешно импортирован
+    </string>
+    <string name="toast_preset_save_failed">
+        Не удалось сохранить пресет
+    </string>
+    <string name="toast_preset_load_failed">
+        Не удалось загрузить пресет
+    </string>
+    <string name="toast_preset_delete_failed">
+        Не удалось удалить пресет
+    </string>
+    <string name="toast_preset_export_failed">
+        Не удалось экспортировать пресет
+    </string>
+    <string name="toast_preset_import_failed">
+        Не удалось импортировать пресет
+    </string>
+    <string name="toast_preset_name_empty">
+        Имя пресета не может быть пустым
+    </string>
+    <string name="toast_preset_reset_success">
+        Настройки сброшены к значениям по умолчанию
+    </string>
+    <string name="hint_preset_name">Имя пресета</string>
+    <string name="preset_created">Создано: %s</string>
+    <string name="warning_longpress_change_title">
+        ⚠️ Предупреждение
+    </string>
+    <string name="warning_longpress_change_message">
+        Изменение функции долгого нажатия уберёт быстрый доступ к загрузке пресета.\n\n
+        Вы по-прежнему сможете управлять пресетами через:\n
+        • Настройки GameBar → Пресеты\n
+        • Назначение загрузки пресета на другой жест\n\n
+        Продолжить?
+    </string>
+    <string name="warning_longpress_checkbox">
+        Я понимаю, больше не напоминать
+    </string>
+    <string name="warning_proceed">Продолжить</string>
+    <string name="warning_cancel">Отмена</string>
+    <string name="show_launcher_icon">
+        Показывать иконку в лаунчере
+    </string>
+    <string name="gb_text">#</string>
+    <string name="gb_global">Глобально</string>
+    <string name="gb_per_app">Для приложений</string>
+    <string name="gb_cpu_usage">Загрузка CPU</string>
+    <string name="gb_font_name">Название шрифта</string>
+    <string name="gb_gpu_usage">Загрузка GPU</string>
+    <string name="gb_ram_usage">Использование ОЗУ</string>
+    <string name="gb_text_size">Размер текста</string>
+    <string name="gb_aabbcc_123">AaBbCc 123</string>
+    <string name="gb_frame_time">Время кадра</string>
+    <string name="gb_split_mode">Режим разделения</string>
+    <string name="gb_cpu_summary">СВОДКА CPU</string>
+    <string name="gb_fps_overlay">Оверлей FPS</string>
+    <string name="gb_gpu_summary">СВОДКА GPU</string>
+    <string name="gb_manual_logs">Ручные логи</string>
+    <string name="gb_item_spacing">Интервал между элементами</string>
+    <string name="gb_split_config">Настройка разделения</string>
+    <string name="gb_stop_capture">Остановить запись</string>
+    <string name="gb_customization">Настройка</string>
+    <string name="gb_ram_frequency">Частота ОЗУ</string>
+    <string name="gb_start_capture">Начать запись</string>
+    <string name="gb_cpu_statistics">СТАТИСТИКА CPU</string>
+    <string name="gb_configure_apps">Настроить приложения</string>
+    <string name="gb_fps_statistics">СТАТИСТИКА FPS</string>
+    <string name="gb_gpu_statistics">СТАТИСТИКА GPU</string>
+    <string name="gb_overlay_format">Формат оверлея</string>
+    <string name="gb_avg_temp_0_0_c">Средн. температура: 0.0°C</string>
+    <string name="gb_cpu_temperature">Температура CPU</string>
+    <string name="gb_gpu_clock_speed">Частота GPU</string>
+    <string name="gb_gpu_temperature">Температура GPU</string>
+    <string name="gb_max_temp_0_0_c">Макс. температура: 0.0°C</string>
+    <string name="gb_min_temp_0_0_c">Мин. температура: 0.0°C</string>
+    <string name="gb_overlay_padding">Отступы оверлея</string>
+    <string name="gb_per_app_gamebar">GameBar для приложений</string>
+    <string name="gb_ram_temperature">Температура ОЗУ</string>
+    <string name="gb_update_interval">Интервал обновления</string>
+    <string name="gb_avg_usage_0">Средняя загрузка: 0%</string>
+    <string name="gb_cpu_clock_speeds">Частоты CPU</string>
+    <string name="gb_fps_display_mode">Режим отображения FPS</string>
+    <string name="gb_max_usage_0">Макс. загрузка: 0%</string>
+    <string name="gb_min_usage_0">Мин. загрузка: 0%</string>
+    <string name="gb_overlay_features">Функции оверлея</string>
+    <string name="gb_overlay_position">Позиция оверлея</string>
+    <string name="gb_stat_title_color">Цвет заголовков</string>
+    <string name="gb_stat_value_color">Цвет значений</string>
+    <string name="gb_avg_fps_0_0">Средний FPS: 0.0</string>
+    <string name="gb_enable_double_tap">Включить двойной тап</string>
+    <string name="gb_enable_long_press">Включить долгое нажатие</string>
+    <string name="gb_enable_single_tap">Включить одиночный тап</string>
+    <string name="gb_max_fps_0_0">Макс. FPS: 0.0</string>
+    <string name="gb_min_fps_0_0">Мин. FPS: 0.0</string>
+    <string name="gb_no_logs_available">Логи отсутствуют</string>
+    <string name="gb_select_fps_method">Выбор метода FPS</string>
+    <string name="gb_device_temperature">Температура устройства</string>
+    <string name="gb_overlay_font_style">Стиль шрифта оверлея</string>
+    <string name="gb_smoothness_0_0">Плавность: 0.0%</string>
+    <string name="gb_std_dev_0_00">Стд. отклонение: 0.00</string>
+    <string name="gb_variance_0_00">Дисперсия: 0.00</string>
+    <string name="gb_avg_clock_0_mhz">Средняя частота: 0 MHz</string>
+    <string name="gb_avg_temp_0_0_c_2">Средн. температура: 0.0°C</string>
+    <string name="gb_double_tap_function">Действие двойного тапа</string>
+    <string name="gb_long_press_duration">Длительность долгого нажатия</string>
+    <string name="gb_long_press_function">Действие долгого нажатия</string>
+    <string name="gb_max_clock_0_mhz">Макс. частота: 0 MHz</string>
+    <string name="gb_max_temp_0_0_c_2">Макс. температура: 0.0°C</string>
+    <string name="gb_min_clock_0_mhz">Мин. частота: 0 MHz</string>
+    <string name="gb_min_temp_0_0_c_2">Мин. температура: 0.0°C</string>
+    <string name="gb_session_information">Информация о сессии</string>
+    <string name="gb_single_tap_function">Действие одиночного тапа</string>
+    <string name="gb_show_cpu_temperature">Показывать температуру CPU</string>
+    <string name="gb_overlay_corner_radius">Скругление углов оверлея</string>
+    <string name="gb_enable_gamebar_overlay">Включить оверлей GameBar</string>
+    <string name="gb_fps_measurement_method">Метод измерения FPS</string>
+    <string name="gb_background_transparency">Прозрачность фона</string>
+    <string name="gb_show_device_temperature">Показывать температуру устройства</string>
+    <string name="gb_overlay_background_color">Цвет фона оверлея</string>
+    <string name="gb_overlay_gesture_controls">Жесты оверлея</string>
+    <string name="gb_show_gpu_usage_percentage">Показывать загрузку GPU</string>
+    <string name="gb_show_current_fps_on_screen">Показывать текущий FPS</string>
+    <string name="gb_show_current_gpu_temperature">Показывать температуру GPU</string>
+    <string name="gb_show_current_ram_temperature">Показывать температуру ОЗУ</string>
+    <string name="gb_show_current_ram_usage_in_mb">Показывать использование ОЗУ (МБ)</string>
+    <string name="gb_tap_once_to_perform_an_action">Тапните один раз для действия</string>
+    <string name="gb_adjust_the_size_of_overlay_text">Настройте размер текста оверлея</string>
+    <string name="gb_double_tap_to_perform_an_action">Сделайте двойной тап для действия</string>
+    <string name="gb_long_press_to_perform_an_action">Сделайте долгое нажатие для действия</string>
+    <string name="gb_show_frame_time_in_milliseconds">Показывать время кадра (мс)</string>
+    <string name="gb_color_for_the_overlay_background">Цвет фона оверлея</string>
+    <string name="gb_show_current_gpu_clock_frequency">Показывать частоту GPU</string>
+    <string name="gb_adjust_the_space_around_the_stats">Настройте отступы вокруг статистики</string>
+    <string name="gb_choose_what_happens_on_double_tap">Выберите действие для двойного тапа</string>
+    <string name="gb_choose_what_happens_on_long_press">Выберите действие для долгого нажатия</string>
+    <string name="gb_choose_what_happens_on_single_tap">Выберите действие для одиночного тапа</string>
+    <string name="gb_show_current_cpu_usage_percentage">Показывать загрузку CPU</string>
+    <string name="gb_view_and_manage_your_saved_presets">Просмотр и управление сохранёнными пресетами</string>
+    <string name="gb_choose_custom_font_for_overlay_text">Выберите шрифт для текста оверлея</string>
+    <string name="gb_adjust_spacing_between_overlay_lines">Настройте интервал между строками оверлея</string>
+    <string name="gb_auto_enable_gamebar_for_selected_apps">Автовключение GameBar для выбранных приложений</string>
+    <string name="gb_choose_what_fps_statistics_to_display">Выберите, какую статистику FPS показывать</string>
+    <string name="gb_choose_between_full_or_minimal_display">Выберите полный или минимальный режим</string>
+    <string name="gb_show_current_ram_frequency_bus_in_ghz">Показывать текущую частоту ОЗУ (шина) в GHz</string>
+    <string name="gb_set_how_often_the_overlay_values_update">Задайте частоту обновления значений оверлея</string>
+    <string name="gb_adjust_the_transparency_of_the_background">Настройте прозрачность фона</string>
+    <string name="gb_color_for_fps_temp_cpu_etc_text">Цвет для текста \'FPS\', \'Temp\', \'CPU\' и т.п.</string>
+    <string name="gb_choose_side_by_side_or_stacked_arrangement">Рядом или один под другим</string>
+    <string name="gb_choose_which_apps_will_auto_enable_gamebar">Выберите, какие приложения будут автоматически включать GameBar</string>
+    <string name="gb_show_current_cpu_clock_speeds_for_each_core">Показывать частоты CPU по ядрам</string>
+    <string name="gb_select_the_position_of_the_overlay_on_screen">Выберите позицию оверлея на экране</string>
+    <string name="gb_color_for_numeric_stats_e_g_29_32_0_c">Цвет для числовых значений (например, \'29\', \'32.0°C\')</string>
+    <string name="gb_set_the_duration_required_to_trigger_long_press">Задайте длительность, необходимую для долгого нажатия</string>
+    <string name="gb_adjust_how_rounded_the_overlay_corners_should_be">Настройте степень скругления углов оверлея</string>
+    <string name="gb_enable_per_app_logging_and_use_the_app_to_generate">Включите логирование по приложениям и используйте приложение для генерации логов</string>
+    <string name="gb_choose_between_the_new_api_method_default_and_lega">Выберите новый метод API (по умолчанию) или Legacy Sysfs</string>
+    <string name="gb_if_turned_on_selected_apps_will_auto_enable_gameba">Если включено, выбранные приложения будут автоматически включать GameBar даже если основной переключатель выключен</string>
+</resources>

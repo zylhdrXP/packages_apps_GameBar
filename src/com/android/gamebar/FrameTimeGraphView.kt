@@ -223,7 +223,7 @@ class FrameTimeGraphView @JvmOverloads constructor(
 
         // Frame Time line
         canvas.drawLine(legendX, legendY, legendX + lineLength, legendY, linePaint)
-        canvas.drawText("Frame Time", legendX + lineLength + 10f, legendY + 8f, textPaint.apply { textSize = 24f })
+        canvas.drawText(context.getString(R.string.gb_frame_time), legendX + lineLength + 10f, legendY + 8f, textPaint.apply { textSize = 24f })
 
         // Average line
         canvas.drawLine(legendX + spacing * 1.5f, legendY, legendX + spacing * 1.5f + lineLength, legendY, avgLinePaint)

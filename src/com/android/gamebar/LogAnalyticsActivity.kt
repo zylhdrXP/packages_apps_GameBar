@@ -35,7 +35,7 @@ class LogAnalyticsActivity : CollapsingToolbarBaseActivity() {
     private fun showAnalytics(filePath: String, fileName: String) {
         // Show loading message
         val loadingDialog = AlertDialog.Builder(this)
-            .setTitle("Analyzing Log...")
+            .setTitle(getString(R.string.gb_analyzing_log))
             .setMessage("Please wait while we analyze the session data.")
             .setCancelable(false)
             .create()

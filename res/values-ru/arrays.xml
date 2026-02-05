@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2025 kenway214
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+
+    <!-- FPS Overlay -->
+    <string-array name="game_bar_fps_method_entries">
+        <item>Новый API (по умолчанию)</item>
+        <item>Устаревший Sysfs</item>
+    </string-array>
+    <string-array name="game_bar_fps_method_values">
+        <item>new</item>
+        <item>legacy</item>
+    </string-array>
+
+    <!-- FPS Display Mode -->
+    <string-array name="fps_display_mode_entries">
+        <item>Базовый (только текущий FPS)</item>
+        <item>Расширенный (FPS + 1% + 0.1% Low)</item>
+    </string-array>
+    <string-array name="fps_display_mode_values">
+        <item>basic</item>
+        <item>advanced</item>
+    </string-array>
+
+    <!-- Update Interval -->
+    <string-array name="fps_overlay_update_interval_entries">
+        <item>Каждые 500 мс</item>
+        <item>Каждую секунду</item>
+        <item>Каждые 2 секунды</item>
+        <item>Каждые 5 секунд</item>
+    </string-array>
+    <string-array name="fps_overlay_update_interval_values">
+        <item>500</item>
+        <item>1000</item>
+        <item>2000</item>
+        <item>5000</item>
+    </string-array>
+
+    <!-- Position -->
+    <string-array name="fps_overlay_position_entries">
+        <item>Сверху слева</item>
+        <item>Сверху по центру</item>
+        <item>Сверху справа</item>
+        <item>Снизу слева</item>
+        <item>Снизу по центру</item>
+        <item>Снизу справа</item>
+        <item>Произвольное (перетаскиваемое)</item>
+    </string-array>
+    <string-array name="fps_overlay_position_values">
+        <item>top_left</item>
+        <item>top_center</item>
+        <item>top_right</item>
+        <item>bottom_left</item>
+        <item>bottom_center</item>
+        <item>bottom_right</item>
+        <item>draggable</item>
+    </string-array>
+
+    <!-- Overlay format -->
+    <string-array name="game_bar_format_entries">
+        <item>Полный</item>
+        <item>Минимальный</item>
+    </string-array>
+    <string-array name="game_bar_format_values">
+        <item>full</item>
+        <item>minimal</item>
+    </string-array>
+
+    <!-- Split Mode -->
+    <string-array name="game_bar_split_mode_entries">
+        <item>Рядом</item>
+        <item>Вертикально</item>
+    </string-array>
+    <string-array name="game_bar_split_mode_values">
+        <item>side_by_side</item>
+        <item>stacked</item>
+    </string-array>
+
+    <!-- Gesture Functions -->
+    <string-array name="gesture_function_entries">
+        <item>Без действия</item>
+        <item>Переключить полный / минимальный режим</item>
+        <item>Запуск / остановка логирования</item>
+        <item>Открыть настройки GameBar</item>
+        <item>Сделать скриншот</item>
+        <item>Запуск / остановка записи экрана</item>
+        <item>Загрузить пресет (быстро)</item>
+    </string-array>
+    <string-array name="gesture_function_values">
+        <item>no_action</item>
+        <item>toggle_format</item>
+        <item>capture_logs</item>
+        <item>open_settings</item>
+        <item>take_screenshot</item>
+        <item>screen_record</item>
+        <item>load_preset</item>
+    </string-array>
+
+    <!-- Long press timeouts -->
+    <string-array name="game_bar_longpress_entries">
+        <item>0,5 секунды</item>
+        <item>1 секунда</item>
+        <item>2 секунды</item>
+        <item>3 секунды</item>
+    </string-array>
+    <string-array name="game_bar_longpress_values">
+        <item>500</item>
+        <item>1000</item>
+        <item>2000</item>
+        <item>3000</item>
+    </string-array>
+
+    <!-- Color presets for GameBar -->
+    <integer-array name="fps_overlay_color_int_values">
+        <item>0xFFFFFFFF</item> <!-- Белый -->
+        <item>0xFFDC143C</item> <!-- Малиновый -->
+        <item>0xFF4CAF50</item> <!-- Зелёный -->
+        <item>0xFF4169E1</item> <!-- Королевский синий -->
+        <item>0xFFFFBF00</item> <!-- Янтарный -->
+        <item>0xFF008080</item> <!-- Бирюзовый -->
+        <item>0xFF8A2BE2</item> <!-- Фиолетовый -->
+        <item>0xFFFF1493</item> <!-- Розовый -->
+    </integer-array>
+
+</resources>
+
