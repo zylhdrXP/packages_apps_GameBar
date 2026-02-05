@@ -86,7 +86,7 @@ class PerAppLogViewFragment : Fragment() {
     }
 
     private fun setupSearchBar() {
-        searchBar.hint = "Search $appName logs..."
+        searchBar.hint = getString(R.string.hint_search_logs_for_app, appName)
         searchBar.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -116,7 +116,7 @@ class PerAppLogViewFragment : Fragment() {
         if (logFiles.isEmpty()) {
             logHistoryRecyclerView.visibility = View.GONE
             emptyStateView.visibility = View.VISIBLE
-            emptyMessageView.text = "No logs available for $appName"
+            emptyMessageView.text = getString(R.string.gb_no_logs_available_for_app, appName)
         } else {
             logHistoryRecyclerView.visibility = View.VISIBLE
             emptyStateView.visibility = View.GONE
@@ -345,10 +345,10 @@ class PerAppLogViewFragment : Fragment() {
     ) {
         val popup = android.widget.PopupMenu(requireContext(), anchorView)
         popup.menu.apply {
-            add(0, 1, 1, "📊 Export Data (CSV)")
-            add(0, 2, 2, "📸 Save Graphics (PNG)")
-            add(0, 3, 3, "📤 Share Data (CSV)")
-            add(0, 4, 4, "🖼️ Share Graphics (PNG)")
+            add(0, 1, 1, getString(R.string.gb_action_export_data_csv))
+            add(0, 2, 2, getString(R.string.gb_action_save_graphics_png))
+            add(0, 3, 3, getString(R.string.gb_action_share_data_csv))
+            add(0, 4, 4, getString(R.string.gb_action_share_graphics_png))
         }
         
         popup.setOnMenuItemClickListener { item ->
@@ -423,9 +423,7 @@ class PerAppLogViewFragment : Fragment() {
                     bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, fos)
                     fos.flush()
                     fos.close()
-                    
-                    view.isDrawingCacheEnabled = false
-                    
+
                     // Share the image
                     val uri = FileProvider.getUriForFile(
                         requireContext(),
@@ -436,17 +434,21 @@ class PerAppLogViewFragment : Fragment() {
                     val intent = Intent(Intent.ACTION_SEND)
                     intent.type = "image/png"
                     intent.putExtra(Intent.EXTRA_STREAM, uri)
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "GameBar Performance Stats - $appName")
+                    intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.gb_share_graphics_subject, appName))
                     intent.putExtra(Intent.EXTRA_TEXT, buildString {
-                        appendLine("🎮 GameBar Performance Stats")
+                        appendLine(getString(R.string.gb_share_graphics_title))
                         appendLine("")
-                        appendLine("📱 App: $appName")
-                        appendLine("📅 Session: ${analytics.sessionDate}")
-                        appendLine("⏱️ Duration: ${analytics.sessionDuration}")
+                        appendLine(getString(R.string.gb_share_graphics_app, appName))
+                        appendLine(getString(R.string.gb_share_graphics_session, analytics.sessionDate))
+                        appendLine(getString(R.string.gb_share_graphics_duration, analytics.sessionDuration))
+
                         appendLine("")
-                        appendLine("🎯 FPS: Avg ${String.format("%.1f", analytics.fpsStats.avgFps)} | Max ${String.format("%.1f", analytics.fpsStats.maxFps)}")
-                        appendLine("✨ Smoothness: ${String.format("%.1f%%", analytics.fpsStats.smoothnessPercentage)}")
-                        appendLine("🔥 1% Low: ${String.format("%.1f", analytics.fpsStats.fps1PercentLow)} FPS")
+                        appendLine(getString(R.string.gb_share_graphics_fps_line,
+                            String.format("%.1f", analytics.fpsStats.avgFps),
+                            String.format("%.1f", analytics.fpsStats.maxFps)
+                        ))
+                        appendLine(getString(R.string.gb_share_graphics_smoothness, String.format("%.1f%%", analytics.fpsStats.smoothnessPercentage)))
+                        appendLine(getString(R.string.gb_share_graphics_low_1, String.format("%.1f", analytics.fpsStats.fps1PercentLow)))
                     })
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     
@@ -514,8 +516,8 @@ class PerAppLogViewFragment : Fragment() {
             
             intent.type = "text/csv"
             intent.putExtra(Intent.EXTRA_STREAM, uri)
-            intent.putExtra(Intent.EXTRA_SUBJECT, "GameBar Performance Log for $appName")
-            intent.putExtra(Intent.EXTRA_TEXT, "GameBar performance log file for $appName: ${logFile.name}")
+            intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.gb_share_log_subject, appName))
+            intent.putExtra(Intent.EXTRA_TEXT, getString(R.string.gb_share_log_text, appName, logFile.name))
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             
             val chooser = Intent.createChooser(intent, getString(R.string.chooser_share_log))

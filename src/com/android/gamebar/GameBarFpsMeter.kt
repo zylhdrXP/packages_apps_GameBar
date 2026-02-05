@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.view.WindowManager
 import android.window.TaskFpsCallback
 import androidx.preference.PreferenceManager
@@ -46,7 +47,7 @@ class GameBarFpsMeter private constructor(context: Context) {
     private var callbackRegistered = false
     private var currentTaskId = -1
     private var lastFpsUpdateTime = System.currentTimeMillis()
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
     
     // FPS history for percentile calculations
     private val fpsHistory = mutableListOf<Float>()

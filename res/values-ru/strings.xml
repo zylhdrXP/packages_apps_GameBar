@@ -369,4 +369,24 @@
     <string name="gb_enable_per_app_logging_and_use_the_app_to_generate">Включите логирование по приложениям и используйте приложение для генерации логов</string>
     <string name="gb_choose_between_the_new_api_method_default_and_lega">Выберите новый метод API (по умолчанию) или Legacy Sysfs</string>
     <string name="gb_if_turned_on_selected_apps_will_auto_enable_gameba">Если включено, выбранные приложения будут автоматически включать GameBar даже если основной переключатель выключен</string>
+
+    <string name="hint_search_logs_for_app">Поиск логов %1$s…</string>
+    <string name="gb_no_logs_available_for_app">Нет логов для %1$s</string>
+
+    <string name="gb_action_export_data_csv">📊 Экспорт данных (CSV)</string>
+    <string name="gb_action_save_graphics_png">📸 Сохранить графику (PNG)</string>
+    <string name="gb_action_share_data_csv">📤 Поделиться данными (CSV)</string>
+    <string name="gb_action_share_graphics_png">🖼️ Поделиться графикой (PNG)</string>
+
+    <string name="gb_share_graphics_subject">Статистика производительности GameBar — %1$s</string>
+    <string name="gb_share_graphics_title">🎮 Статистика производительности GameBar</string>
+    <string name="gb_share_graphics_app">📱 Приложение: %1$s</string>
+    <string name="gb_share_graphics_session">📅 Сессия: %1$s</string>
+    <string name="gb_share_graphics_duration">⏱️ Длительность: %1$s</string>
+    <string name="gb_share_graphics_fps_line">🎯 FPS: ср. %1$s | макс. %2$s</string>
+    <string name="gb_share_graphics_smoothness">✨ Плавность: %1$s</string>
+    <string name="gb_share_graphics_low_1">🔥 Нижний 1%%: %1$s FPS</string>
+
+    <string name="gb_share_log_subject">Лог производительности GameBar — %1$s</string>
+    <string name="gb_share_log_text">Файл лога производительности GameBar для %1$s: %2$s</string>
 </resources>

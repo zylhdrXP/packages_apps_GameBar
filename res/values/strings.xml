@@ -244,6 +244,26 @@
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
 
+    <string name="hint_search_logs_for_app">Search %1$s logs…</string>
+    <string name="gb_no_logs_available_for_app">No logs available for %1$s</string>
+
+    <string name="gb_action_export_data_csv">📊 Export Data (CSV)</string>
+    <string name="gb_action_save_graphics_png">📸 Save Graphics (PNG)</string>
+    <string name="gb_action_share_data_csv">📤 Share Data (CSV)</string>
+    <string name="gb_action_share_graphics_png">🖼️ Share Graphics (PNG)</string>
+
+    <string name="gb_share_graphics_subject">GameBar Performance Stats - %1$s</string>
+    <string name="gb_share_graphics_title">🎮 GameBar Performance Stats</string>
+    <string name="gb_share_graphics_app">📱 App: %1$s</string>
+    <string name="gb_share_graphics_session">📅 Session: %1$s</string>
+    <string name="gb_share_graphics_duration">⏱️ Duration: %1$s</string>
+    <string name="gb_share_graphics_fps_line">🎯 FPS: Avg %1$s | Max %2$s</string>
+    <string name="gb_share_graphics_smoothness">✨ Smoothness: %1$s</string>
+    <string name="gb_share_graphics_low_1">🔥 1%% Low: %1$s FPS</string>
+
+    <string name="gb_share_log_subject">GameBar Performance Log for %1$s</string>
+    <string name="gb_share_log_text">GameBar performance log file for %1$s: %2$s</string>
+
     <string name="config_proc_stat_path">/proc/stat</string>
     <string name="config_proc_meminfo_path">/proc/meminfo</string>
     <string name="config_ram_freq_path">/sys/class/devfreq/*/cur_freq</string>
