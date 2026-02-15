@@ -5,6 +5,13 @@
 
 package com.android.gamebar
 
+import android.content.ContentValues
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -29,9 +36,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,10 +67,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -322,6 +334,7 @@ private fun FpsRecordDetailScreen(
     val iconBitmap = remember(session.packageName) {
         runCatching { context.packageManager.getApplicationIcon(session.packageName).toBitmap() }.getOrNull()
     }
+    var showMenu by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier =
@@ -367,6 +380,63 @@ private fun FpsRecordDetailScreen(
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                }
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Session options",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Export Session Log (CSV)") },
+                            onClick = {
+                                showMenu = false
+                                val ok = exportFileToDownloads(
+                                    context = context,
+                                    source = session.file,
+                                    mimeType = "text/csv",
+                                    displayName = session.file.name,
+                                )
+                                Toast.makeText(
+                                    context,
+                                    if (ok) "Session log exported to Downloads" else "Failed to export session log",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Share Session Log (CSV)") },
+                            onClick = {
+                                showMenu = false
+                                shareSessionFile(context, session.file)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Save Graphics (PNG)") },
+                            onClick = {
+                                showMenu = false
+                                val ok = FpsRecordImageGenerator.saveGraphics(context, session.appName, analytics)
+                                Toast.makeText(
+                                    context,
+                                    if (ok) "Graphics saved to Downloads" else "Failed to save graphics",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Share Graphics (PNG)") },
+                            onClick = {
+                                showMenu = false
+                                FpsRecordImageGenerator.generateAndShareImage(context, session.appName, analytics)
+                            }
+                        )
+                    }
                 }
             }
         }
@@ -1088,6 +1158,68 @@ private fun formatTimeLabel(index: Int, steps: Int, samples: Int): String {
 private fun avgOrNull(values: List<Float>): Float? {
     if (values.isEmpty()) return null
     return values.average().toFloat()
+}
+
+private fun shareSessionFile(context: Context, file: File) {
+    if (!file.exists() || !file.canRead()) {
+        Toast.makeText(context, "Session log is not readable", Toast.LENGTH_SHORT).show()
+        return
+    }
+    runCatching {
+        val shareSource =
+            File(context.externalCacheDir ?: context.cacheDir, "share_${System.currentTimeMillis()}_${file.name}").apply {
+                file.copyTo(this, overwrite = true)
+            }
+        val uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.fileprovider",
+            shareSource
+        )
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/csv"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_SUBJECT, "FPS Session Log")
+            putExtra(Intent.EXTRA_TEXT, "FPS session log: ${file.name}")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        context.startActivity(Intent.createChooser(shareIntent, "Share session log"))
+    }.onFailure {
+        Toast.makeText(context, "Failed to share session log", Toast.LENGTH_SHORT).show()
+    }
+}
+
+private fun exportFileToDownloads(
+    context: Context,
+    source: File,
+    mimeType: String,
+    displayName: String,
+): Boolean {
+    if (!source.exists() || !source.canRead()) return false
+
+    return runCatching {
+        val resolver = context.contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, displayName)
+            put(MediaStore.Downloads.MIME_TYPE, mimeType)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                put(MediaStore.Downloads.IS_PENDING, 1)
+            }
+        }
+
+        val collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI
+        val uri = resolver.insert(collection, values) ?: return false
+
+        resolver.openOutputStream(uri)?.use { out ->
+            FileInputStream(source).use { input -> input.copyTo(out) }
+        } ?: return false
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val done = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
+            resolver.update(uri, done, null, null)
+        }
+        true
+    }.getOrElse { false }
 }
 
 @Composable
