@@ -199,14 +199,24 @@ class GameBar private constructor(context: Context) {
                 val dataExport = GameDataExport.getInstance()
                 val perAppLogManager = dataExport.getPerAppLogManager()
                 val currentPackage = ForegroundAppDetector.getForegroundPackageName(context)
+                if (currentPackage.isBlank() || currentPackage == "Unknown") {
+                    Toast.makeText(context, "Unable to detect foreground app", Toast.LENGTH_SHORT).show()
+                    return
+                }
                 
                 if (dataExport.getLoggingMode() == GameDataExport.LoggingMode.PER_APP) {
-                    if (perAppLogManager.isAppLoggingEnabled(context, currentPackage)) {
-                        Toast.makeText(context, R.string.toast_auto_logging_enabled, Toast.LENGTH_SHORT).show()
-                    } else if (perAppLogManager.isAppLoggingActive(currentPackage)) {
+                    if (perAppLogManager.isAppLoggingActive(currentPackage)) {
                         perAppLogManager.stopManualLoggingForApp(currentPackage)
+                        // Auto-stop capture when no active app sessions remain.
+                        if (perAppLogManager.getCurrentlyLoggingApps().isEmpty()) {
+                            dataExport.stopCapture()
+                        }
                         Toast.makeText(context, R.string.toast_manual_logging_stopped, Toast.LENGTH_SHORT).show()
                     } else {
+                        // Double tap now fully controls session logging lifecycle.
+                        if (!dataExport.isCapturing()) {
+                            dataExport.startCapture()
+                        }
                         perAppLogManager.startManualLoggingForApp(currentPackage)
                     }
                 } else {
@@ -547,21 +557,8 @@ class GameBar private constructor(context: Context) {
             statViews.add(createStatLine("Frame Time", if (frameTimeStr == "N/A") "N/A" else "${frameTimeStr}ms"))
         }
 
-        // 2) Battery temp - Always collect for logging
-        var batteryTempStr = "N/A"
-        val (path, divider) = GameBarConfig.getBatteryTempConfig()
-        if (path != null) {
-            val tmp = readLine(path)
-            if (!tmp.isNullOrEmpty()) {
-                try {
-                    val raw = tmp.trim().toInt()
-                    val celcius = raw / divider.toFloat()
-                    batteryTempStr =  String.format(Locale.getDefault(), "%.1f", celcius)
-                } catch (ignored: NumberFormatException){
-                    batteryTempStr = "Err"
-                }
-            }
-        }
+        // 2) Battery temperature
+        var batteryTempStr = GameBarBatteryInfo.getBatteryTempC(context)
         if (showBatteryTemp) {
             statViews.add(createStatLine("Temp", "${batteryTempStr}°C"))
         }
@@ -651,6 +648,10 @@ class GameBar private constructor(context: Context) {
             statViews.add(createStatLine("GPU Temp", if (gpuTempStr == "N/A") "N/A" else "${gpuTempStr}°C"))
         }
 
+        // 10) Battery level - logging data
+        val batteryLevelStr = GameBarBatteryInfo.getBatteryLevelPercent(context)
+        val batteryPowerWattStr = GameBarBatteryInfo.getBatteryPowerWatt(context)
+
         if (splitMode == "side_by_side") {
             layout.orientation = LinearLayout.HORIZONTAL
             if (overlayFormat == "minimal") {
@@ -678,18 +679,20 @@ class GameBar private constructor(context: Context) {
             val prefs = PreferenceManager.getDefaultSharedPreferences(context)
             
             // Check logging parameters and use N/A if disabled
-            val logFps = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_FPS, true)) fpsStr else "N/A"
-            val logFrameTime = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_FRAME_TIME, true)) frameTimeStr else "N/A"
-            val logBatteryTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_BATTERY_TEMP, true)) batteryTempStr else "N/A"
-            val logCpuUsage = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_CPU_USAGE, true)) cpuUsageStr else "N/A"
-            val logCpuClock = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_CPU_CLOCK, true)) cpuClockStr else "N/A"
-            val logCpuTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_CPU_TEMP, true)) cpuTempStr else "N/A"
-            val logRam = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_RAM, true)) ramStr else "N/A"
-            val logRamSpeed = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_RAM_SPEED, true)) ramSpeedStr else "N/A"
-            val logRamTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_RAM_TEMP, true)) ramTempStr else "N/A"
-            val logGpuUsage = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_GPU_USAGE, true)) gpuUsageStr else "N/A"
-            val logGpuClock = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_GPU_CLOCK, true)) gpuClockStr else "N/A"
-            val logGpuTemp = if (prefs.getBoolean(GameBarLogFragment.PREF_LOG_GPU_TEMP, true)) gpuTempStr else "N/A"
+            val logFps = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_FPS, true)) fpsStr else "N/A"
+            val logFrameTime = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_FRAME_TIME, true)) frameTimeStr else "N/A"
+            val logBatteryTemp = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_BATTERY_TEMP, true)) batteryTempStr else "N/A"
+            val logCpuUsage = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_CPU_USAGE, true)) cpuUsageStr else "N/A"
+            val logCpuClock = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_CPU_CLOCK, true)) cpuClockStr else "N/A"
+            val logCpuTemp = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_CPU_TEMP, true)) cpuTempStr else "N/A"
+            val logRam = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_RAM, true)) ramStr else "N/A"
+            val logRamSpeed = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_RAM_SPEED, true)) ramSpeedStr else "N/A"
+            val logRamTemp = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_RAM_TEMP, true)) ramTempStr else "N/A"
+            val logGpuUsage = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_GPU_USAGE, true)) gpuUsageStr else "N/A"
+            val logGpuClock = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_GPU_CLOCK, true)) gpuClockStr else "N/A"
+            val logGpuTemp = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_GPU_TEMP, true)) gpuTempStr else "N/A"
+            val logBatteryLevel = batteryLevelStr
+            val logPowerWatt = batteryPowerWattStr
 
             GameDataExport.getInstance().addOverlayData(
                     dateTime,
@@ -705,7 +708,9 @@ class GameBar private constructor(context: Context) {
                     logRamTemp,
                     logGpuUsage,
                     logGpuClock,
-                    logGpuTemp
+                    logGpuTemp,
+                    logBatteryLevel,
+                    logPowerWatt
             )
         }
 

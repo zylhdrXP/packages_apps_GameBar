@@ -161,6 +161,12 @@ class GameBarFragment : SettingsBasePreferenceFragment() {
             startActivity(Intent(requireContext(), GameBarPerAppConfigActivity::class.java))
             true
         }
+
+        val fpsRecordPref: Preference? = findPreference("game_bar_fps_record")
+        fpsRecordPref?.setOnPreferenceClickListener {
+            startActivity(Intent(requireContext(), FpsRecordActivity::class.java))
+            true
+        }
         
         val fontSelectorPref: Preference? = findPreference("game_bar_font_selector")
         fontSelectorPref?.setOnPreferenceClickListener {

@@ -10,14 +10,6 @@
         android:checkable="true"
         android:showAsAction="never" />
     <item
-        android:id="@+id/menu_log_monitor"
-        android:title="Log Monitor"
-        android:showAsAction="never" />
-    <item
-        android:id="@+id/menu_open_external_log"
-        android:title="Open External Log"
-        android:showAsAction="never" />
-    <item
         android:id="@+id/menu_user_guide"
         android:title="@string/game_bar_user_guide"
         android:showAsAction="never" />

@@ -134,17 +134,7 @@
         android:theme="@style/Theme.SubSettingsBase.Expressive" />
 
     <activity
-        android:name=".GameBarLogActivity"
-        android:exported="false"
-        android:theme="@style/Theme.SubSettingsBase.Expressive" />
-
-    <activity
-        android:name=".PerAppLogViewActivity"
-        android:exported="false"
-        android:theme="@style/Theme.SubSettingsBase.Expressive" />
-
-    <activity
-        android:name=".LogAnalyticsActivity"
+        android:name=".FpsRecordActivity"
         android:exported="false"
         android:theme="@style/Theme.SubSettingsBase.Expressive" />
 

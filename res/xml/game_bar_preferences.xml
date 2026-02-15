@@ -320,6 +320,16 @@
     </com.android.gamebar.ExpandablePreferenceCategory>
 
     <com.android.gamebar.ExpandablePreferenceCategory
+        android:key="category_fps_record"
+        android:title="@string/fps_record_title">
+
+        <Preference
+            android:key="game_bar_fps_record"
+            android:title="@string/fps_record_title"
+            android:summary="@string/fps_record_summary" />
+    </com.android.gamebar.ExpandablePreferenceCategory>
+
+    <com.android.gamebar.ExpandablePreferenceCategory
         android:key="category_presets"
         android:title="@string/preset_category_title">
 

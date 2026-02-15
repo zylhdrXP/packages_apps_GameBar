@@ -18,18 +18,25 @@ data class LogAnalytics(
     val fpsStats: FpsStatistics,
     val cpuStats: CpuStatistics,
     val gpuStats: GpuStatistics,
+    val powerStats: PowerStatistics,
     val sessionDuration: String,
     val totalSamples: Int,
     val appName: String,
     val sessionDate: String,
     val fpsTimeData: List<Pair<Long, Double>>,  // Timestamp in millis, FPS value
     val frameTimeData: List<Pair<Long, Double>>,  // Frame time over time
+    val batteryTempTimeData: List<Pair<Long, Double>>, // Battery temp over time
+    val batteryLevelTimeData: List<Pair<Long, Double>>, // Battery level over time
     val cpuUsageTimeData: List<Pair<Long, Double>>,  // CPU usage over time
     val cpuTempTimeData: List<Pair<Long, Double>>,   // CPU temp over time
+    val ramUsageTimeData: List<Pair<Long, Double>>,  // RAM usage over time (MB)
+    val ramSpeedTimeData: List<Pair<Long, Double>>,  // RAM speed over time (MHz)
+    val ramTempTimeData: List<Pair<Long, Double>>,   // RAM temp over time (C)
     val cpuClockTimeData: Map<Int, List<Pair<Long, Double>>>,  // Per-core clock speeds over time
     val gpuUsageTimeData: List<Pair<Long, Double>>,  // GPU usage over time
     val gpuTempTimeData: List<Pair<Long, Double>>,   // GPU temp over time
-    val gpuClockTimeData: List<Pair<Long, Double>>   // GPU clock speed over time
+    val gpuClockTimeData: List<Pair<Long, Double>>,  // GPU clock speed over time
+    val powerTimeData: List<Pair<Long, Double>>      // Power over time (W)
 ) : Serializable
 
 data class FpsStatistics(
@@ -64,6 +71,12 @@ data class GpuStatistics(
     val avgTemp: Double
 ) : Serializable
 
+data class PowerStatistics(
+    val maxPower: Double,
+    val minPower: Double,
+    val avgPower: Double
+) : Serializable
+
 class PerAppLogReader {
 
     companion object {
@@ -84,6 +97,8 @@ class PerAppLogReader {
         private const val COL_GPU_USAGE = 11
         private const val COL_GPU_CLOCK = 12
         private const val COL_GPU_TEMP = 13
+        private const val COL_BATTERY_LEVEL = 14
+        private const val COL_POWER = 15
     }
 
     /**
@@ -101,10 +116,16 @@ class PerAppLogReader {
             val fpsTimeData = mutableListOf<Pair<Long, Double>>()
             val frameTimeValues = mutableListOf<Double>()
             val frameTimeData = mutableListOf<Pair<Long, Double>>()
+            val batteryTempValues = mutableListOf<Double>()
+            val batteryTempTimeData = mutableListOf<Pair<Long, Double>>()
+            val batteryLevelTimeData = mutableListOf<Pair<Long, Double>>()
             val cpuUsageValues = mutableListOf<Double>()
             val cpuUsageTimeData = mutableListOf<Pair<Long, Double>>()
             val cpuTempValues = mutableListOf<Double>()
             val cpuTempTimeData = mutableListOf<Pair<Long, Double>>()
+            val ramUsageTimeData = mutableListOf<Pair<Long, Double>>()
+            val ramSpeedTimeData = mutableListOf<Pair<Long, Double>>()
+            val ramTempTimeData = mutableListOf<Pair<Long, Double>>()
             val cpuClockTimeData = mutableMapOf<Int, MutableList<Pair<Long, Double>>>()
             val gpuUsageValues = mutableListOf<Double>()
             val gpuUsageTimeData = mutableListOf<Pair<Long, Double>>()
@@ -112,17 +133,28 @@ class PerAppLogReader {
             val gpuClockTimeData = mutableListOf<Pair<Long, Double>>()
             val gpuTempValues = mutableListOf<Double>()
             val gpuTempTimeData = mutableListOf<Pair<Long, Double>>()
+            val powerValues = mutableListOf<Double>()
+            val powerTimeData = mutableListOf<Pair<Long, Double>>()
             var firstTimestamp: String? = null
             var lastTimestamp: String? = null
             var packageName = ""
             var lineCount = 0
             var sessionStartTimeMs: Long = 0
+            var powerColumnIndex = -1
 
             BufferedReader(FileReader(file)).use { reader ->
                 var line = reader.readLine()
                 
                 // Skip header
                 if (line != null && line.contains("DateTime")) {
+                    val headers = line.split(",")
+                    powerColumnIndex = headers.indexOfFirst { header ->
+                        val normalized = header.trim().lowercase()
+                        normalized == "power" ||
+                            normalized.contains("power_w") ||
+                            normalized.contains("power(w)") ||
+                            normalized.contains("watt")
+                    }
                     line = reader.readLine()
                 }
 
@@ -195,6 +227,39 @@ class PerAppLogReader {
                                     }
                                 }
                             }
+
+                            // Extract Battery Temp
+                            if (columns.size > COL_BATTERY_TEMP) {
+                                val batteryTempStr = columns[COL_BATTERY_TEMP].trim()
+                                if (batteryTempStr.isNotEmpty() && batteryTempStr != "N/A" && batteryTempStr != "-") {
+                                    val batteryTemp = parseNumericValue(batteryTempStr)
+                                    if (batteryTemp != null && batteryTemp > 0) {
+                                        batteryTempValues.add(batteryTemp)
+                                        val relativeTime = if (sessionStartTimeMs > 0) {
+                                            fpsTimeData.lastOrNull()?.first ?: (lineCount * 1000L)
+                                        } else {
+                                            lineCount * 1000L
+                                        }
+                                        batteryTempTimeData.add(Pair(relativeTime, batteryTemp))
+                                    }
+                                }
+                            }
+
+                            // Extract Battery Level
+                            if (columns.size > COL_BATTERY_LEVEL) {
+                                val batteryLevelStr = columns[COL_BATTERY_LEVEL].trim()
+                                if (batteryLevelStr.isNotEmpty() && batteryLevelStr != "N/A" && batteryLevelStr != "-") {
+                                    val batteryLevel = batteryLevelStr.toDoubleOrNull()
+                                    if (batteryLevel != null && batteryLevel in 0.0..100.0) {
+                                        val relativeTime = if (sessionStartTimeMs > 0) {
+                                            fpsTimeData.lastOrNull()?.first ?: (lineCount * 1000L)
+                                        } else {
+                                            lineCount * 1000L
+                                        }
+                                        batteryLevelTimeData.add(Pair(relativeTime, batteryLevel))
+                                    }
+                                }
+                            }
                             
                             // Extract CPU Temp
                             if (columns.size > COL_CPU_TEMP) {
@@ -212,6 +277,54 @@ class PerAppLogReader {
                                     }
                                 }
                             }
+
+                            // Extract RAM Usage (MB)
+                            if (columns.size > COL_RAM_USAGE) {
+                                val ramUsageStr = columns[COL_RAM_USAGE].trim()
+                                if (ramUsageStr.isNotEmpty() && ramUsageStr != "N/A" && ramUsageStr != "-") {
+                                    val ramUsage = parseNumericValue(ramUsageStr)
+                                    if (ramUsage != null && ramUsage >= 0) {
+                                        val relativeTime = if (sessionStartTimeMs > 0) {
+                                            fpsTimeData.lastOrNull()?.first ?: (lineCount * 1000L)
+                                        } else {
+                                            lineCount * 1000L
+                                        }
+                                        ramUsageTimeData.add(Pair(relativeTime, ramUsage))
+                                    }
+                                }
+                            }
+
+                            // Extract RAM Speed (convert GHz to MHz if needed)
+                            if (columns.size > COL_RAM_SPEED) {
+                                val ramSpeedStr = columns[COL_RAM_SPEED].trim()
+                                if (ramSpeedStr.isNotEmpty() && ramSpeedStr != "N/A" && ramSpeedStr != "-") {
+                                    val ramSpeedMhz = parseRamSpeedToMhz(ramSpeedStr)
+                                    if (ramSpeedMhz != null && ramSpeedMhz > 0) {
+                                        val relativeTime = if (sessionStartTimeMs > 0) {
+                                            fpsTimeData.lastOrNull()?.first ?: (lineCount * 1000L)
+                                        } else {
+                                            lineCount * 1000L
+                                        }
+                                        ramSpeedTimeData.add(Pair(relativeTime, ramSpeedMhz))
+                                    }
+                                }
+                            }
+
+                            // Extract RAM Temp
+                            if (columns.size > COL_RAM_TEMP) {
+                                val ramTempStr = columns[COL_RAM_TEMP].trim()
+                                if (ramTempStr.isNotEmpty() && ramTempStr != "N/A" && ramTempStr != "-") {
+                                    val ramTemp = parseNumericValue(ramTempStr)
+                                    if (ramTemp != null && ramTemp > 0) {
+                                        val relativeTime = if (sessionStartTimeMs > 0) {
+                                            fpsTimeData.lastOrNull()?.first ?: (lineCount * 1000L)
+                                        } else {
+                                            lineCount * 1000L
+                                        }
+                                        ramTempTimeData.add(Pair(relativeTime, ramTemp))
+                                    }
+                                }
+                            }
                             
                             // Extract CPU Clock (multi-core data)
                             if (columns.size > COL_CPU_CLOCK) {
@@ -224,16 +337,18 @@ class PerAppLogReader {
                                         lineCount * 1000L
                                     }
                                     
-                                    cpuClockStr.split(";").forEachIndexed { index, coreData ->
+                                    cpuClockStr.split(";").forEach { coreData ->
                                         try {
-                                            // Extract MHz value from "cpuX: YYYY MHz"
+                                            // Extract cpu core id and frequency from "cpuX: YYYY MHz"
+                                            val cpuIdMatch = Regex("cpu\\s*(\\d+)", RegexOption.IGNORE_CASE).find(coreData)
                                             val mhzMatch = Regex("(\\d+)\\s*MHz").find(coreData)
-                                            if (mhzMatch != null) {
+                                            if (cpuIdMatch != null && mhzMatch != null) {
+                                                val cpuId = cpuIdMatch.groupValues[1].toInt()
                                                 val mhz = mhzMatch.groupValues[1].toDouble()
-                                                if (!cpuClockTimeData.containsKey(index)) {
-                                                    cpuClockTimeData[index] = mutableListOf()
+                                                if (!cpuClockTimeData.containsKey(cpuId)) {
+                                                    cpuClockTimeData[cpuId] = mutableListOf()
                                                 }
-                                                cpuClockTimeData[index]?.add(Pair(relativeTime, mhz))
+                                                cpuClockTimeData[cpuId]?.add(Pair(relativeTime, mhz))
                                             }
                                         } catch (e: Exception) {
                                             // Skip malformed core data
@@ -293,6 +408,26 @@ class PerAppLogReader {
                                 }
                             }
 
+                            // Extract Power (optional, compatible with older logs)
+                            val resolvedPowerIndex = if (powerColumnIndex >= 0) powerColumnIndex else {
+                                if (columns.size > COL_POWER) COL_POWER else -1
+                            }
+                            if (resolvedPowerIndex >= 0 && columns.size > resolvedPowerIndex) {
+                                val powerStr = columns[resolvedPowerIndex].trim()
+                                if (powerStr.isNotEmpty() && powerStr != "N/A" && powerStr != "-") {
+                                    val power = powerStr.toDoubleOrNull()
+                                    if (power != null && power >= 0) {
+                                        powerValues.add(power)
+                                        val relativeTime = if (sessionStartTimeMs > 0) {
+                                            fpsTimeData.lastOrNull()?.first ?: (lineCount * 1000L)
+                                        } else {
+                                            lineCount * 1000L
+                                        }
+                                        powerTimeData.add(Pair(relativeTime, power))
+                                    }
+                                }
+                            }
+
                             // Extract timestamps for session duration
                             if (firstTimestamp == null) {
                                 firstTimestamp = timestampStr
@@ -322,6 +457,9 @@ class PerAppLogReader {
             
             // Calculate GPU statistics
             val gpuStats = calculateGpuStatistics(gpuUsageValues, gpuClockValues, gpuTempValues)
+
+            // Calculate Power statistics
+            val powerStats = calculatePowerStatistics(powerValues)
             
             // Calculate session duration
             val sessionDuration = calculateSessionDuration(firstTimestamp, lastTimestamp)
@@ -333,23 +471,46 @@ class PerAppLogReader {
                 fpsStats = fpsStats,
                 cpuStats = cpuStats,
                 gpuStats = gpuStats,
+                powerStats = powerStats,
                 sessionDuration = sessionDuration,
                 totalSamples = fpsValues.size,
                 appName = packageName,
                 sessionDate = sessionDate,
                 fpsTimeData = fpsTimeData,
                 frameTimeData = frameTimeData,
+                batteryTempTimeData = batteryTempTimeData,
+                batteryLevelTimeData = batteryLevelTimeData,
                 cpuUsageTimeData = cpuUsageTimeData,
                 cpuTempTimeData = cpuTempTimeData,
+                ramUsageTimeData = ramUsageTimeData,
+                ramSpeedTimeData = ramSpeedTimeData,
+                ramTempTimeData = ramTempTimeData,
                 cpuClockTimeData = cpuClockTimeData,
                 gpuUsageTimeData = gpuUsageTimeData,
                 gpuTempTimeData = gpuTempTimeData,
-                gpuClockTimeData = gpuClockTimeData
+                gpuClockTimeData = gpuClockTimeData,
+                powerTimeData = powerTimeData
             )
             
         } catch (e: Exception) {
             Log.e(TAG, "Error analyzing log file: $logFilePath", e)
             null
+        }
+    }
+
+    private fun parseNumericValue(raw: String): Double? {
+        val normalized = raw.replace(",", ".")
+        val match = Regex("(-?\\d+(?:\\.\\d+)?)").find(normalized) ?: return null
+        return match.value.toDoubleOrNull()
+    }
+
+    private fun parseRamSpeedToMhz(raw: String): Double? {
+        val value = parseNumericValue(raw) ?: return null
+        val lower = raw.lowercase()
+        return when {
+            "ghz" in lower -> value * 1000.0
+            "mhz" in lower -> value
+            else -> value
         }
     }
 
@@ -450,6 +611,17 @@ class PerAppLogReader {
             maxTemp = maxTemp,
             minTemp = minTemp,
             avgTemp = avgTemp
+        )
+    }
+
+    private fun calculatePowerStatistics(powerValues: List<Double>): PowerStatistics {
+        val maxPower = if (powerValues.isNotEmpty()) powerValues.maxOrNull() ?: 0.0 else 0.0
+        val minPower = if (powerValues.isNotEmpty()) powerValues.minOrNull() ?: 0.0 else 0.0
+        val avgPower = if (powerValues.isNotEmpty()) powerValues.average() else 0.0
+        return PowerStatistics(
+            maxPower = maxPower,
+            minPower = minPower,
+            avgPower = avgPower
         )
     }
     

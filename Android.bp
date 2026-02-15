@@ -23,6 +23,16 @@ android_app {
     privileged: true,
 
     static_libs: [
+        "androidx.activity_activity-compose",
+        "androidx.compose.animation_animation",
+        "androidx.compose.foundation_foundation",
+        "androidx.compose.material3_material3",
+        "androidx.compose.material_material-icons-extended",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.ui_ui",
+        "androidx.compose.ui_ui-text",
+        "androidx.compose.ui_ui-tooling-preview",
+        "androidx.lifecycle_lifecycle-runtime-compose",
         "androidx.core_core",
         "androidx.recyclerview_recyclerview",
         "org.lineageos.settings.resources"
