@@ -26,7 +26,6 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.max
 
@@ -692,29 +691,7 @@ object FpsRecordImageGenerator {
         cpuClockTimeData: Map<Int, List<Pair<Long, Double>>>,
         dark: Boolean,
     ): List<Series> {
-        if (cpuClockTimeData.isEmpty()) return emptyList()
-        val coreIds = cpuClockTimeData.keys.sorted()
-        if (coreIds.isEmpty()) return emptyList()
-
-        val avg = coreIds.associateWith { core ->
-            val values = cpuClockTimeData[core].orEmpty().map { it.second.toFloat() }.filter { it > 0f }
-            if (values.isEmpty()) 0f else values.average().toFloat()
-        }
-        val groups = mutableListOf<MutableList<Int>>()
-        for (core in coreIds) {
-            if (groups.isEmpty()) {
-                groups.add(mutableListOf(core))
-                continue
-            }
-            val g = groups.last()
-            val prev = g.last()
-            val prevAvg = avg[prev] ?: 0f
-            val nowAvg = avg[core] ?: 0f
-            val base = max(prevAvg, nowAvg).coerceAtLeast(1f)
-            val delta = abs(nowAvg - prevAvg) / base
-            if (core == prev + 1 && delta <= 0.18f) g.add(core) else groups.add(mutableListOf(core))
-        }
-
+        val groups = CpuClusterDetermination.resolveClusters(cpuClockTimeData)
         return groups.mapIndexed { index, cores ->
             Series(
                 label = "Cluster ${index + 1} (${cores.joinToString(" ")})",

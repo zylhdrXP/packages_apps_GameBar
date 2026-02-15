@@ -1063,35 +1063,7 @@ private fun buildCpuClusterSeries(
     isDark: Boolean,
 ): List<ChartSeries> {
     if (cpuClockTimeData.isEmpty()) return emptyList()
-
-    val sortedCoreIds = cpuClockTimeData.keys.sorted()
-    if (sortedCoreIds.isEmpty()) return emptyList()
-
-    val coreAverages = sortedCoreIds.associateWith { coreId ->
-        val values = cpuClockTimeData[coreId].orEmpty().map { it.second.toFloat() }.filter { it > 0f }
-        if (values.isEmpty()) 0f else values.average().toFloat()
-    }
-
-    val groups = mutableListOf<MutableList<Int>>()
-    for (coreId in sortedCoreIds) {
-        if (groups.isEmpty()) {
-            groups.add(mutableListOf(coreId))
-            continue
-        }
-        val currentGroup = groups.last()
-        val prevCoreId = currentGroup.last()
-        val prevAvg = coreAverages[prevCoreId] ?: 0f
-        val currentAvg = coreAverages[coreId] ?: 0f
-        val maxBase = max(prevAvg, currentAvg).coerceAtLeast(1f)
-        val ratioDelta = kotlin.math.abs(currentAvg - prevAvg) / maxBase
-
-        if (coreId == prevCoreId + 1 && ratioDelta <= 0.18f) {
-            currentGroup.add(coreId)
-        } else {
-            groups.add(mutableListOf(coreId))
-        }
-    }
-
+    val groups = CpuClusterDetermination.resolveClusters(cpuClockTimeData)
     return groups.mapIndexed { index, cores ->
         val values = mergeCoreSeries(cores, cpuClockTimeData)
         ChartSeries(
