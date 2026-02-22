@@ -48,6 +48,10 @@ object FpsRecordImageGenerator {
         val blue: Int,
         val orange: Int,
         val cyan: Int,
+        val fpsGreen: Int,
+        val cpuTempCyan: Int,
+        val gpuTempPink: Int,
+        val ramUsageYellow: Int,
     )
 
     private data class Series(
@@ -132,7 +136,7 @@ object FpsRecordImageGenerator {
         val cpuFreqSeries = buildCpuClusterSeries(analytics.cpuClockTimeData, dark)
 
         drawFixedAxisLineChartCard(
-            canvas, "FPS", listOf(Series("FPS", p.blue, fpsValues)),
+            canvas, "FPS", listOf(Series("FPS", p.fpsGreen, fpsValues)),
             y, 0f, (((fpsValues.maxOrNull() ?: 0f) / 30f).toInt() + 1).coerceAtLeast(2) * 30f, 30f, "", p
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
@@ -159,7 +163,7 @@ object FpsRecordImageGenerator {
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
         drawFixedAxisLineChartCard(
-            canvas, "CPU Temp (°C)", listOf(Series("Temp", p.orange, cpuTemp)),
+            canvas, "CPU Temp (°C)", listOf(Series("Temp", p.cpuTempCyan, cpuTemp)),
             y, 0f, (((cpuTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
@@ -168,19 +172,19 @@ object FpsRecordImageGenerator {
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
         drawFixedAxisLineChartCard(
-            canvas, "GPU Temp (°C)", listOf(Series("Temp", p.orange, gpuTemp)),
+            canvas, "GPU Temp (°C)", listOf(Series("Temp", p.gpuTempPink, gpuTemp)),
             y, 0f, (((gpuTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
         drawFixedAxisLineChartCard(
-            canvas, "RAM Usage (MB)", listOf(Series("RAM Usage", p.cyan, ramUsage)),
+            canvas, "RAM Usage (MB)", listOf(Series("RAM Usage", p.ramUsageYellow, ramUsage)),
             y, 0f, (((ramUsage.maxOrNull() ?: 0f) / 512f).toInt() + 1).coerceAtLeast(4) * 512f, 512f, "MB", p
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
         drawFixedAxisLineChartCard(
-            canvas, "RAM Frequency (MHz)", listOf(Series("RAM Freq", p.blue, ramFreq)),
+            canvas, "RAM Frequency (MHz)", listOf(Series("RAM Freq", p.cyan, ramFreq)),
             y, 0f, (((ramFreq.maxOrNull() ?: 0f) / 200f).toInt() + 1).coerceAtLeast(4) * 200f, 200f, "MHz", p
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
@@ -766,27 +770,35 @@ object FpsRecordImageGenerator {
     private fun palette(dark: Boolean): Palette {
         return if (dark) {
             Palette(
-                bg = Color.parseColor("#0D1117"),
-                card = Color.parseColor("#161B22"),
+                bg = Color.parseColor("#000000"),
+                card = Color.parseColor("#000000"),
                 text = Color.parseColor("#E6EDF3"),
-                sub = Color.parseColor("#9DA7B3"),
-                grid = Color.parseColor("#1FFFFFFF"),
-                label = Color.parseColor("#99FFFFFF"),
+                sub = Color.parseColor("#8B949E"),
+                grid = Color.parseColor("#30FFFFFF"),
+                label = Color.parseColor("#B3FFFFFF"),
                 blue = Color.parseColor("#58A6FF"),
                 orange = Color.parseColor("#FF8626"),
                 cyan = Color.parseColor("#3FB950"),
+                fpsGreen = Color.parseColor("#4CAF50"),
+                cpuTempCyan = Color.parseColor("#00BCD4"),
+                gpuTempPink = Color.parseColor("#E91E63"),
+                ramUsageYellow = Color.parseColor("#FFC107"),
             )
         } else {
             Palette(
                 bg = Color.parseColor("#F6F8FA"),
-                card = Color.parseColor("#E9EDF2"),
+                card = Color.parseColor("#F2F4F7"),
                 text = Color.parseColor("#111827"),
-                sub = Color.parseColor("#4B5563"),
-                grid = Color.parseColor("#22000000"),
+                sub = Color.parseColor("#8B949E"),
+                grid = Color.parseColor("#30000000"),
                 label = Color.parseColor("#99000000"),
-                blue = Color.parseColor("#0969DA"),
-                orange = Color.parseColor("#9A6700"),
-                cyan = Color.parseColor("#1A7F37"),
+                blue = Color.parseColor("#58A6FF"),
+                orange = Color.parseColor("#FF8626"),
+                cyan = Color.parseColor("#00BCD4"),
+                fpsGreen = Color.parseColor("#4CAF50"),
+                cpuTempCyan = Color.parseColor("#00BCD4"),
+                gpuTempPink = Color.parseColor("#E91E63"),
+                ramUsageYellow = Color.parseColor("#FFC107"),
             )
         }
     }

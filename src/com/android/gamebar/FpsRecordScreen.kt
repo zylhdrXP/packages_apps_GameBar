@@ -13,6 +13,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -70,6 +71,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
@@ -234,11 +236,13 @@ private fun FpsRecordSessionRow(
 
     val avgFps = if (session.avgFps > 0f) formatValue(session.avgFps) else "--"
     val power = if (session.avgPower > 0f) "${formatValue(session.avgPower)}W" else "--"
-    val subTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val subTextColor = Color(0xFF8B949E)
 
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onOpen() },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = fpsRecordCardColor()),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        border = BorderStroke(1.dp, fpsRecordCardBorderColor()),
         shape = RoundedCornerShape(16.dp),
     ) {
         Row(
@@ -329,12 +333,26 @@ private fun FpsRecordDetailScreen(
         buildCpuClusterSeries(analytics.cpuClockTimeData, isDark)
     }
 
-    val subTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val subTextColor = Color(0xFF8B949E)
     val context = LocalContext.current
     val iconBitmap = remember(session.packageName) {
         runCatching { context.packageManager.getApplicationIcon(session.packageName).toBitmap() }.getOrNull()
     }
     var showMenu by remember { mutableStateOf(false) }
+    var descriptionText by remember(session.file.absolutePath) { mutableStateOf("") }
+    var descriptionLoaded by remember(session.file.absolutePath) { mutableStateOf(false) }
+
+    LaunchedEffect(session.file.absolutePath) {
+        descriptionText = withContext(Dispatchers.IO) { loadSessionDescription(session.file) }
+        descriptionLoaded = true
+    }
+    LaunchedEffect(session.file.absolutePath, descriptionText, descriptionLoaded) {
+        if (!descriptionLoaded) return@LaunchedEffect
+        delay(400)
+        withContext(Dispatchers.IO) {
+            saveSessionDescription(session.file, descriptionText)
+        }
+    }
 
     LazyColumn(
         modifier =
@@ -444,7 +462,28 @@ private fun FpsRecordDetailScreen(
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                colors = CardDefaults.cardColors(containerColor = fpsRecordCardColor()),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                border = BorderStroke(1.dp, fpsRecordCardBorderColor()),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                OutlinedTextField(
+                    value = descriptionText,
+                    onValueChange = { descriptionText = it },
+                    modifier = Modifier.fillMaxWidth().padding(12.dp),
+                    minLines = 1,
+                    maxLines = 6,
+                    placeholder = { Text("Description") },
+                )
+            }
+        }
+
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = fpsRecordCardColor()),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                border = BorderStroke(1.dp, fpsRecordCardBorderColor()),
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(
@@ -463,17 +502,17 @@ private fun FpsRecordDetailScreen(
         }
 
         item {
-            val chartColors = rememberChartColors()
+            val fpsColor = Color(0xFF4CAF50)
             val fpsMax = fpsValues.maxOrNull() ?: 0f
             val fpsStep = 30f
             val yMax = ((fpsMax / fpsStep).toInt() + 1).coerceAtLeast(2) * fpsStep
 
             LineChartCard(
                 title = "FPS",
-                series = listOf(ChartSeries("FPS", chartColors.blue, fpsValues)),
+                series = listOf(ChartSeries("FPS", fpsColor, fpsValues)),
                 chartContent = {
                     FixedAxisLineChart(
-                        series = listOf(ChartSeries("FPS", chartColors.blue, fpsValues)),
+                        series = listOf(ChartSeries("FPS", fpsColor, fpsValues)),
                         yMin = 0f,
                         yMax = yMax,
                         yStep = fpsStep,
@@ -589,16 +628,16 @@ private fun FpsRecordDetailScreen(
 
         if (cpuTempValues.isNotEmpty()) {
             item {
-                val chartColors = rememberChartColors()
+                val cpuTempColor = Color(0xFF00BCD4)
                 val maxTemp = cpuTempValues.maxOrNull() ?: 0f
                 val yMax = (((maxTemp / 10f).toInt() + 1).coerceAtLeast(4) * 10f)
 
                 LineChartCard(
                     title = "CPU Temp (°C)",
-                    series = listOf(ChartSeries("Temp", chartColors.orange, cpuTempValues)),
+                    series = listOf(ChartSeries("Temp", cpuTempColor, cpuTempValues)),
                     chartContent = {
                         FixedAxisLineChart(
-                            series = listOf(ChartSeries("Temp", chartColors.orange, cpuTempValues)),
+                            series = listOf(ChartSeries("Temp", cpuTempColor, cpuTempValues)),
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
@@ -646,16 +685,16 @@ private fun FpsRecordDetailScreen(
 
         if (gpuTempValues.isNotEmpty()) {
             item {
-                val chartColors = rememberChartColors()
+                val gpuTempColor = Color(0xFFE91E63)
                 val maxTemp = gpuTempValues.maxOrNull() ?: 0f
                 val yMax = (((maxTemp / 10f).toInt() + 1).coerceAtLeast(4) * 10f)
 
                 LineChartCard(
                     title = "GPU Temp (°C)",
-                    series = listOf(ChartSeries("Temp", chartColors.orange, gpuTempValues)),
+                    series = listOf(ChartSeries("Temp", gpuTempColor, gpuTempValues)),
                     chartContent = {
                         FixedAxisLineChart(
-                            series = listOf(ChartSeries("Temp", chartColors.orange, gpuTempValues)),
+                            series = listOf(ChartSeries("Temp", gpuTempColor, gpuTempValues)),
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
@@ -674,15 +713,15 @@ private fun FpsRecordDetailScreen(
 
         if (ramUsageValues.isNotEmpty()) {
             item {
-                val chartColors = rememberChartColors()
+                val ramUsageColor = Color(0xFFFFC107)
                 val maxUsage = ramUsageValues.maxOrNull() ?: 0f
                 val yMax = (((maxUsage / 512f).toInt() + 1).coerceAtLeast(4) * 512f)
                 LineChartCard(
                     title = "RAM Usage (MB)",
-                    series = listOf(ChartSeries("RAM Usage", chartColors.cyan, ramUsageValues)),
+                    series = listOf(ChartSeries("RAM Usage", ramUsageColor, ramUsageValues)),
                     chartContent = {
                         FixedAxisLineChart(
-                            series = listOf(ChartSeries("RAM Usage", chartColors.cyan, ramUsageValues)),
+                            series = listOf(ChartSeries("RAM Usage", ramUsageColor, ramUsageValues)),
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 512f,
@@ -706,10 +745,10 @@ private fun FpsRecordDetailScreen(
                 val yMax = (((maxFreq / 200f).toInt() + 1).coerceAtLeast(4) * 200f)
                 LineChartCard(
                     title = "RAM Frequency (MHz)",
-                    series = listOf(ChartSeries("RAM Freq", chartColors.blue, ramSpeedValues)),
+                    series = listOf(ChartSeries("RAM Freq", chartColors.cyan, ramSpeedValues)),
                     chartContent = {
                         FixedAxisLineChart(
-                            series = listOf(ChartSeries("RAM Freq", chartColors.blue, ramSpeedValues)),
+                            series = listOf(ChartSeries("RAM Freq", chartColors.cyan, ramSpeedValues)),
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 200f,
@@ -814,7 +853,6 @@ private fun StatsGrid(analytics: LogAnalytics) {
     val maxTemp = max(analytics.cpuStats.maxTemp.toFloat(), analytics.gpuStats.maxTemp.toFloat())
     val fpsValues = analytics.fpsTimeData.map { it.second.toFloat() }.sorted()
     val low5 = averageSlowestPercent(fpsValues, 0.05f)
-    val chartColors = rememberChartColors()
 
     val items =
         listOf(
@@ -836,8 +874,8 @@ private fun StatsGrid(analytics: LogAnalytics) {
             ) {
                 row.forEach { (label, value) ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
-                        Text(value, color = chartColors.blue, fontWeight = FontWeight.Bold)
+                        Text(label, color = Color(0xFF8B949E), fontSize = 11.sp)
+                        Text(value, color = Color(0xFF58A6FF), fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -860,9 +898,12 @@ private fun LineChartCard(
     chartHeight: Int = 180,
     chartContent: (@Composable () -> Unit)? = null,
 ) {
+    val containerColor = fpsRecordCardColor()
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        border = BorderStroke(1.dp, fpsRecordCardBorderColor()),
         shape = RoundedCornerShape(16.dp),
     ) {
         Column(
@@ -874,15 +915,23 @@ private fun LineChartCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(title, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold)
+                Text(title, color = Color(0xFF8B949E), fontWeight = FontWeight.SemiBold)
                 if (!rightTitle.isNullOrBlank()) {
-                    Text(rightTitle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                    Text(rightTitle, color = Color(0xFF8B949E), fontSize = 12.sp)
                 }
             }
-            if (chartContent != null) {
-                chartContent()
-            } else {
-                LineChart(series = series, modifier = Modifier.fillMaxWidth().height(chartHeight.dp))
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .background(containerColor, RoundedCornerShape(12.dp))
+                        .padding(6.dp)
+            ) {
+                if (chartContent != null) {
+                    chartContent()
+                } else {
+                    LineChart(series = series, modifier = Modifier.fillMaxWidth().height(chartHeight.dp))
+                }
             }
             ChartLegend(series = series)
             if (footerStats != null) {
@@ -890,6 +939,18 @@ private fun LineChartCard(
             }
         }
     }
+}
+
+@Composable
+private fun fpsRecordCardColor(): Color {
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    return if (isDark) Color(0xFF000000) else Color(0xFFF2F4F7)
+}
+
+@Composable
+private fun fpsRecordCardBorderColor(): Color {
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    return if (isDark) Color(0x26FFFFFF) else Color(0x18000000)
 }
 
 @Composable
@@ -918,9 +979,9 @@ private fun LineChart(
     val yMin = minY - pad
     val yMax = maxY + pad
 
-    val baseOnSurface = MaterialTheme.colorScheme.onSurface
-    val gridColor = baseOnSurface.copy(alpha = 0.12f)
-    val labelColor = baseOnSurface.copy(alpha = 0.6f)
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val gridColor = if (isDark) Color(0x30FFFFFF) else Color(0x30000000)
+    val labelColor = if (isDark) Color(0xB3FFFFFF) else Color(0x99000000)
     val steps = 5
     val dash = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f)
 
@@ -1025,7 +1086,7 @@ private fun ChartLegend(series: List<ChartSeries>) {
                     modifier = Modifier.size(8.dp).background(s.color, CircleShape)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(s.label, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
+                Text(s.label, color = Color(0xFF8B949E), fontSize = 11.sp)
             }
         }
     }
@@ -1047,7 +1108,7 @@ private fun ChartFooterRow(stats: ChartFooter) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        val textColor = MaterialTheme.colorScheme.onSurfaceVariant
+        val textColor = Color(0xFF8B949E)
         Text("MAX: $maxText", color = textColor, fontSize = 12.sp)
         Text("MIN: $minText", color = textColor, fontSize = 12.sp)
         Text("AVG: $avgText", color = textColor, fontSize = 12.sp)
@@ -1160,6 +1221,27 @@ private fun shareSessionFile(context: Context, file: File) {
     }
 }
 
+private fun descriptionFileFor(sessionFile: File): File {
+    val parent = sessionFile.parentFile ?: return File(sessionFile.absolutePath + ".desc")
+    return File(parent, "${sessionFile.name}.desc")
+}
+
+private fun loadSessionDescription(sessionFile: File): String {
+    val descFile = descriptionFileFor(sessionFile)
+    return runCatching { if (descFile.exists()) descFile.readText() else "" }.getOrDefault("")
+}
+
+private fun saveSessionDescription(sessionFile: File, description: String) {
+    val descFile = descriptionFileFor(sessionFile)
+    runCatching {
+        if (description.isBlank()) {
+            if (descFile.exists()) descFile.delete()
+        } else {
+            descFile.writeText(description)
+        }
+    }
+}
+
 private fun exportFileToDownloads(
     context: Context,
     source: File,
@@ -1206,8 +1288,9 @@ private fun GpuDualAxisChart(
     val freqUpper = ((freqMax / freqStep).toInt() + 1).coerceAtLeast(1) * freqStep
     val usageSteps = listOf(0f, 50f, 75f, 90f, 100f)
     val steps = 5
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-    val labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val gridColor = if (isDark) Color(0x30FFFFFF) else Color(0x30000000)
+    val labelColor = if (isDark) Color(0xB3FFFFFF) else Color(0x99000000)
 
     Canvas(modifier = modifier) {
         val w = size.width
@@ -1331,8 +1414,9 @@ private fun PowerCapacityDualAxisChart(
     val powerUpper = ceil(powerMax.toDouble()).toFloat().coerceAtLeast(1f)
     val steps = 5
     val capacitySteps = listOf(0f, 20f, 40f, 60f, 80f, 100f)
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-    val labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val gridColor = if (isDark) Color(0x30FFFFFF) else Color(0x30000000)
+    val labelColor = if (isDark) Color(0xB3FFFFFF) else Color(0x99000000)
 
     Canvas(modifier = modifier) {
         val w = size.width
@@ -1486,8 +1570,9 @@ private fun AreaChart(
     }
     val maxY = points.maxOrNull() ?: 1f
     val steps = 6
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-    val labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val gridColor = if (isDark) Color(0x30FFFFFF) else Color(0x30000000)
+    val labelColor = if (isDark) Color(0xB3FFFFFF) else Color(0x99000000)
     val dash = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f)
 
     Canvas(modifier = modifier) {
@@ -1575,8 +1660,9 @@ private fun FixedAxisLineChart(
         }
         return
     }
-    val gridColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
-    val labelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val gridColor = if (isDark) Color(0x30FFFFFF) else Color(0x30000000)
+    val labelColor = if (isDark) Color(0xB3FFFFFF) else Color(0x99000000)
     val dash = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f)
 
     Canvas(modifier = modifier) {
