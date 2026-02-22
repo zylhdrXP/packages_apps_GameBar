@@ -7,8 +7,6 @@
 package com.android.gamebar
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -278,7 +276,7 @@ class PerAppLogManager private constructor() {
 
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val fileName = "${packageName}_GameBar_log_$timeStamp.csv"
-        val outFile = File(Environment.getExternalStorageDirectory(), fileName)
+        val outFile = File(getLogsDirectory(), fileName)
 
         var bw: BufferedWriter? = null
         try {
@@ -303,16 +301,14 @@ class PerAppLogManager private constructor() {
     }
 
     fun getPerAppLogFiles(packageName: String): List<File> {
-        val externalStorageDir = Environment.getExternalStorageDirectory()
-        val files = externalStorageDir.listFiles { file ->
+        val files = getLogsDirectory().listFiles { file ->
             file.name.startsWith("${packageName}_GameBar_log_") && file.name.endsWith(".csv")
         }
         return files?.sortedByDescending { it.lastModified() } ?: emptyList()
     }
 
     fun getAllPerAppLogFiles(): Map<String, List<File>> {
-        val externalStorageDir = Environment.getExternalStorageDirectory()
-        val files = externalStorageDir.listFiles { file ->
+        val files = getLogsDirectory().listFiles { file ->
             file.name.contains("_GameBar_log_") && 
             file.name.endsWith(".csv") && 
             !file.name.startsWith("GameBar_log_") // Exclude global logs
@@ -330,6 +326,16 @@ class PerAppLogManager private constructor() {
 
     fun getCurrentlyLoggingApps(): Set<String> {
         return activeLogSessions.keys.toSet()
+    }
+
+    private fun getLogsDirectory(): File {
+        val context = android.app.ActivityThread.currentApplication()
+        val baseDir = context?.filesDir ?: File(".")
+        val dir = File(baseDir, "fps_records")
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        return dir
     }
     
     /**

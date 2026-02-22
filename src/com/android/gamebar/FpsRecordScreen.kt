@@ -5,13 +5,12 @@
 
 package com.android.gamebar
 
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.os.Environment
-import android.provider.MediaStore
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -53,6 +52,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,9 +72,9 @@ import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileInputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -341,6 +341,21 @@ private fun FpsRecordDetailScreen(
     var showMenu by remember { mutableStateOf(false) }
     var descriptionText by remember(session.file.absolutePath) { mutableStateOf("") }
     var descriptionLoaded by remember(session.file.absolutePath) { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
+    val createCsvDocumentLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            coroutineScope.launch(Dispatchers.IO) {
+                val saved = writeFileToUri(context, session.file, uri)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        context,
+                        if (saved) "Session CSV saved" else "Failed to save CSV",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
 
     LaunchedEffect(session.file.absolutePath) {
         descriptionText = withContext(Dispatchers.IO) { loadSessionDescription(session.file) }
@@ -412,20 +427,10 @@ private fun FpsRecordDetailScreen(
                         onDismissRequest = { showMenu = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Export Session Log (CSV)") },
+                            text = { Text("Save as CSV") },
                             onClick = {
                                 showMenu = false
-                                val ok = exportFileToDownloads(
-                                    context = context,
-                                    source = session.file,
-                                    mimeType = "text/csv",
-                                    displayName = session.file.name,
-                                )
-                                Toast.makeText(
-                                    context,
-                                    if (ok) "Session log exported to Downloads" else "Failed to export session log",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                createCsvDocumentLauncher.launch(session.file.name)
                             }
                         )
                         DropdownMenuItem(
@@ -1242,36 +1247,12 @@ private fun saveSessionDescription(sessionFile: File, description: String) {
     }
 }
 
-private fun exportFileToDownloads(
-    context: Context,
-    source: File,
-    mimeType: String,
-    displayName: String,
-): Boolean {
+private fun writeFileToUri(context: Context, source: File, targetUri: Uri): Boolean {
     if (!source.exists() || !source.canRead()) return false
-
     return runCatching {
-        val resolver = context.contentResolver
-        val values = ContentValues().apply {
-            put(MediaStore.Downloads.DISPLAY_NAME, displayName)
-            put(MediaStore.Downloads.MIME_TYPE, mimeType)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-                put(MediaStore.Downloads.IS_PENDING, 1)
-            }
-        }
-
-        val collection = MediaStore.Downloads.EXTERNAL_CONTENT_URI
-        val uri = resolver.insert(collection, values) ?: return false
-
-        resolver.openOutputStream(uri)?.use { out ->
-            FileInputStream(source).use { input -> input.copyTo(out) }
+        context.contentResolver.openOutputStream(targetUri)?.use { out ->
+            source.inputStream().use { input -> input.copyTo(out) }
         } ?: return false
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val done = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
-            resolver.update(uri, done, null, null)
-        }
         true
     }.getOrElse { false }
 }
