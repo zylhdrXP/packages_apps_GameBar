@@ -6,10 +6,14 @@
 package com.android.gamebar
 
 import java.io.File
+import android.util.Log
 import kotlin.math.abs
 import kotlin.math.max
 
 object CpuClusterDetermination {
+    private const val TAG = "CpuClusterDetermination"
+    @Volatile
+    private var cachedPolicyClusters: List<List<Int>>? = null
 
     fun resolveClusters(
         cpuClockTimeData: Map<Int, List<Pair<Long, Double>>>
@@ -36,23 +40,46 @@ object CpuClusterDetermination {
     }
 
     private fun getPolicyClusters(): List<List<Int>> {
+        cachedPolicyClusters?.let { return it }
+
         val cpufreqDir = File("/sys/devices/system/cpu/cpufreq")
         if (!cpufreqDir.exists() || !cpufreqDir.isDirectory) return emptyList()
 
-        return cpufreqDir.listFiles()
-            ?.filter { it.isDirectory && it.name.startsWith("policy") }
-            ?.sortedBy { it.name.removePrefix("policy").toIntOrNull() ?: Int.MAX_VALUE }
-            ?.mapNotNull { policyDir ->
-                val relatedCpus = File(policyDir, "related_cpus")
-                if (!relatedCpus.exists() || !relatedCpus.canRead()) return@mapNotNull null
-                val cores = relatedCpus.readText()
-                    .trim()
-                    .split(Regex("\\s+"))
-                    .mapNotNull { it.toIntOrNull() }
-                    .sorted()
-                if (cores.isEmpty()) null else cores
+        val clusters = runCatching {
+            cpufreqDir.listFiles()
+                ?.filter { it.isDirectory && it.name.startsWith("policy") }
+                ?.sortedBy { it.name.removePrefix("policy").toIntOrNull() ?: Int.MAX_VALUE }
+                ?.mapNotNull { policyDir ->
+                    val relatedCpus = File(policyDir, "related_cpus")
+                    readRelatedCoresSafely(relatedCpus)
+                }
+                .orEmpty()
+        }.getOrElse {
+            Log.w(TAG, "Failed to discover policy clusters", it)
+            emptyList()
+        }
+
+        if (clusters.isNotEmpty()) {
+            cachedPolicyClusters = clusters
+        }
+        return clusters
+    }
+
+    private fun readRelatedCoresSafely(file: File): List<Int>? {
+        if (!file.exists() || !file.canRead()) return null
+
+        val content = runCatching { file.bufferedReader().use { it.readLine() ?: "" } }
+            .getOrElse {
+                Log.w(TAG, "Skipping busy/unreadable node: ${file.absolutePath}", it)
+                return null
             }
-            .orEmpty()
+
+        val cores = content.trim()
+            .split(Regex("\\s+"))
+            .mapNotNull { it.toIntOrNull() }
+            .sorted()
+
+        return if (cores.isEmpty()) null else cores
     }
 
     private fun fallbackByFrequencyGap(
