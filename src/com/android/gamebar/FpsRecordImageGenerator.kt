@@ -137,13 +137,15 @@ object FpsRecordImageGenerator {
 
         drawFixedAxisLineChartCard(
             canvas, "FPS", listOf(Series("FPS", p.fpsGreen, fpsValues)),
-            y, 0f, (((fpsValues.maxOrNull() ?: 0f) / 30f).toInt() + 1).coerceAtLeast(2) * 30f, 30f, "", p
+            y, 0f, (((fpsValues.maxOrNull() ?: 0f) / 30f).toInt() + 1).coerceAtLeast(2) * 30f, 30f, "", p,
+            fillUnderFirstSeries = true, fillGradientColors = intArrayOf(0x804CAF50.toInt(), 0x104CAF50.toInt())
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
         drawFixedAxisLineChartCard(
             canvas, "Battery Temp (°C)", listOf(Series("Battery Temp", p.orange, batteryTemp)),
-            y, 0f, (((batteryTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p
+            y, 0f, (((batteryTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p,
+            fillUnderFirstSeries = true
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
@@ -152,7 +154,8 @@ object FpsRecordImageGenerator {
 
         drawFixedAxisLineChartCard(
             canvas, "CPU Usage (%)", listOf(Series("Total", p.blue, cpuUsage)),
-            y, 0f, 100f, 10f, "%", p
+            y, 0f, 100f, 10f, "%", p,
+            fillUnderFirstSeries = true
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
@@ -164,7 +167,8 @@ object FpsRecordImageGenerator {
 
         drawFixedAxisLineChartCard(
             canvas, "CPU Temp (°C)", listOf(Series("Temp", p.cpuTempCyan, cpuTemp)),
-            y, 0f, (((cpuTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p
+            y, 0f, (((cpuTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p,
+            fillUnderFirstSeries = true
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
@@ -173,13 +177,15 @@ object FpsRecordImageGenerator {
 
         drawFixedAxisLineChartCard(
             canvas, "GPU Temp (°C)", listOf(Series("Temp", p.gpuTempPink, gpuTemp)),
-            y, 0f, (((gpuTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p
+            y, 0f, (((gpuTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p,
+            fillUnderFirstSeries = true
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
         drawFixedAxisLineChartCard(
             canvas, "RAM Usage (MB)", listOf(Series("RAM Usage", p.ramUsageYellow, ramUsage)),
-            y, 0f, (((ramUsage.maxOrNull() ?: 0f) / 512f).toInt() + 1).coerceAtLeast(4) * 512f, 512f, "MB", p
+            y, 0f, (((ramUsage.maxOrNull() ?: 0f) / 512f).toInt() + 1).coerceAtLeast(4) * 512f, 512f, "MB", p,
+            fillUnderFirstSeries = true, fillGradientColors = intArrayOf(0x80FFC107.toInt(), 0x10FFC107.toInt())
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
@@ -191,7 +197,8 @@ object FpsRecordImageGenerator {
 
         drawFixedAxisLineChartCard(
             canvas, "RAM Temp (°C)", listOf(Series("RAM Temp", p.orange, ramTemp)),
-            y, 0f, (((ramTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p
+            y, 0f, (((ramTemp.maxOrNull() ?: 0f) / 10f).toInt() + 1).coerceAtLeast(4) * 10f, 10f, "°C", p,
+            fillUnderFirstSeries = true
         )
         y += CHART_CARD_HEIGHT + CARD_SPACING
 
@@ -200,7 +207,8 @@ object FpsRecordImageGenerator {
         } else {
             drawFixedAxisLineChartCard(
                 canvas, "Battery Level (%)", listOf(Series("Capacity(%)", p.orange, capacity)),
-                y, 0f, 100f, 10f, "%", p
+                y, 0f, 100f, 10f, "%", p,
+                fillUnderFirstSeries = true
             )
         }
         return bitmap
@@ -323,6 +331,8 @@ object FpsRecordImageGenerator {
         yStep: Float,
         unit: String,
         p: Palette,
+        fillUnderFirstSeries: Boolean = false,
+        fillGradientColors: IntArray? = null,
     ) {
         drawCardBackground(canvas, title, null, startY, p)
         val plotLeft = PADDING + CARD_PADDING + 44f
@@ -372,10 +382,11 @@ object FpsRecordImageGenerator {
             paint.style = Paint.Style.STROKE
         }
 
-        series.forEach { s ->
+        series.forEachIndexed { seriesIndex, s ->
             val values = s.values
-            if (values.size <= 1) return@forEach
+            if (values.size <= 1) return@forEachIndexed
             val path = Path()
+            val fillPath = Path()
             var started = false
             values.forEachIndexed { index, value ->
                 val v = value ?: return@forEachIndexed
@@ -383,12 +394,34 @@ object FpsRecordImageGenerator {
                 val y = plotBottom - ((v.coerceIn(yMin, yMax) - yMin) / range) * CHART_HEIGHT
                 if (!started) {
                     path.moveTo(x, y)
+                    if (fillUnderFirstSeries && seriesIndex == 0) {
+                        fillPath.moveTo(x, plotBottom)
+                        fillPath.lineTo(x, y)
+                    }
                     started = true
                 } else {
                     path.lineTo(x, y)
+                    if (fillUnderFirstSeries && seriesIndex == 0) {
+                        fillPath.lineTo(x, y)
+                    }
                 }
             }
             if (started) {
+                if (fillUnderFirstSeries && seriesIndex == 0) {
+                    fillPath.lineTo(plotLeft + plotWidth, plotBottom)
+                    fillPath.close()
+                    val gradientColors = fillGradientColors ?: intArrayOf(
+                        (s.color and 0x00FFFFFF) or (115 shl 24),
+                        (s.color and 0x00FFFFFF) or (20 shl 24)
+                    )
+                    paint.style = Paint.Style.FILL
+                    paint.shader = android.graphics.LinearGradient(
+                        0f, plotTop, 0f, plotBottom,
+                        gradientColors, null, android.graphics.Shader.TileMode.CLAMP
+                    )
+                    canvas.drawPath(fillPath, paint)
+                    paint.shader = null
+                }
                 paint.color = s.color
                 paint.strokeWidth = 3f
                 paint.style = Paint.Style.STROKE

@@ -57,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -521,6 +522,11 @@ private fun FpsRecordDetailScreen(
                         yMin = 0f,
                         yMax = yMax,
                         yStep = fpsStep,
+                        fillUnderFirstSeries = true,
+                        fillGradientColors = listOf(
+                            Color(0x804CAF50),
+                            Color(0x104CAF50),
+                        ),
                         modifier = Modifier.fillMaxWidth().height(180.dp),
                     )
                 },
@@ -547,6 +553,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
+                            fillUnderFirstSeries = true,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
                     },
@@ -646,6 +653,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
+                            fillUnderFirstSeries = true,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
                     },
@@ -703,6 +711,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
+                            fillUnderFirstSeries = true,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
                     },
@@ -730,6 +739,11 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 512f,
+                            fillUnderFirstSeries = true,
+                            fillGradientColors = listOf(
+                                Color(0x80FFC107),
+                                Color(0x10FFC107),
+                            ),
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
                     },
@@ -784,6 +798,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
+                            fillUnderFirstSeries = true,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
                     },
@@ -1631,6 +1646,8 @@ private fun FixedAxisLineChart(
     yMin: Float,
     yMax: Float,
     yStep: Float,
+    fillUnderFirstSeries: Boolean = false,
+    fillGradientColors: List<Color>? = null,
     modifier: Modifier = Modifier,
 ) {
     if (series.isEmpty()) return
@@ -1695,10 +1712,11 @@ private fun FixedAxisLineChart(
             )
         }
 
-        series.forEach { s ->
+        series.forEachIndexed { seriesIndex, s ->
             val values = s.values
-            if (values.size <= 1) return@forEach
+            if (values.size <= 1) return@forEachIndexed
             val path = Path()
+            val fillPath = Path()
             var hasStarted = false
             values.forEachIndexed { index, value ->
                 val v = value ?: return@forEachIndexed
@@ -1707,12 +1725,35 @@ private fun FixedAxisLineChart(
                 val y = topPad + plotH - ((clamped - yMin) / (yMax - yMin)) * plotH
                 if (!hasStarted) {
                     path.moveTo(x, y)
+                    if (fillUnderFirstSeries && seriesIndex == 0) {
+                        fillPath.moveTo(x, topPad + plotH)
+                        fillPath.lineTo(x, y)
+                    }
                     hasStarted = true
                 } else {
                     path.lineTo(x, y)
+                    if (fillUnderFirstSeries && seriesIndex == 0) {
+                        fillPath.lineTo(x, y)
+                    }
                 }
             }
             if (hasStarted) {
+                if (fillUnderFirstSeries && seriesIndex == 0) {
+                    fillPath.lineTo(leftPad + plotW, topPad + plotH)
+                    fillPath.close()
+                    val gradient = fillGradientColors ?: listOf(
+                        s.color.copy(alpha = 0.45f),
+                        s.color.copy(alpha = 0.08f),
+                    )
+                    drawPath(
+                        path = fillPath,
+                        brush = Brush.verticalGradient(
+                            colors = gradient,
+                            startY = topPad,
+                            endY = topPad + plotH,
+                        )
+                    )
+                }
                 drawPath(path, color = s.color, style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.2f))
             }
         }
