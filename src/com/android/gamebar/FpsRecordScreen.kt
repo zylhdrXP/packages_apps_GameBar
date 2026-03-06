@@ -90,7 +90,8 @@ private data class FpsSessionItem(
     val dateText: String,
     val avgFps: Float,
     val avgPower: Float,
-    val duration: String
+    val duration: String,
+    val resolution: String
 )
 
 @Composable
@@ -275,6 +276,9 @@ private fun FpsRecordSessionRow(
                     Spacer(modifier = Modifier.height(2.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(session.dateText, color = subTextColor, fontSize = 12.sp)
+                        if (session.resolution != "Unknown") {
+                            Text("Res: ${session.resolution}", color = subTextColor, fontSize = 12.sp)
+                        }
                         Text(power, color = subTextColor, fontSize = 12.sp)
                         Text(session.duration, color = subTextColor, fontSize = 12.sp)
                     }
@@ -497,9 +501,18 @@ private fun FpsRecordDetailScreen(
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text(dateText, color = subTextColor, fontSize = 12.sp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(dateText, color = subTextColor, fontSize = 12.sp)
+                        if (analytics.resolution != "Unknown") {
+                            Text("Res: ${analytics.resolution}", color = subTextColor, fontSize = 12.sp)
+                        }
+                    }
                     Text(
-                        text = "Session Summary",
+                        text = stringResource(R.string.fps_record_stats_title),
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -1793,7 +1806,8 @@ private fun loadSessions(pm: android.content.pm.PackageManager): List<FpsSession
                     dateText = dateFormat.format(Date(file.lastModified())),
                     avgFps = avgFps,
                     avgPower = avgPower,
-                    duration = duration
+                    duration = duration,
+                    resolution = analytics?.resolution ?: "Unknown"
                 )
             }
         }

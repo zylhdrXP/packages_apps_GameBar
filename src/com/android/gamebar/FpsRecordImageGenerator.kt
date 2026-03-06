@@ -228,6 +228,11 @@ object FpsRecordImageGenerator {
         var y = startY + 36f
         canvas.drawText(appName, PADDING, y, title)
         y += 50f
+        if (analytics.resolution != "Unknown") {
+            val resText = "Res: ${analytics.resolution}"
+            val resWidth = sub.measureText(resText)
+            canvas.drawText(resText, WIDTH - PADDING - resWidth, y, sub)
+        }
         canvas.drawText("${analytics.sessionDate} • ${analytics.sessionDuration}", PADDING, y, sub)
         return y + 40f
     }

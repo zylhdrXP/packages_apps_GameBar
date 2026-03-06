@@ -23,6 +23,7 @@ data class LogAnalytics(
     val totalSamples: Int,
     val appName: String,
     val sessionDate: String,
+    val resolution: String = "Unknown",
     val fpsTimeData: List<Pair<Long, Double>>,  // Timestamp in millis, FPS value
     val frameTimeData: List<Pair<Long, Double>>,  // Frame time over time
     val batteryTempTimeData: List<Pair<Long, Double>>, // Battery temp over time
@@ -466,6 +467,9 @@ class PerAppLogReader {
             
             // Extract session date from filename
             val sessionDate = extractSessionDate(file.name)
+            
+            // Extract resolution from filename
+            val resolutionStr = extractSessionResolution(file.name)
 
             LogAnalytics(
                 fpsStats = fpsStats,
@@ -476,6 +480,7 @@ class PerAppLogReader {
                 totalSamples = fpsValues.size,
                 appName = packageName,
                 sessionDate = sessionDate,
+                resolution = resolutionStr,
                 fpsTimeData = fpsTimeData,
                 frameTimeData = frameTimeData,
                 batteryTempTimeData = batteryTempTimeData,
@@ -704,6 +709,25 @@ class PerAppLogReader {
         } catch (e: Exception) {
             Log.w(TAG, "Error extracting session date from filename: $fileName", e)
             "Unknown Date"
+        }
+    }
+
+    /**
+     * Extract session resolution from filename
+     * Filename format: packageName_GameBar_log_resolution_yyyyMMdd_HHmmss.csv
+     */
+    private fun extractSessionResolution(fileName: String): String {
+        return try {
+            val pattern = Regex("""_GameBar_log_([0-9x]+)_""")
+            val match = pattern.find(fileName)
+            
+            if (match != null) {
+                match.groupValues[1]
+            } else {
+                "Unknown"
+            }
+        } catch (e: Exception) {
+            "Unknown"
         }
     }
 

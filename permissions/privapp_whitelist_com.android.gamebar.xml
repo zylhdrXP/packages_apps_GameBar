@@ -19,5 +19,6 @@
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.WRITE_EXTERNAL_STORAGE"/>
         <permission name="android.permission.READ_EXTERNAL_STORAGE"/>
+        <permission name="android.permission.DUMP"/>
     </privapp-permissions>
 </permissions>

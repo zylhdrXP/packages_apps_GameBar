@@ -166,5 +166,6 @@
     <string name="fps_record_title">GameBar FPS Record</string>
     <string name="fps_record_summary">View per-session app FPS logs with summary and graphs</string>
     <string name="fps_record_empty">No FPS record sessions found</string>
+    <string name="fps_record_stats_title">Session Summary</string>
 
 </resources>

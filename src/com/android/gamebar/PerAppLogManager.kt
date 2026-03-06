@@ -62,6 +62,7 @@ class PerAppLogManager private constructor() {
     }
 
     private val activeLogSessions = ConcurrentHashMap<String, MutableList<Array<String>>>()
+    private val activeLogResolutions = ConcurrentHashMap<String, String>()
     private val handler = Handler(Looper.getMainLooper())
     private var listener: PerAppStateListener? = null
     private var currentForegroundApp: String? = null
@@ -162,6 +163,20 @@ class PerAppLogManager private constructor() {
         val logData = mutableListOf<Array<String>>()
         logData.add(CSV_HEADER)
         activeLogSessions[packageName] = logData
+        
+        Thread {
+            try {
+                val context = android.app.ActivityThread.currentApplication()
+                if (context != null) {
+                    val res = GameResolutionDetector.detectGameRenderResolution(context, packageName)
+                    activeLogResolutions[packageName] = res
+                } else {
+                    activeLogResolutions[packageName] = "Unknown"
+                }
+            } catch (e: Exception) {
+                activeLogResolutions[packageName] = "Unknown"
+            }
+        }.start()
         
         listener?.onAppLoggingStarted(packageName)
         
@@ -274,8 +289,9 @@ class PerAppLogManager private constructor() {
     private fun exportPerAppDataToCsv(packageName: String, logData: List<Array<String>>) {
         if (logData.size <= 1) return
 
+        val resolution = activeLogResolutions.remove(packageName) ?: "Unknown"
         val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val fileName = "${packageName}_GameBar_log_$timeStamp.csv"
+        val fileName = "${packageName}_GameBar_log_${resolution}_$timeStamp.csv"
         val outFile = File(getLogsDirectory(), fileName)
 
         var bw: BufferedWriter? = null
@@ -369,6 +385,20 @@ class PerAppLogManager private constructor() {
         val logData = mutableListOf<Array<String>>()
         logData.add(CSV_HEADER)
         activeLogSessions[packageName] = logData
+        
+        Thread {
+            try {
+                val context = android.app.ActivityThread.currentApplication()
+                if (context != null) {
+                    val res = GameResolutionDetector.detectGameRenderResolution(context, packageName)
+                    activeLogResolutions[packageName] = res
+                } else {
+                    activeLogResolutions[packageName] = "Unknown"
+                }
+            } catch (e: Exception) {
+                activeLogResolutions[packageName] = "Unknown"
+            }
+        }.start()
         
         listener?.onAppLoggingStarted(packageName)
         
