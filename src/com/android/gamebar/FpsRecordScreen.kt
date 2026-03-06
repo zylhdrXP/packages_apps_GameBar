@@ -66,6 +66,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -148,7 +149,7 @@ fun FpsRecordScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.background)
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
@@ -167,14 +168,14 @@ fun FpsRecordScreen(
             }
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = "FPS Record",
+                text = stringResource(R.string.fps_record_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }
 
         Text(
-            text = "Per-session game performance logs with session summary and graphs.",
+            text = stringResource(R.string.fps_record_summary),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 13.sp,
         )
@@ -192,7 +193,7 @@ fun FpsRecordScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = "No FPS record sessions found",
+                    text = stringResource(R.string.fps_record_empty),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
@@ -374,7 +375,7 @@ private fun FpsRecordDetailScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.background)
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
