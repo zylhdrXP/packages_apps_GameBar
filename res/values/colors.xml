@@ -9,6 +9,7 @@
     <color name="ic_gamebar_launcher_background">#141B2D</color>
     
     <!-- Default colors for ColorPicker -->
-    <color name="gamebar_default_title_color">#FFFFFFFF</color>
-    <color name="gamebar_default_value_color">#FF4CAF50</color>
+    <color name="gamebar_default_bg_color">#FF0D1117</color>
+    <color name="gamebar_default_title_color">#FF9FCEDE</color>
+    <color name="gamebar_default_value_color">#FFFFB347</color>
 </resources>

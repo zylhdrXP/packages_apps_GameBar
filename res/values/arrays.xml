@@ -122,6 +122,9 @@
         <item>0xFF008080</item> <!-- Teal -->
         <item>0xFF8A2BE2</item> <!-- Electric Violet -->
         <item>0xFFFF1493</item> <!-- Magenta -->
+        <item>0xFFFFB347</item>
+        <item>0xFF9FCEDE</item>
+        <item>0xFF0D1117</item>
     </integer-array>
 
 </resources>

@@ -94,13 +94,13 @@ class GameBar private constructor(context: Context) {
     private var isShowing = false
 
     // Style properties
-    private var textSizeSp = 14
-    private var backgroundAlpha = 128
-    private var backgroundColorInt = 0xFF000000.toInt()
-    private var cornerRadius = 90
-    private var paddingDp = 8
-    private var titleColorHex = "#FFFFFF"
-    private var valueColorHex = "#FFFFFF"
+    private var textSizeSp = 15
+    private var backgroundAlpha = 255
+    private var backgroundColorInt = 0xFF0D1117.toInt()
+    private var cornerRadius = 30
+    private var paddingDp = 4
+    private var titleColorHex = "#9FCEDE"
+    private var valueColorHex = "#FFB347"
     private var customTypeface: Typeface? = null
     private var overlayFormat = "full"
     private var position = "top_center"
@@ -289,21 +289,21 @@ class GameBar private constructor(context: Context) {
         longPressFunction = prefs.getString("game_bar_longpress_function", "load_preset") ?: "load_preset"
 
         updateSplitMode(prefs.getString("game_bar_split_mode", "side_by_side") ?: "side_by_side")
-        updateTextSize(prefs.getInt("game_bar_text_size", 12))
-        updateBackgroundAlpha(prefs.getInt("game_bar_background_alpha", 95))
-        updateBackgroundColor(prefs.getInt("game_bar_background_color", 0xFF000000.toInt()))
-        updateCornerRadius(prefs.getInt("game_bar_corner_radius", 100))
+        updateTextSize(prefs.getInt("game_bar_text_size", 15))
+        updateBackgroundAlpha(prefs.getInt("game_bar_background_alpha", 255))
+        updateBackgroundColor(prefs.getInt("game_bar_background_color", 0xFF0D1117.toInt()))
+        updateCornerRadius(prefs.getInt("game_bar_corner_radius", 30))
         updatePadding(prefs.getInt("game_bar_padding", 4))
-        val titleColorInt = prefs.getInt("game_bar_title_color", 0xFFFFFFFF.toInt())
+        val titleColorInt = prefs.getInt("game_bar_title_color", 0xFF9FCEDE.toInt())
         val titleColorHex = String.format("#%06X", 0xFFFFFF and titleColorInt)
         updateTitleColor(titleColorHex)
         
-        val valueColorInt = prefs.getInt("game_bar_value_color", 0xFF4CAF50.toInt())
+        val valueColorInt = prefs.getInt("game_bar_value_color", 0xFFFFB347.toInt())
         val valueColorHex = String.format("#%06X", 0xFFFFFF and valueColorInt)
         updateValueColor(valueColorHex)
         
         // Load custom font
-        val fontPath = prefs.getString("game_bar_font_path", "default") ?: "default"
+        val fontPath = prefs.getString("game_bar_font_path", "fonts/Circular-Std-Bold.ttf") ?: "fonts/Circular-Std-Bold.ttf"
         loadCustomFont(fontPath)
         
         updateOverlayFormat(prefs.getString("game_bar_format", "full") ?: "full")

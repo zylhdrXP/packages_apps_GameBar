@@ -125,7 +125,7 @@
             android:key="game_bar_text_size"
             android:title="Text Size"
             android:summary="Adjust the size of overlay text"
-            android:defaultValue="12"
+            android:defaultValue="15"
             android:max="50"
             android:min="5"
             settings:units="" />
@@ -133,7 +133,7 @@
             android:key="game_bar_background_alpha"
             android:title="Background Transparency"
             android:summary="Adjust the transparency of the background"
-            android:defaultValue="95"
+            android:defaultValue="255"
             android:max="255"
             android:min="0"
             settings:units="" />
@@ -142,7 +142,7 @@
             android:key="game_bar_background_color"
             android:title="Overlay Background Color"
             android:summary="Color for the overlay background"
-            android:defaultValue="0xFF000000"
+            android:defaultValue="@color/gamebar_default_bg_color"
             app:gamebar_dialogType="custom"
             app:gamebar_showAlphaSlider="true"
             app:gamebar_colorShape="circle"
@@ -155,7 +155,7 @@
             android:key="game_bar_corner_radius"
             android:title="Overlay Corner Radius"
             android:summary="Adjust how rounded the overlay corners should be"
-            android:defaultValue="100"
+            android:defaultValue="30"
             android:max="100"
             android:min="0"
             settings:units="" />

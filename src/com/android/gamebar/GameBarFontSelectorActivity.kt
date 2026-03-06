@@ -39,7 +39,7 @@ class GameBarFontSelectorActivity : CollapsingToolbarBaseActivity() {
 
     private fun loadFonts() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val currentFontPath = prefs.getString("game_bar_font_path", "default") ?: "default"
+        val currentFontPath = prefs.getString("game_bar_font_path", "fonts/Circular-Std-Bold.ttf") ?: "fonts/Circular-Std-Bold.ttf"
 
         // Add default font
         fontList.add(
@@ -47,7 +47,7 @@ class GameBarFontSelectorActivity : CollapsingToolbarBaseActivity() {
                 name = "default",
                 displayName = "System Default",
                 path = "default",
-                isSelected = (currentFontPath == "default")
+                isSelected = (currentFontPath == "fonts/Circular-Std-Bold.ttf")
             )
         )
 
