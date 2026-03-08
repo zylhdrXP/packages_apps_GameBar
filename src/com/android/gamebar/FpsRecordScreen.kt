@@ -37,6 +37,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -344,7 +346,8 @@ private fun FpsRecordDetailScreen(
     val iconBitmap = remember(session.packageName) {
         runCatching { context.packageManager.getApplicationIcon(session.packageName).toBitmap() }.getOrNull()
     }
-    var showMenu by remember { mutableStateOf(false) }
+    var showShareMenu by remember { mutableStateOf(false) }
+    var showSaveMenu by remember { mutableStateOf(false) }
     var descriptionText by remember(session.file.absolutePath) { mutableStateOf("") }
     var descriptionLoaded by remember(session.file.absolutePath) { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -420,51 +423,67 @@ private fun FpsRecordDetailScreen(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
-                Box {
-                    IconButton(onClick = { showMenu = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Session options",
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
+                Row {
+                    Box {
+                        IconButton(onClick = { showShareMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Share options",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showShareMenu,
+                            onDismissRequest = { showShareMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Share Session Log (CSV)") },
+                                onClick = {
+                                    showShareMenu = false
+                                    shareSessionFile(context, session.file)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Share Graphics (PNG)") },
+                                onClick = {
+                                    showShareMenu = false
+                                    FpsRecordImageGenerator.generateAndShareImage(context, session.appName, analytics)
+                                }
+                            )
+                        }
                     }
-                    DropdownMenu(
-                        expanded = showMenu,
-                        onDismissRequest = { showMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Save as CSV") },
-                            onClick = {
-                                showMenu = false
-                                createCsvDocumentLauncher.launch(session.file.name)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Share Session Log (CSV)") },
-                            onClick = {
-                                showMenu = false
-                                shareSessionFile(context, session.file)
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Save Graphics (PNG)") },
-                            onClick = {
-                                showMenu = false
-                                val ok = FpsRecordImageGenerator.saveGraphics(context, session.appName, analytics)
-                                Toast.makeText(
-                                    context,
-                                    if (ok) "Graphics saved to Downloads" else "Failed to save graphics",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Share Graphics (PNG)") },
-                            onClick = {
-                                showMenu = false
-                                FpsRecordImageGenerator.generateAndShareImage(context, session.appName, analytics)
-                            }
-                        )
+                    Box {
+                        IconButton(onClick = { showSaveMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.Save,
+                                contentDescription = "Save options",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showSaveMenu,
+                            onDismissRequest = { showSaveMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Save as CSV") },
+                                onClick = {
+                                    showSaveMenu = false
+                                    createCsvDocumentLauncher.launch(session.file.name)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Save Graphics (PNG)") },
+                                onClick = {
+                                    showSaveMenu = false
+                                    val ok = FpsRecordImageGenerator.saveGraphics(context, session.appName, analytics)
+                                    Toast.makeText(
+                                        context,
+                                        if (ok) "Graphics saved to Downloads" else "Failed to save graphics",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            )
+                        }
                     }
                 }
             }
