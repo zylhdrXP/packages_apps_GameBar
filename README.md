@@ -176,26 +176,28 @@ Configure GameBar to automatically activate for specific apps:
 ## Usage
 
 ### Quick Settings Tile
-
-1. Add GameBar tile to Quick Settings
-2. Tap to toggle overlay on/off
-3. Long-press tile to open settings
+- Add GameBar tile to Quick Settings.
+- **Tap** to toggle the overlay on/off.
+- **Long-press** to open settings.
 
 ### Gesture Controls
+- **Double-tap overlay:** Start or stop recording performance data (like FPS). This is the primary logging method.
+- **Single-tap:** Toggle the overlay's visibility.
+- **Long-press:** Configurable action (hide overlay, take a screenshot, or open settings).
+- **Drag:** Move the overlay (when draggable mode is enabled).
 
-- **Double-tap overlay**: Capture screenshot
-- **Single-tap**: Toggle visibility
-- **Long-press**: Configurable action (hide, screenshot, or settings)
-- **Drag**: Move overlay (when draggable mode enabled)
+### How to Record a Performance Log
+The logging method has been simplified to a single, manual action.
 
-### Logging & Analytics
+1.  **Enable the Overlay:** Open **Settings > System > GameBar** and turn on the main **"Enable GameBar Overlay"** switch. The overlay must be visible to start a recording.
+2.  **Run a Game:** Open the game or application you want to test.
+3.  **Start Recording:** When you are ready, **double-tap** the GameBar overlay. You will see an indicator that recording has started.
+4.  **Stop Recording:** Once you are finished, **double-tap** the overlay again. The log file will be saved automatically.
 
-GameBar includes comprehensive logging features:
-
-- **Global Logging**: Record all system metrics continuously
-- **Per-App Logging**: Separate logs for each configured app
-- **Analytics**: View FPS distribution, frame time graphs, temperature charts
-- **Export**: Share logs as CSV files
+### Viewing Your Recordings
+- All recordings are saved in one place:
+- Go to **Settings > System > GameBar > GameBar FPS Records** to view your list of saved logs.
+- From there, you can view detailed analytics for each session.
 
 ## SELinux Policy
 

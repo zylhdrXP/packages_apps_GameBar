@@ -16,145 +16,31 @@ GameBar is a **real-time performance overlay** that displays FPS, CPU/GPU usage,
 
 ---
 
-## 🚀 Quick Start Guide
+## Usage
 
-### Step 1: Enable GameBar Overlay
-1. Open **Settings** app
-2. Navigate to **System** → **GameBar**
-3. Turn **ON** the **"Enable GameBar Overlay"** switch
-4. Grant overlay permission if asked
+### Quick Settings Tile
+- Add GameBar tile to Quick Settings.
+- **Tap** to toggle the overlay on/off.
+- **Long-press** to open settings.
 
-✅ You'll see the GameBar overlay on your screen!
+### Gesture Controls
+- **Double-tap overlay:** Start or stop recording performance data (like FPS). This is the primary logging method.
+- **Single-tap:** Toggle the overlay's visibility.
+- **Long-press:** Configurable action (hide overlay, take a screenshot, or open settings).
+- **Drag:** Move the overlay (when draggable mode is enabled).
 
-> **⚠️ IMPORTANT:** The GameBar overlay **MUST be ON** to collect performance data. Logging cannot work when the overlay is disabled.
+### How to Record a Performance Log
+The logging method has been simplified to a single, manual action.
 
-### Step 2: Choose Your Logging Mode
+1.  **Enable the Overlay:** Open **Settings > System > GameBar** and turn on the main **"Enable GameBar Overlay"** switch. The overlay must be visible to start a recording.
+2.  **Run a Game:** Open the game or application you want to test.
+3.  **Start Recording:** When you are ready, **double-tap** the GameBar overlay. You will see an indicator that recording has started.
+4.  **Stop Recording:** Once you are finished, **double-tap** the overlay again. The log file will be saved automatically.
 
-GameBar offers **3 logging modes** to fit your needs:
-
-| Mode | Icon | Best For | How It Works |
-|------|------|----------|--------------|
-| **Per-App** | 🎯 | Specific apps/games | Auto-logs when configured apps are in foreground |
-| **Universal** | 🌐 | All apps | Logs everything while GameBar is active |
-| **Manual** | 👆 | Quick testing | Double-tap overlay to start/stop logging |
-
-### Step 3: Configure & Start Logging
-Follow the detailed guide below for your chosen mode ⬇️
-
----
-
-## 🎯 Mode 1: Per-App Logging (Recommended)
-**🌟 Best for tracking specific games or apps over time**
-
-### What it does:
-- **Automatically** starts logging when you open a configured app
-- **Automatically** stops and saves when you close the app
-- Each session saved separately with timestamp
-- Perfect for comparing performance across gaming sessions
-- Requires **GameBar overlay to be ON**
-
-### How to Set Up:
-
-#### ⚙️ Setup (One Time)
-1. Go to **Settings** → **System** → **GameBar**
-2. Tap **"Per-App GameBar"**
-3. Tap **"Configure Apps"**
-4. Select your game/app from the list (e.g., BGMI, COD Mobile, Chrome)
-5. Enable the switch for that app
-6. Go back to GameBar main settings
-7. Tap **"GameBar Logging"**
-8. Select **"Per-App Logging"** mode
-9. **Turn ON** the main **"Enable GameBar Overlay"** switch
-
-#### 📱 Using It
-1. **Ensure GameBar overlay is ON** (critical requirement!)
-2. Open your configured game/app
-3. **That's it!** 🎉
-
-**What happens:**
-- ✅ Toast message: *"BGMI GameBar log started"*
-- GameBar collects FPS, CPU, GPU, temps, etc. while you play
-- Close the game → Toast: *"BGMI GameBar log ended"*
-- Log automatically saved with timestamp!
-
-> **⚠️ Important:** If GameBar overlay is OFF when you open the app, you'll see:
-> *"BGMI: GameBar logging enabled but GameBar overlay is OFF. Turn ON GameBar to collect logs."*
-
-#### 📂 Viewing Your Logs
-1. Go to **Settings** → **System** → **GameBar**
-2. Tap **"Per-App GameBar"**
-3. Find your app → Tap it
-4. See all sessions with timestamps and duration!
-5. Tap any session to view detailed analytics
-
-**Log file location:** `/sdcard/Documents/GameBar/PerAppLogs/{package_name}/`
-
----
-
-## 👆 Mode 2: Manual Logging (Double-Tap)
-**⚡ Best for quick tests without setup!**
-
-### What it does:
-- Start/stop logging with double-tap gesture
-- Works in **any app** (no configuration needed)
-- Logs saved under that app's name in per-app logs
-- Great for one-time performance checks
-- Only works in **Per-App Logging mode**
-
-### How to Use:
-
-#### 📱 Taking a Manual Log
-1. Go to **GameBar** → **GameBar Logging** → Select **"Per-App Logging"**
-2. **Turn ON GameBar overlay** (must be ON!)
-3. Open any app (doesn't need to be configured)
-4. **Double-tap** the GameBar overlay
-   - Toast: *"AppName: Manual logging started"*
-5. Use the app normally (gaming, browsing, etc.)
-6. **Double-tap** again to stop
-   - Toast: *"Manual logging stopped and saved"*
-
-#### ⚠️ Important Notes:
-- **GameBar overlay must be ON** to collect data
-- If app already has auto-logging enabled, double-tap shows:
-  *"This app has auto-logging enabled. Logs are saved automatically."*
-- Manual logs and auto logs are stored in the same location
-- You can manually log apps that aren't in your configured list
-
-#### 📂 Finding Your Logs
-Same location as auto logs:
-1. **GameBar** → **"Per-App GameBar"**
-2. Find the app you manually logged
-3. All sessions (auto + manual) appear together!
-
----
-
-## 🌐 Mode 3: Universal Logging
-**📊 Best for continuous monitoring across all apps!**
-
-### What it does:
-- Records data from **ALL apps** in one continuous log
-- You control start/stop with double-tap
-- Good for multi-app benchmarks and system-wide monitoring
-- Logs everything while active (app switches included)
-
-### How to Use:
-
-#### ⚙️ Setup
-1. Go to **GameBar** → **"GameBar Logging"**
-2. Select **"Universal Logging"** mode
-
-#### 📱 Taking a Universal Log
-1. **Turn ON GameBar overlay** (required!)
-2. **Double-tap** GameBar overlay to start
-   - Toast: *"Capture Started"*
-3. Use different apps, switch between them, test anything
-4. **Double-tap** again to stop
-   - Toast: *"Capture Stopped and Data Exported"*
-
-#### 📂 Finding Your Logs
-1. **GameBar** → **"GameBar Logging"** → **"View Logs"**
-2. Universal logs are stored in: `/sdcard/Documents/GameBar/GameBar_log_{timestamp}.csv`
-3. Each log contains data from all apps used during that session
+### Viewing Your Recordings
+- All recordings are saved in one place:
+- Go to **Settings > System > GameBar > GameBar FPS Records** to view your list of saved logs.
+- From there, you can view detailed analytics for each session.
 
 ---
 
