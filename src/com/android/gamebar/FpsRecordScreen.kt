@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -243,11 +244,9 @@ private fun FpsRecordSessionRow(
     val power = if (session.avgPower > 0f) "${formatValue(session.avgPower)}W" else "--"
     val subTextColor = Color(0xFF8B949E)
 
-    Card(
+    ElevatedCard(
         modifier = Modifier.fillMaxWidth().clickable { onOpen() },
-        colors = CardDefaults.cardColors(containerColor = fpsRecordCardColor()),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        border = BorderStroke(1.dp, fpsRecordCardBorderColor()),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
         shape = RoundedCornerShape(16.dp),
     ) {
         Row(
@@ -255,7 +254,10 @@ private fun FpsRecordSessionRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
                 if (iconBitmap != null) {
                     Image(
                         bitmap = iconBitmap.asImageBitmap(),
@@ -286,6 +288,7 @@ private fun FpsRecordSessionRow(
                     }
                 }
             }
+            Spacer(modifier = Modifier.width(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val chartColors = rememberChartColors()
                 Text(
@@ -299,7 +302,7 @@ private fun FpsRecordSessionRow(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = MaterialTheme.colorScheme.error,
                     )
                 }
             }
@@ -490,11 +493,9 @@ private fun FpsRecordDetailScreen(
         }
 
         item {
-            Card(
+            ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = fpsRecordCardColor()),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                border = BorderStroke(1.dp, fpsRecordCardBorderColor()),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
                 shape = RoundedCornerShape(16.dp),
             ) {
                 OutlinedTextField(
@@ -509,11 +510,9 @@ private fun FpsRecordDetailScreen(
         }
 
         item {
-            Card(
+            ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = fpsRecordCardColor()),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                border = BorderStroke(1.dp, fpsRecordCardBorderColor()),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(
@@ -951,12 +950,10 @@ private fun LineChartCard(
     chartHeight: Int = 180,
     chartContent: (@Composable () -> Unit)? = null,
 ) {
-    val containerColor = fpsRecordCardColor()
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
+        colors = CardDefaults.cardColors(containerColor = chartBackgroundColor()),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        border = BorderStroke(1.dp, fpsRecordCardBorderColor()),
         shape = RoundedCornerShape(16.dp),
     ) {
         Column(
@@ -977,7 +974,6 @@ private fun LineChartCard(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .background(containerColor, RoundedCornerShape(12.dp))
                         .padding(6.dp)
             ) {
                 if (chartContent != null) {
@@ -994,16 +990,11 @@ private fun LineChartCard(
     }
 }
 
-@Composable
-private fun fpsRecordCardColor(): Color {
-    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    return if (isDark) Color(0xFF000000) else Color(0xFFF2F4F7)
-}
 
 @Composable
-private fun fpsRecordCardBorderColor(): Color {
+private fun chartBackgroundColor(): Color {
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    return if (isDark) Color(0x26FFFFFF) else Color(0x18000000)
+    return if (isDark) Color(0xFF000000) else Color(0xFFFFFFFF)
 }
 
 @Composable

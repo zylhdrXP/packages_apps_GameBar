@@ -824,8 +824,8 @@ object FpsRecordImageGenerator {
             )
         } else {
             Palette(
-                bg = Color.parseColor("#F6F8FA"),
-                card = Color.parseColor("#F2F4F7"),
+                bg = Color.parseColor("#F2F4F7"),
+                card = Color.parseColor("#FFFFFF"),
                 text = Color.parseColor("#111827"),
                 sub = Color.parseColor("#8B949E"),
                 grid = Color.parseColor("#30000000"),
