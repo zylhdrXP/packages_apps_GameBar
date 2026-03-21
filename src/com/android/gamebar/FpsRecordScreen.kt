@@ -51,6 +51,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,12 +70,16 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.toBitmap
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -108,9 +113,27 @@ fun FpsRecordScreen(
     var loadingAnalytics by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
+    suspend fun refreshSessions() {
         sessions = withContext(Dispatchers.IO) { loadSessions(context.packageManager) }
+    }
+    LaunchedEffect(Unit) {
+        refreshSessions()
+    }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                scope.launch {
+                    refreshSessions()
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     if (selectedSession != null) {
@@ -131,6 +154,9 @@ fun FpsRecordScreen(
                 selectedSession = null
                 selectedAnalytics = null
                 loadingAnalytics = false
+                scope.launch {
+                    refreshSessions()
+                }
             }
         )
         return
@@ -218,7 +244,11 @@ fun FpsRecordScreen(
                     },
                     onDelete = {
                         if (session.file.delete()) {
+                            descriptionFileFor(session.file).delete()
                             sessions = sessions.filter { it.file.absolutePath != session.file.absolutePath }
+                            scope.launch {
+                                refreshSessions()
+                            }
                         }
                     },
                 )
@@ -270,33 +300,57 @@ private fun FpsRecordSessionRow(
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                Column {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(
                         text = session.appName,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(session.dateText, color = subTextColor, fontSize = 12.sp)
+                    val metaLine =
                         if (session.resolution != "Unknown") {
-                            Text("Res: ${session.resolution}", color = subTextColor, fontSize = 12.sp)
+                            "${session.dateText}   Res: ${session.resolution}"
+                        } else {
+                            session.dateText
                         }
-                        Text(power, color = subTextColor, fontSize = 12.sp)
-                        Text(session.duration, color = subTextColor, fontSize = 12.sp)
-                    }
+                    Text(
+                        text = metaLine,
+                        color = subTextColor,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = "Power: $power   Time: ${session.duration}",
+                        color = subTextColor,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
             Spacer(modifier = Modifier.width(12.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
                 val chartColors = rememberChartColors()
+                Text(
+                    text = "AVG FPS",
+                    color = subTextColor,
+                    fontSize = 10.sp,
+                    maxLines = 1
+                )
                 Text(
                     text = avgFps,
                     color = chartColors.blue,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(end = 12.dp),
                 )
                 IconButton(onClick = onDelete) {
                     Icon(
