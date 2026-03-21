@@ -148,7 +148,14 @@ public class PartsCustomSeekBarPreference extends Preference implements Slider.O
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
 
-        mSlider = (Slider) holder.findViewById(R.id.slider);
+        final Slider boundSlider = (Slider) holder.findViewById(R.id.slider);
+        if (mSlider != null && mSlider != boundSlider) {
+            mSlider.removeOnChangeListener(this);
+            mSlider.removeOnSliderTouchListener(this);
+        }
+        mSlider = boundSlider;
+        mSlider.removeOnChangeListener(this);
+        mSlider.removeOnSliderTouchListener(this);
         mSlider.setValueTo(mMaxValue);
         mSlider.setValueFrom(mMinValue);
         mSlider.setValue(mValue);
