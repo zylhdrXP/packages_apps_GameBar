@@ -76,6 +76,15 @@ fun GameBarSettingsScreen(
     fun putBoolean(key: String, value: Boolean) = prefs.edit().putBoolean(key, value).apply()
     fun putInt(key: String, value: Int) = prefs.edit().putInt(key, value).apply()
     fun putString(key: String, value: String) = prefs.edit().putString(key, value).apply()
+    fun readGestureAction(key: String, defaultValue: String): String {
+        val raw = prefs.getString(key, defaultValue) ?: defaultValue
+        return if (raw == "capture_logs") {
+            putString(key, "no_action")
+            "no_action"
+        } else {
+            raw
+        }
+    }
 
     fun applyPrefs(rebuild: Boolean = false) {
         if (!GameBar.isInstanceCreated()) return
@@ -90,6 +99,9 @@ fun GameBarSettingsScreen(
     var showSavePresetDialog by remember { mutableStateOf(false) }
     var savePresetName by remember { mutableStateOf("") }
     var showResetDefaultsDialog by remember { mutableStateOf(false) }
+    var fpsRecordControlEnabled by remember {
+        mutableStateOf(prefs.getBoolean("game_bar_fps_record_control_enabled", false))
+    }
 
     val importPresetLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
@@ -148,11 +160,11 @@ fun GameBarSettingsScreen(
     var splitMode by remember { mutableStateOf(prefs.getString("game_bar_split_mode", "side_by_side") ?: "side_by_side") }
 
     var singleTapEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_single_tap_enable", true)) }
-    var singleTapFunction by remember { mutableStateOf(prefs.getString("game_bar_single_tap_function", "toggle_format") ?: "toggle_format") }
+    var singleTapFunction by remember { mutableStateOf(readGestureAction("game_bar_single_tap_function", "toggle_format")) }
     var doubleTapEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_doubletap_enable", true)) }
-    var doubleTapFunction by remember { mutableStateOf(prefs.getString("game_bar_doubletap_function", "capture_logs") ?: "capture_logs") }
+    var doubleTapFunction by remember { mutableStateOf(readGestureAction("game_bar_doubletap_function", "no_action")) }
     var longPressEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_longpress_enable", true)) }
-    var longPressFunction by remember { mutableStateOf(prefs.getString("game_bar_longpress_function", "load_preset") ?: "load_preset") }
+    var longPressFunction by remember { mutableStateOf(readGestureAction("game_bar_longpress_function", "load_preset")) }
     var longPressTimeout by remember { mutableStateOf(prefs.getString("game_bar_longpress_timeout", "500") ?: "500") }
 
     val fpsDisplayOptions = listOf(
@@ -183,7 +195,6 @@ fun GameBarSettingsScreen(
     val gestureOptions = listOf(
         SelectOption("no_action", "No Action"),
         SelectOption("toggle_format", "Toggle Full/Minimal Format"),
-        SelectOption("capture_logs", "Start/Stop Log Capture"),
         SelectOption("open_settings", "Open GameBar Settings"),
         SelectOption("take_screenshot", "Take Screenshot"),
         SelectOption("screen_record", "Start/Stop Screen Record"),
@@ -408,6 +419,19 @@ fun GameBarSettingsScreen(
                     GameBarNavTab.FPS_RECORD -> {
                         item {
                             SettingsSectionCard(title = stringResource(R.string.fps_record_title), summary = stringResource(R.string.fps_record_summary)) {
+                                SettingsSwitchRow(
+                                    "Floating Recording Control",
+                                    "Show draggable play/record control bubble and record without main overlay",
+                                    fpsRecordControlEnabled
+                                ) { enabled ->
+                                    fpsRecordControlEnabled = enabled
+                                    putBoolean("game_bar_fps_record_control_enabled", enabled)
+                                    val svcIntent = Intent(context, FpsRecordControlOverlayService::class.java).apply {
+                                        action = FpsRecordControlOverlayService.ACTION_SET_ENABLED
+                                        putExtra(FpsRecordControlOverlayService.EXTRA_ENABLED, enabled)
+                                    }
+                                    context.startService(svcIntent)
+                                }
                                 SettingsActionRow(stringResource(R.string.fps_record_title), stringResource(R.string.fps_record_summary), onOpenFpsRecord)
                             }
                         }

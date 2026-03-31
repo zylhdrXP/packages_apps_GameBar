@@ -134,7 +134,7 @@ class GameBar private constructor(context: Context) {
     private var singleTapEnabled = true
     private var singleTapFunction = "toggle_format"
     private var doubleTapEnabled = true
-    private var doubleTapFunction = "capture_logs"
+    private var doubleTapFunction = "no_action"
     private var longPressFunction = "load_preset"
     private var bgDrawable: GradientDrawable? = null
     
@@ -195,41 +195,6 @@ class GameBar private constructor(context: Context) {
                 Toast.makeText(context, context.getString(R.string.toast_overlay_format, overlayFormat), Toast.LENGTH_SHORT).show()
                 updateStats()
             }
-            "capture_logs" -> {
-                val dataExport = GameDataExport.getInstance()
-                val perAppLogManager = dataExport.getPerAppLogManager()
-                val currentPackage = ForegroundAppDetector.getForegroundPackageName(context)
-                if (currentPackage.isBlank() || currentPackage == "Unknown") {
-                    Toast.makeText(context, "Unable to detect foreground app", Toast.LENGTH_SHORT).show()
-                    return
-                }
-                
-                if (dataExport.getLoggingMode() == GameDataExport.LoggingMode.PER_APP) {
-                    if (perAppLogManager.isAppLoggingActive(currentPackage)) {
-                        perAppLogManager.stopManualLoggingForApp(currentPackage)
-                        // Auto-stop capture when no active app sessions remain.
-                        if (perAppLogManager.getCurrentlyLoggingApps().isEmpty()) {
-                            dataExport.stopCapture()
-                        }
-                        Toast.makeText(context, R.string.toast_manual_logging_stopped, Toast.LENGTH_SHORT).show()
-                    } else {
-                        // Double tap now fully controls session logging lifecycle.
-                        if (!dataExport.isCapturing()) {
-                            dataExport.startCapture()
-                        }
-                        perAppLogManager.startManualLoggingForApp(currentPackage)
-                    }
-                } else {
-                    if (dataExport.isCapturing()) {
-                        dataExport.stopCapture()
-                        dataExport.exportDataToCsv()
-                        Toast.makeText(context, R.string.toast_capture_stopped, Toast.LENGTH_SHORT).show()
-                    } else {
-                        dataExport.startCapture()
-                        Toast.makeText(context, R.string.toast_capture_started, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
             "open_settings" -> {
                 openOverlaySettings()
             }
@@ -283,10 +248,22 @@ class GameBar private constructor(context: Context) {
         showRamTemp = prefs.getBoolean("game_bar_ram_temp_enable", false)
 
         singleTapEnabled = prefs.getBoolean("game_bar_single_tap_enable", true)
-        singleTapFunction = prefs.getString("game_bar_single_tap_function", "toggle_format") ?: "toggle_format"
+        singleTapFunction = sanitizeGestureFunction(
+            prefs = prefs,
+            key = "game_bar_single_tap_function",
+            defaultValue = "toggle_format"
+        )
         doubleTapEnabled = prefs.getBoolean("game_bar_doubletap_enable", true)
-        doubleTapFunction = prefs.getString("game_bar_doubletap_function", "capture_logs") ?: "capture_logs"
-        longPressFunction = prefs.getString("game_bar_longpress_function", "load_preset") ?: "load_preset"
+        doubleTapFunction = sanitizeGestureFunction(
+            prefs = prefs,
+            key = "game_bar_doubletap_function",
+            defaultValue = "no_action"
+        )
+        longPressFunction = sanitizeGestureFunction(
+            prefs = prefs,
+            key = "game_bar_longpress_function",
+            defaultValue = "load_preset"
+        )
 
         updateSplitMode(prefs.getString("game_bar_split_mode", "side_by_side") ?: "side_by_side")
         updateTextSize(prefs.getInt("game_bar_text_size", 15))
@@ -319,6 +296,19 @@ class GameBar private constructor(context: Context) {
             val lpt = lpTimeoutStr.toLong()
             setLongPressThresholdMs(lpt)
         } catch (ignored: NumberFormatException) {}
+    }
+
+    private fun sanitizeGestureFunction(
+        prefs: SharedPreferences,
+        key: String,
+        defaultValue: String
+    ): String {
+        val value = prefs.getString(key, defaultValue) ?: defaultValue
+        if (value == "capture_logs") {
+            prefs.edit().putString(key, "no_action").apply()
+            return "no_action"
+        }
+        return value
     }
 
     fun show() {

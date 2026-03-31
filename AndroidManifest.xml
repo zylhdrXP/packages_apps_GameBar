@@ -116,6 +116,10 @@
             android:name=".PerAppLogService"
             android:exported="false" />
 
+        <service
+            android:name=".FpsRecordControlOverlayService"
+            android:exported="false" />
+
         <!-- GameBar BootReceiver -->
         <receiver
             android:name=".GameBarBootReceiver"

@@ -129,36 +129,6 @@ class PerAppLogManager private constructor() {
     private fun startLoggingForApp(packageName: String) {
         if (activeLogSessions.containsKey(packageName)) return
 
-        // Check if GameBar overlay is actually showing
-        val isGameBarShowing = GameBar.isShowing()
-        
-        if (!isGameBarShowing) {
-            // GameBar overlay is OFF - cannot collect data
-            Log.w(TAG, "Cannot start logging for $packageName - GameBar overlay is OFF")
-            handler.post {
-                try {
-                    val context = android.app.ActivityThread.currentApplication()
-                    context?.let {
-                        val pm = it.packageManager
-                        try {
-                            val appInfo = pm.getApplicationInfo(packageName, 0)
-                            val appName = pm.getApplicationLabel(appInfo).toString()
-                            android.widget.Toast.makeText(it, 
-                                "$appName: GameBar logging enabled but GameBar overlay is OFF. Turn ON GameBar to collect logs.", 
-                                android.widget.Toast.LENGTH_LONG).show()
-                        } catch (e: Exception) {
-                            android.widget.Toast.makeText(it, 
-                                "GameBar logging enabled but GameBar overlay is OFF. Turn ON GameBar to collect logs.", 
-                                android.widget.Toast.LENGTH_LONG).show()
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to show warning toast for $packageName", e)
-                }
-            }
-            return
-        }
-
         Log.d(TAG, "Starting logging for app: $packageName")
         val logData = mutableListOf<Array<String>>()
         logData.add(CSV_HEADER)
@@ -362,25 +332,7 @@ class PerAppLogManager private constructor() {
             // Already logging, ignore
             return
         }
-        
-        // Check if GameBar overlay is showing
-        val isGameBarShowing = GameBar.isShowing()
-        if (!isGameBarShowing) {
-            handler.post {
-                try {
-                    val context = android.app.ActivityThread.currentApplication()
-                    context?.let {
-                        android.widget.Toast.makeText(it, 
-                            "Cannot start logging - GameBar overlay is OFF", 
-                            android.widget.Toast.LENGTH_SHORT).show()
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to show toast", e)
-                }
-            }
-            return
-        }
-        
+
         Log.d(TAG, "Starting manual logging for app: $packageName")
         val logData = mutableListOf<Array<String>>()
         logData.add(CSV_HEADER)

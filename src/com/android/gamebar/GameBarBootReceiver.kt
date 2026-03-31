@@ -35,5 +35,14 @@ class GameBarBootReceiver : BroadcastReceiver() {
             val monitorIntent = Intent(context, GameBarMonitorService::class.java)
             context.startService(monitorIntent)
         }
+
+        val fpsControlEnabled = prefs.getBoolean("game_bar_fps_record_control_enabled", false)
+        if (fpsControlEnabled) {
+            val fpsControlIntent = Intent(context, FpsRecordControlOverlayService::class.java).apply {
+                action = FpsRecordControlOverlayService.ACTION_SET_ENABLED
+                putExtra(FpsRecordControlOverlayService.EXTRA_ENABLED, true)
+            }
+            context.startService(fpsControlIntent)
+        }
     }
 }
