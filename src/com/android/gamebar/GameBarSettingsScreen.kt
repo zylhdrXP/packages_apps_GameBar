@@ -50,9 +50,9 @@ import com.android.gamebar.ui.components.HeaderCard
 import com.android.gamebar.ui.components.HomeMenuCard
 import com.android.gamebar.ui.components.SelectOption
 import com.android.gamebar.ui.components.SettingsActionRow
+import com.android.gamebar.ui.components.SettingsCustomSliderRow
 import com.android.gamebar.ui.components.SettingsSectionCard
 import com.android.gamebar.ui.components.SettingsSelectRow
-import com.android.gamebar.ui.components.SettingsSliderRow
 import com.android.gamebar.ui.components.SettingsSwitchRow
 import com.android.gamebar.ui.theme.UiStyleController
 import java.io.File
@@ -357,8 +357,8 @@ fun GameBarSettingsScreen(
                     GameBarNavTab.CUSTOMIZATION -> {
                         item {
                             SettingsSectionCard(title = "Customization") {
-                                SettingsSliderRow("Text Size", textSize, 5, 50) { textSize = it; putInt("game_bar_text_size", it); applyPrefs() }
-                                SettingsSliderRow("Background Transparency", bgAlpha, 0, 255) { bgAlpha = it; putInt("game_bar_background_alpha", it); applyPrefs() }
+                                SettingsCustomSliderRow("Text Size", textSize, 5, 50, defaultValue = 15) { textSize = it; putInt("game_bar_text_size", it); applyPrefs() }
+                                SettingsCustomSliderRow("Background Transparency", bgAlpha, 0, 255, defaultValue = 255) { bgAlpha = it; putInt("game_bar_background_alpha", it); applyPrefs() }
                                 SettingsActionRow("Overlay Background Color", colorLabel(bgColor)) {
                                     openColorPicker(dialogId = 1001, currentColor = bgColor, showAlpha = true) { picked ->
                                         bgColor = picked
@@ -366,9 +366,9 @@ fun GameBarSettingsScreen(
                                         applyPrefs()
                                     }
                                 }
-                                SettingsSliderRow("Overlay Corner Radius", cornerRadius, 0, 100) { cornerRadius = it; putInt("game_bar_corner_radius", it); applyPrefs() }
-                                SettingsSliderRow("Overlay Padding", paddingValue, 0, 64) { paddingValue = it; putInt("game_bar_padding", it); applyPrefs() }
-                                SettingsSliderRow("Item Spacing", itemSpacing, 0, 50) { itemSpacing = it; putInt("game_bar_item_spacing", it); applyPrefs() }
+                                SettingsCustomSliderRow("Overlay Corner Radius", cornerRadius, 0, 100, defaultValue = 30) { cornerRadius = it; putInt("game_bar_corner_radius", it); applyPrefs() }
+                                SettingsCustomSliderRow("Overlay Padding", paddingValue, 0, 64, defaultValue = 4) { paddingValue = it; putInt("game_bar_padding", it); applyPrefs() }
+                                SettingsCustomSliderRow("Item Spacing", itemSpacing, 0, 50, defaultValue = 8) { itemSpacing = it; putInt("game_bar_item_spacing", it); applyPrefs() }
                                 SettingsSelectRow("Update Interval", updateInterval, intervalOptions) { updateInterval = it; putString("game_bar_update_interval", it); applyPrefs() }
                                 SettingsActionRow("Stat Title Color", colorLabel(titleColor)) {
                                     openColorPicker(dialogId = 1002, currentColor = titleColor, showAlpha = false) { picked ->

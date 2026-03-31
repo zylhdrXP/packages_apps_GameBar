@@ -20,6 +20,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -42,6 +44,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -64,6 +67,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.ui.viewinterop.AndroidView
 import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
@@ -403,25 +408,65 @@ fun SettingsSwitchRow(
 }
 
 @Composable
-fun SettingsSliderRow(
+fun SettingsCustomSliderRow(
     title: String,
     value: Int,
     min: Int,
     max: Int,
+    defaultValue: Int,
+    units: String = "",
+    showSign: Boolean = false,
     onValueCommitted: (Int) -> Unit,
 ) {
     var sliderValue by remember(value) { mutableStateOf(value.toFloat()) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isDragging by interactionSource.collectIsDraggedAsState()
+    val shownValue = sliderValue.roundToInt().coerceIn(min, max)
+    val valueText = buildString {
+        if (showSign && shownValue > 0) append("+")
+        append(shownValue)
+        if (units.isNotBlank()) {
+            append(" ")
+            append(units)
+        }
+        if (!isDragging && shownValue == defaultValue) {
+            append(" (Default)")
+        }
+    }
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-            Text(sliderValue.roundToInt().toString(), color = MaterialTheme.colorScheme.primary)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    valueText,
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+                if (!isDragging && shownValue != defaultValue) {
+                    IconButton(
+                        onClick = {
+                            sliderValue = defaultValue.toFloat()
+                            onValueCommitted(defaultValue)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Restore,
+                            contentDescription = "Reset to default",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
         Slider(
             value = sliderValue,
             onValueChange = { sliderValue = it },
+            interactionSource = interactionSource,
             valueRange = min.toFloat()..max.toFloat(),
             onValueChangeFinished = {
                 onValueCommitted(sliderValue.roundToInt().coerceIn(min, max))
