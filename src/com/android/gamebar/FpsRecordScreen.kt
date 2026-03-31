@@ -962,30 +962,66 @@ private fun StatsGrid(analytics: LogAnalytics) {
 
     val items =
         listOf(
-            "MAX" to formatValue(analytics.fpsStats.maxFps.toFloat()),
-            "MIN" to formatValue(analytics.fpsStats.minFps.toFloat()),
-            "AVERAGE" to formatValue(analytics.fpsStats.avgFps.toFloat()),
-            "1% LOW" to formatValue(analytics.fpsStats.fps1PercentLow.toFloat()),
-            "0.1% LOW" to formatValue(analytics.fpsStats.fps0_1PercentLow.toFloat()),
-            "5% LOW" to formatValue(low5),
-            "MAX TEMP" to formatValue(maxTemp),
-            "AVG POWER" to formatValue(analytics.powerStats.avgPower.toFloat()),
+            SummaryStat("MAX", formatValue(analytics.fpsStats.maxFps.toFloat()), "FPS"),
+            SummaryStat("MIN", formatValue(analytics.fpsStats.minFps.toFloat()), "FPS"),
+            SummaryStat("AVERAGE", formatValue(analytics.fpsStats.avgFps.toFloat()), "FPS"),
+            SummaryStat("1% LOW", formatValue(analytics.fpsStats.fps1PercentLow.toFloat()), "FPS"),
+            SummaryStat("0.1% LOW", formatValue(analytics.fpsStats.fps0_1PercentLow.toFloat()), "FPS"),
+            SummaryStat("5% LOW", formatValue(low5), "FPS"),
+            SummaryStat("MAX", formatValue(maxTemp), "Temperature"),
+            SummaryStat("AVERAGE", formatValue(analytics.powerStats.avgPower.toFloat()), "Power(Watt)"),
         )
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         for (row in items.chunked(4)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                row.forEach { (label, value) ->
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                        Text(label, color = Color(0xFF8B949E), fontSize = 11.sp)
-                        Text(value, color = Color(0xFF58A6FF), fontWeight = FontWeight.Bold)
-                    }
+                row.forEach { stat ->
+                    SummaryStatTile(stat = stat, modifier = Modifier.weight(1f))
                 }
             }
         }
+    }
+}
+
+private data class SummaryStat(
+    val label: String,
+    val value: String,
+    val unit: String,
+)
+
+@Composable
+private fun SummaryStatTile(
+    stat: SummaryStat,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(horizontal = 2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            text = stat.label,
+            color = Color(0xFF8B949E),
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium,
+        )
+        Text(
+            text = stat.value,
+            color = Color(0xFFE6EDF3),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+        )
+        Text(
+            text = stat.unit,
+            color = Color(0xFF8B949E),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+        )
     }
 }
 

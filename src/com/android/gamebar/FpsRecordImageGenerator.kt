@@ -246,31 +246,35 @@ object FpsRecordImageGenerator {
         val fpsValues = analytics.fpsTimeData.map { it.second.toFloat() }.sorted()
         val low5 = averageSlowestPercent(fpsValues, 0.05f)
         val items = listOf(
-            "MAX" to formatValue(analytics.fpsStats.maxFps.toFloat()),
-            "MIN" to formatValue(analytics.fpsStats.minFps.toFloat()),
-            "AVERAGE" to formatValue(analytics.fpsStats.avgFps.toFloat()),
-            "1% LOW" to formatValue(analytics.fpsStats.fps1PercentLow.toFloat()),
-            "0.1% LOW" to formatValue(analytics.fpsStats.fps0_1PercentLow.toFloat()),
-            "5% LOW" to formatValue(low5),
-            "MAX TEMP" to formatValue(maxTemp),
-            "AVG POWER" to formatValue(analytics.powerStats.avgPower.toFloat()),
+            Triple("MAX", formatValue(analytics.fpsStats.maxFps.toFloat()), "FPS"),
+            Triple("MIN", formatValue(analytics.fpsStats.minFps.toFloat()), "FPS"),
+            Triple("AVERAGE", formatValue(analytics.fpsStats.avgFps.toFloat()), "FPS"),
+            Triple("1% LOW", formatValue(analytics.fpsStats.fps1PercentLow.toFloat()), "FPS"),
+            Triple("0.1% LOW", formatValue(analytics.fpsStats.fps0_1PercentLow.toFloat()), "FPS"),
+            Triple("5% LOW", formatValue(low5), "FPS"),
+            Triple("MAX", formatValue(maxTemp), "Temperature"),
+            Triple("AVERAGE", formatValue(analytics.powerStats.avgPower.toFloat()), "Power(Watt)"),
         )
         val colW = rect.width() / 4f
-        var rowY = rect.top + 62f
+        var rowY = rect.top + 56f
         items.chunked(4).forEach { row ->
-            row.forEachIndexed { index, (label, value) ->
+            row.forEachIndexed { index, (label, value, unit) ->
                 val x = rect.left + (index * colW) + colW / 2f
                 paint.color = p.sub
                 paint.textAlign = Paint.Align.CENTER
                 paint.textSize = 24f
                 paint.typeface = Typeface.DEFAULT
                 canvas.drawText(label, x, rowY, paint)
-                paint.color = p.blue
-                paint.textSize = 36f
+                paint.color = p.text
+                paint.textSize = 42f
                 paint.typeface = Typeface.DEFAULT_BOLD
-                canvas.drawText(value, x, rowY + 42f, paint)
+                canvas.drawText(value, x, rowY + 48f, paint)
+                paint.color = p.sub
+                paint.textSize = 22f
+                paint.typeface = Typeface.DEFAULT
+                canvas.drawText(unit, x, rowY + 84f, paint)
             }
-            rowY += 100f
+            rowY += 138f
         }
     }
 
