@@ -102,6 +102,11 @@ private data class FpsSessionItem(
     val resolution: String
 )
 
+private enum class SessionDetailTab {
+    CHARTS,
+    STATS,
+}
+
 @Composable
 fun FpsRecordScreen(
     onBack: () -> Unit
@@ -405,6 +410,7 @@ private fun FpsRecordDetailScreen(
     }
     var showShareMenu by remember { mutableStateOf(false) }
     var showSaveMenu by remember { mutableStateOf(false) }
+    var selectedDetailTab by remember(session.file.absolutePath) { mutableStateOf(SessionDetailTab.CHARTS) }
     var descriptionText by remember(session.file.absolutePath) { mutableStateOf("") }
     var descriptionLoaded by remember(session.file.absolutePath) { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -501,10 +507,17 @@ private fun FpsRecordDetailScreen(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Share Graphics (PNG)") },
+                                text = { Text("Share Graphics Charts (PNG)") },
                                 onClick = {
                                     showShareMenu = false
-                                    FpsRecordImageGenerator.generateAndShareImage(context, session.appName, analytics)
+                                    FpsRecordImageGenerator.generateAndShareChartsImage(context, session.appName, analytics)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Share Graphics Stats (PNG)") },
+                                onClick = {
+                                    showShareMenu = false
+                                    FpsRecordImageGenerator.generateAndShareStatsImage(context, session.appName, analytics)
                                 }
                             )
                         }
@@ -529,10 +542,22 @@ private fun FpsRecordDetailScreen(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Save Graphics (PNG)") },
+                                text = { Text("Save Graphics Charts (PNG)") },
                                 onClick = {
                                     showSaveMenu = false
-                                    val ok = FpsRecordImageGenerator.saveGraphics(context, session.appName, analytics)
+                                    val ok = FpsRecordImageGenerator.saveChartsGraphics(context, session.appName, analytics)
+                                    Toast.makeText(
+                                        context,
+                                        if (ok) "Graphics saved to Downloads" else "Failed to save graphics",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Save Graphics Stats (PNG)") },
+                                onClick = {
+                                    showSaveMenu = false
+                                    val ok = FpsRecordImageGenerator.saveStatsGraphics(context, session.appName, analytics)
                                     Toast.makeText(
                                         context,
                                         if (ok) "Graphics saved to Downloads" else "Failed to save graphics",
@@ -594,6 +619,30 @@ private fun FpsRecordDetailScreen(
         }
 
         item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = chartBackgroundColor()),
+                shape = RoundedCornerShape(14.dp),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    SessionTabChip(
+                        label = "Charts",
+                        selected = selectedDetailTab == SessionDetailTab.CHARTS,
+                        modifier = Modifier.weight(1f)
+                    ) { selectedDetailTab = SessionDetailTab.CHARTS }
+                    SessionTabChip(
+                        label = "Detailed Stats",
+                        selected = selectedDetailTab == SessionDetailTab.STATS,
+                        modifier = Modifier.weight(1f)
+                    ) { selectedDetailTab = SessionDetailTab.STATS }
+                }
+            }
+        }
+
+        if (selectedDetailTab == SessionDetailTab.CHARTS) item {
             val fpsColor = Color(0xFF4CAF50)
             val fpsMax = fpsValues.maxOrNull() ?: 0f
             val fpsStep = 30f
@@ -625,7 +674,7 @@ private fun FpsRecordDetailScreen(
             )
         }
 
-        if (batteryTempValues.isNotEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && batteryTempValues.isNotEmpty()) {
             item {
                 val chartColors = rememberChartColors()
                 val maxTemp = batteryTempValues.maxOrNull() ?: 0f
@@ -653,7 +702,7 @@ private fun FpsRecordDetailScreen(
             }
         }
 
-        item {
+        if (selectedDetailTab == SessionDetailTab.CHARTS) item {
             val chartColors = rememberChartColors()
             LineChartCard(
                 title = "Frame Time (ms)",
@@ -674,7 +723,7 @@ private fun FpsRecordDetailScreen(
             )
         }
 
-        item {
+        if (selectedDetailTab == SessionDetailTab.CHARTS) item {
             val chartColors = rememberChartColors()
             LineChartCard(
                 title = "CPU Usage (%)",
@@ -697,7 +746,7 @@ private fun FpsRecordDetailScreen(
             )
         }
 
-        if (cpuClockSeries.isNotEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && cpuClockSeries.isNotEmpty()) {
             item {
                 val cpuClockFlatValues = cpuClockSeries.flatMap { it.values }.mapNotNull { it }
                 val maxFreq = cpuClockFlatValues.maxOrNull() ?: 0f
@@ -724,7 +773,7 @@ private fun FpsRecordDetailScreen(
             }
         }
 
-        if (cpuTempValues.isNotEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && cpuTempValues.isNotEmpty()) {
             item {
                 val cpuTempColor = Color(0xFF00BCD4)
                 val maxTemp = cpuTempValues.maxOrNull() ?: 0f
@@ -753,7 +802,7 @@ private fun FpsRecordDetailScreen(
             }
         }
 
-        if (gpuClockValues.isNotEmpty() || gpuUsageValues.isNotEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && (gpuClockValues.isNotEmpty() || gpuUsageValues.isNotEmpty())) {
             item {
                 val chartColors = rememberChartColors()
                 LineChartCard(
@@ -782,7 +831,7 @@ private fun FpsRecordDetailScreen(
             }
         }
 
-        if (gpuTempValues.isNotEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && gpuTempValues.isNotEmpty()) {
             item {
                 val gpuTempColor = Color(0xFFE91E63)
                 val maxTemp = gpuTempValues.maxOrNull() ?: 0f
@@ -811,7 +860,7 @@ private fun FpsRecordDetailScreen(
             }
         }
 
-        if (ramUsageValues.isNotEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && ramUsageValues.isNotEmpty()) {
             item {
                 val ramUsageColor = Color(0xFFFFC107)
                 val maxUsage = ramUsageValues.maxOrNull() ?: 0f
@@ -843,7 +892,7 @@ private fun FpsRecordDetailScreen(
             }
         }
 
-        if (ramSpeedValues.isNotEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && ramSpeedValues.isNotEmpty()) {
             item {
                 val chartColors = rememberChartColors()
                 val maxFreq = ramSpeedValues.maxOrNull() ?: 0f
@@ -870,7 +919,7 @@ private fun FpsRecordDetailScreen(
             }
         }
 
-        if (ramTempValues.isNotEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && ramTempValues.isNotEmpty()) {
             item {
                 val chartColors = rememberChartColors()
                 val maxTemp = ramTempValues.maxOrNull() ?: 0f
@@ -898,7 +947,7 @@ private fun FpsRecordDetailScreen(
             }
         }
 
-        if (powerValues.isNotEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && powerValues.isNotEmpty()) {
             item {
                 val chartColors = rememberChartColors()
                 LineChartCard(
@@ -927,7 +976,7 @@ private fun FpsRecordDetailScreen(
             }
         }
 
-        if (capacityValues.isNotEmpty() && powerValues.isEmpty()) {
+        if (selectedDetailTab == SessionDetailTab.CHARTS && capacityValues.isNotEmpty() && powerValues.isEmpty()) {
             item {
                 val chartColors = rememberChartColors()
                 LineChartCard(
@@ -950,6 +999,10 @@ private fun FpsRecordDetailScreen(
                     )
                 )
             }
+        }
+
+        if (selectedDetailTab == SessionDetailTab.STATS) {
+            item { DetailedStatsCard(analytics = analytics) }
         }
     }
 }
@@ -1024,6 +1077,252 @@ private fun SummaryStatTile(
         )
     }
 }
+
+@Composable
+private fun SessionTabChip(
+    label: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+) {
+    val bg = if (selected) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    val fg = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+    Box(
+        modifier = modifier
+            .background(bg, RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = label, color = fg, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+private data class MetricRow(
+    val label: String,
+    val value: String,
+    val tone: MetricTone = MetricTone.NEUTRAL,
+)
+
+private enum class MetricTone {
+    GOOD,
+    WARN,
+    BAD,
+    NEUTRAL
+}
+
+@Composable
+private fun DetailedStatsCard(analytics: LogAnalytics) {
+    val fps = analytics.fpsTimeData.map { it.second.toFloat() }
+    val frameTime = analytics.frameTimeData.map { it.second.toFloat() }
+    val cpuUsage = analytics.cpuUsageTimeData.map { it.second.toFloat() }
+    val cpuTemp = analytics.cpuTempTimeData.map { it.second.toFloat() }
+    val batteryTemp = analytics.batteryTempTimeData.map { it.second.toFloat() }
+    val gpuUsage = analytics.gpuUsageTimeData.map { it.second.toFloat() }
+    val gpuClock = analytics.gpuClockTimeData.map { it.second.toFloat() }
+    val gpuTemp = analytics.gpuTempTimeData.map { it.second.toFloat() }
+    val ramUsage = analytics.ramUsageTimeData.map { it.second.toFloat() }
+    val power = analytics.powerTimeData.map { it.second.toFloat() }
+    val batteryLevel = analytics.batteryLevelTimeData.map { it.second.toFloat() }
+    val fpsSorted = fps.sorted()
+    val low5 = averageSlowestPercent(fpsSorted, 0.05f)
+    val frameSortedDesc = frameTime.sortedDescending()
+    val frameBudgetMs = 16.67f
+    val spikes = frameTime.count { it > frameBudgetMs * 2f }
+    val droppedPct = if (frameTime.isNotEmpty()) (frameTime.count { it > frameBudgetMs }.toFloat() / frameTime.size) * 100f else 0f
+    val frameVariance = variance(frameTime)
+    val frameStdDev = kotlin.math.sqrt(frameVariance.toDouble()).toFloat()
+    val frame1High = averageTopPercent(frameSortedDesc, 0.01f)
+    val frame01High = averageTopPercent(frameSortedDesc, 0.001f)
+
+    val sessionHours = sessionHours(analytics)
+    val batteryDrop = batteryDropPercent(batteryLevel)
+    val totalPower = totalPowerConsumptionWh(analytics)
+    val avgPower = analytics.powerStats.avgPower.toFloat()
+    val drainRate = if (sessionHours > 0f) batteryDrop / sessionHours else 0f
+
+    val cpuClusterRows = buildClusterRows(analytics.cpuClockTimeData)
+    val gpuMax = gpuClock.maxOrNull() ?: 0f
+    val gpuMaxHit = if (gpuClock.isNotEmpty() && gpuMax > 0f) (gpuClock.count { it >= gpuMax }.toFloat() / gpuClock.size) * 100f else 0f
+
+    val sections = listOf(
+        "FPS METRICS" to listOf(
+            MetricRow("Avg FPS", formatValue(analytics.fpsStats.avgFps.toFloat()), scoreFps(analytics.fpsStats.avgFps.toFloat())),
+            MetricRow("Min FPS", formatValue(analytics.fpsStats.minFps.toFloat()), scoreFps(analytics.fpsStats.minFps.toFloat())),
+            MetricRow("Max FPS", formatValue(analytics.fpsStats.maxFps.toFloat()), MetricTone.NEUTRAL),
+            MetricRow("1% Low FPS", formatValue(analytics.fpsStats.fps1PercentLow.toFloat()), scoreFps(analytics.fpsStats.fps1PercentLow.toFloat())),
+            MetricRow("0.1% Low FPS", formatValue(analytics.fpsStats.fps0_1PercentLow.toFloat()), scoreFps(analytics.fpsStats.fps0_1PercentLow.toFloat())),
+            MetricRow("5% Low FPS", formatValue(low5), scoreFps(low5)),
+            MetricRow("FPS Variance", formatValue(analytics.fpsStats.variance.toFloat()), MetricTone.NEUTRAL),
+            MetricRow("FPS Standard Deviation", formatValue(analytics.fpsStats.standardDeviation.toFloat()), MetricTone.NEUTRAL),
+            MetricRow("Smoothness", "${formatValue(analytics.fpsStats.smoothnessPercentage.toFloat())}%", scoreSmoothness(analytics.fpsStats.smoothnessPercentage.toFloat())),
+        ),
+        "FRAMETIME METRICS (ms)" to listOf(
+            MetricRow("Avg Frametime", formatValue(avgOrNull(frameTime) ?: 0f), scoreFrameTime(avgOrNull(frameTime) ?: 0f)),
+            MetricRow("1% High Frametime", formatValue(frame1High), scoreFrameTime(frame1High)),
+            MetricRow("0.1% High Frametime", formatValue(frame01High), scoreFrameTime(frame01High)),
+            MetricRow("Frametime Variance", formatValue(frameVariance), MetricTone.NEUTRAL),
+            MetricRow("Frametime Std Deviation", formatValue(frameStdDev), MetricTone.NEUTRAL),
+            MetricRow("Frame Spikes (>33.3ms)", spikes.toString(), if (spikes == 0) MetricTone.GOOD else if (spikes < 10) MetricTone.WARN else MetricTone.BAD),
+            MetricRow("Dropped Frames", "${formatValue(droppedPct)}%", if (droppedPct < 1f) MetricTone.GOOD else if (droppedPct < 5f) MetricTone.WARN else MetricTone.BAD),
+        ),
+        "CPU METRICS" to buildList {
+            add(MetricRow("Total CPU Usage (%)", formatRangeTriple(cpuUsage), scoreCpu(avgOrNull(cpuUsage) ?: 0f)))
+            addAll(cpuClusterRows)
+            add(MetricRow("CPU Temperature (°C)", formatRangeTriple(cpuTemp), scoreTemp(avgOrNull(cpuTemp) ?: 0f)))
+            add(MetricRow("Device Temp (Battery °C)", formatRangeTriple(batteryTemp), scoreTemp(avgOrNull(batteryTemp) ?: 0f)))
+        },
+        "GPU METRICS" to listOf(
+            MetricRow("GPU Usage (%)", formatRangeTriple(gpuUsage), scoreCpu(avgOrNull(gpuUsage) ?: 0f)),
+            MetricRow("GPU Frequency (MHz)", formatRangeTriple(gpuClock), MetricTone.NEUTRAL),
+            MetricRow("GPU Max Frequency Hit", "${formatValue(gpuMaxHit)}%", if (gpuMaxHit > 40f) MetricTone.GOOD else if (gpuMaxHit > 15f) MetricTone.WARN else MetricTone.BAD),
+            MetricRow("GPU Temperature (°C)", formatRangeTriple(gpuTemp), scoreTemp(avgOrNull(gpuTemp) ?: 0f)),
+        ),
+        "RAM / MEMORY METRICS" to listOf(
+            MetricRow("RAM Usage (MB)", formatRangeTriple(ramUsage), MetricTone.NEUTRAL),
+        ),
+        "POWER METRICS" to listOf(
+            MetricRow("Total Power Consumption", "${formatValue(totalPower)} Wh", MetricTone.NEUTRAL),
+            MetricRow("Total Battery % Dropped", "${formatValue(batteryDrop)}%", if (batteryDrop < 3f) MetricTone.GOOD else if (batteryDrop < 8f) MetricTone.WARN else MetricTone.BAD),
+            MetricRow("Average Power Consumption", "${formatValue(avgPower)} W", if (avgPower < 3f) MetricTone.GOOD else if (avgPower < 6f) MetricTone.WARN else MetricTone.BAD),
+            MetricRow("Battery Drain Rate", "${formatValue(drainRate)} %/h", if (drainRate < 5f) MetricTone.GOOD else if (drainRate < 12f) MetricTone.WARN else MetricTone.BAD),
+        )
+    )
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = chartBackgroundColor()),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            sections.forEach { (sectionTitle, rows) ->
+                Text(
+                    text = sectionTitle,
+                    color = Color(0xFF8B949E),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                rows.forEach { row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = row.label,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 13.sp,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = row.value,
+                            color = toneColor(row.tone),
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun toneColor(tone: MetricTone): Color = when (tone) {
+    MetricTone.GOOD -> Color(0xFF3FB950)
+    MetricTone.WARN -> Color(0xFFFFB347)
+    MetricTone.BAD -> Color(0xFFFF6B6B)
+    MetricTone.NEUTRAL -> Color(0xFF58A6FF)
+}
+
+private fun variance(values: List<Float>): Float {
+    if (values.size <= 1) return 0f
+    val avg = values.average().toFloat()
+    return values.sumOf { ((it - avg) * (it - avg)).toDouble() }.toFloat() / values.size
+}
+
+private fun averageTopPercent(sortedDescending: List<Float>, percent: Float): Float {
+    if (sortedDescending.isEmpty()) return 0f
+    val count = (sortedDescending.size * percent).toInt().coerceAtLeast(1)
+    return sortedDescending.take(count).average().toFloat()
+}
+
+private fun formatRangeTriple(values: List<Float>): String {
+    if (values.isEmpty()) return "--"
+    val max = values.maxOrNull() ?: 0f
+    val min = values.minOrNull() ?: 0f
+    val avg = avgOrNull(values) ?: 0f
+    return "Max ${formatValue(max)} / Min ${formatValue(min)} / Avg ${formatValue(avg)}"
+}
+
+private fun buildClusterRows(cpuClockTimeData: Map<Int, List<Pair<Long, Double>>>): List<MetricRow> {
+    if (cpuClockTimeData.isEmpty()) return listOf(MetricRow("Per-cluster Metrics", "N/A", MetricTone.NEUTRAL))
+    val groups = CpuClusterDetermination.resolveClusters(cpuClockTimeData)
+    val labels = listOf("Little", "Mid", "Big")
+    return groups.mapIndexed { index, cores ->
+        val merged = mergeCoreSeries(cores, cpuClockTimeData).mapNotNull { it }.filter { it > 0f }
+        if (merged.isEmpty()) {
+            MetricRow("${labels.getOrElse(index) { "Cluster ${index + 1}" }} Cluster", "N/A", MetricTone.NEUTRAL)
+        } else {
+            val avg = avgOrNull(merged) ?: 0f
+            val max = merged.maxOrNull() ?: 0f
+            val estUsage = if (max > 0f) ((avg / max) * 100f).coerceIn(0f, 100f) else 0f
+            MetricRow(
+                "${labels.getOrElse(index) { "Cluster ${index + 1}" }} (Est. Usage / Avg Freq / Max Freq)",
+                "${formatValue(estUsage)}% / ${formatValue(avg)} MHz / ${formatValue(max)} MHz",
+                scoreCpu(estUsage)
+            )
+        }
+    }
+}
+
+private fun sessionHours(analytics: LogAnalytics): Float {
+    val maxMs = analytics.fpsTimeData.maxOfOrNull { it.first } ?: 0L
+    if (maxMs > 0L) return (maxMs / 1000f) / 3600f
+    val parts = analytics.sessionDuration.lowercase(Locale.getDefault())
+    val mins = Regex("(\\d+)m").find(parts)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+    val secs = Regex("(\\d+)s").find(parts)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+    return (mins * 60f + secs) / 3600f
+}
+
+private fun batteryDropPercent(levels: List<Float>): Float {
+    if (levels.size < 2) return 0f
+    return (levels.first() - levels.last()).coerceAtLeast(0f)
+}
+
+private fun totalPowerConsumptionWh(analytics: LogAnalytics): Float {
+    val data = analytics.powerTimeData
+    if (data.isEmpty()) return 0f
+    if (data.size == 1) return data.first().second.toFloat() / 3600f
+    var wh = 0f
+    for (i in 1 until data.size) {
+        val prev = data[i - 1]
+        val cur = data[i]
+        val dtHours = ((cur.first - prev.first).coerceAtLeast(0L) / 1000f) / 3600f
+        val avgW = ((prev.second + cur.second) / 2.0).toFloat()
+        wh += avgW * dtHours
+    }
+    return wh
+}
+
+private fun scoreFps(fps: Float): MetricTone =
+    if (fps >= 55f) MetricTone.GOOD else if (fps >= 35f) MetricTone.WARN else MetricTone.BAD
+
+private fun scoreSmoothness(value: Float): MetricTone =
+    if (value >= 95f) MetricTone.GOOD else if (value >= 80f) MetricTone.WARN else MetricTone.BAD
+
+private fun scoreFrameTime(ms: Float): MetricTone =
+    if (ms <= 16.67f) MetricTone.GOOD else if (ms <= 25f) MetricTone.WARN else MetricTone.BAD
+
+private fun scoreTemp(celsius: Float): MetricTone =
+    if (celsius < 45f) MetricTone.GOOD else if (celsius < 55f) MetricTone.WARN else MetricTone.BAD
+
+private fun scoreCpu(usage: Float): MetricTone =
+    if (usage < 55f) MetricTone.GOOD else if (usage < 80f) MetricTone.WARN else MetricTone.BAD
 
 private data class ChartSeries(
     val label: String,

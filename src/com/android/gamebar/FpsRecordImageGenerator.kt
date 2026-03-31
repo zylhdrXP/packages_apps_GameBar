@@ -28,6 +28,7 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.sqrt
 
 object FpsRecordImageGenerator {
 
@@ -61,7 +62,11 @@ object FpsRecordImageGenerator {
     )
 
     fun generateAndShareImage(context: Context, appName: String, analytics: LogAnalytics) {
-        val bitmap = generateImage(context, appName, analytics)
+        generateAndShareChartsImage(context, appName, analytics)
+    }
+
+    fun generateAndShareChartsImage(context: Context, appName: String, analytics: LogAnalytics) {
+        val bitmap = generateChartsImage(context, appName, analytics)
         val file = File(context.externalCacheDir ?: context.cacheDir, "fps_record_${System.currentTimeMillis()}.png")
         runCatching {
             FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
@@ -76,8 +81,28 @@ object FpsRecordImageGenerator {
         }
     }
 
+    fun generateAndShareStatsImage(context: Context, appName: String, analytics: LogAnalytics) {
+        val bitmap = generateStatsImage(context, appName, analytics)
+        val file = File(context.externalCacheDir ?: context.cacheDir, "fps_record_stats_${System.currentTimeMillis()}.png")
+        runCatching {
+            FileOutputStream(file).use { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) }
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "image/png"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                putExtra(Intent.EXTRA_SUBJECT, "FPS Record Stats: $appName")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(shareIntent, "Share FPS stats graphics"))
+        }
+    }
+
     fun saveGraphics(context: Context, appName: String, analytics: LogAnalytics): Boolean {
-        val bitmap = generateImage(context, appName, analytics)
+        return saveChartsGraphics(context, appName, analytics)
+    }
+
+    fun saveChartsGraphics(context: Context, appName: String, analytics: LogAnalytics): Boolean {
+        val bitmap = generateChartsImage(context, appName, analytics)
         val fileName = buildImageName(appName)
 
         return runCatching {
@@ -103,7 +128,34 @@ object FpsRecordImageGenerator {
         }.getOrElse { false }
     }
 
-    private fun generateImage(context: Context, appName: String, analytics: LogAnalytics): Bitmap {
+    fun saveStatsGraphics(context: Context, appName: String, analytics: LogAnalytics): Boolean {
+        val bitmap = generateStatsImage(context, appName, analytics)
+        val fileName = buildImageName("${appName}_stats")
+
+        return runCatching {
+            val resolver = context.contentResolver
+            val values = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                put(MediaStore.Downloads.MIME_TYPE, "image/png")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+                    put(MediaStore.Downloads.IS_PENDING, 1)
+                }
+            }
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return false
+            resolver.openOutputStream(uri)?.use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            } ?: return false
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val done = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
+                resolver.update(uri, done, null, null)
+            }
+            true
+        }.getOrElse { false }
+    }
+
+    private fun generateChartsImage(context: Context, appName: String, analytics: LogAnalytics): Bitmap {
         val dark = isSystemDark(context)
         val p = palette(dark)
         val chartCount = 12
@@ -212,6 +264,165 @@ object FpsRecordImageGenerator {
             )
         }
         return bitmap
+    }
+
+    private data class StatEntry(
+        val label: String,
+        val value: String,
+        val color: Int,
+    )
+
+    private data class StatSection(
+        val title: String,
+        val rows: List<StatEntry>,
+    )
+
+    private fun generateStatsImage(context: Context, appName: String, analytics: LogAnalytics): Bitmap {
+        val dark = isSystemDark(context)
+        val p = palette(dark)
+        val sections = buildDetailedStatsSections(analytics, p)
+        val sectionHeight = 56f
+        val titleHeight = 36f
+        val sectionPadding = 20f
+        val totalRows = sections.sumOf { it.rows.size }
+        val totalHeight = (PADDING + 200f + (sections.size * (titleHeight + sectionPadding)) + (totalRows * sectionHeight) + 120f).toInt()
+
+        val bitmap = Bitmap.createBitmap(WIDTH, totalHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        canvas.drawColor(p.bg)
+
+        var y = PADDING + 20f
+        y = drawHeader(canvas, appName, analytics, y, p)
+
+        val cardRect = RectF(PADDING, y, WIDTH - PADDING, totalHeight - PADDING)
+        val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = p.card }
+        canvas.drawRoundRect(cardRect, 30f, 30f, cardPaint)
+
+        val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = p.sub
+            textSize = 23f
+            typeface = Typeface.DEFAULT
+            textAlign = Paint.Align.LEFT
+        }
+        val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            textSize = 24f
+            typeface = Typeface.DEFAULT_BOLD
+            textAlign = Paint.Align.RIGHT
+        }
+        val sectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = p.sub
+            textSize = 24f
+            typeface = Typeface.DEFAULT_BOLD
+            textAlign = Paint.Align.LEFT
+        }
+
+        var rowY = y + 46f
+        sections.forEach { section ->
+            canvas.drawText(section.title, PADDING + 24f, rowY, sectionPaint)
+            rowY += 30f
+            section.rows.forEach { row ->
+                canvas.drawText(row.label, PADDING + 24f, rowY + 18f, labelPaint)
+                valuePaint.color = row.color
+                canvas.drawText(row.value, WIDTH - PADDING - 24f, rowY + 18f, valuePaint)
+                rowY += sectionHeight
+            }
+            rowY += sectionPadding
+        }
+
+        return bitmap
+    }
+
+    private fun buildDetailedStatsSections(analytics: LogAnalytics, p: Palette): List<StatSection> {
+        val fps = analytics.fpsTimeData.map { it.second.toFloat() }
+        val fpsSorted = fps.sorted()
+        val low5 = averageSlowestPercent(fpsSorted, 0.05f)
+        val frame = analytics.frameTimeData.map { it.second.toFloat() }
+        val frameSortedDesc = frame.sortedDescending()
+        val frameBudget = 16.67f
+        val frameVariance = variance(frame)
+        val frameStd = sqrt(frameVariance.toDouble()).toFloat()
+        val frameSpikes = frame.count { it > frameBudget * 2f }
+        val droppedPct = if (frame.isEmpty()) 0f else (frame.count { it > frameBudget }.toFloat() / frame.size) * 100f
+
+        val cpuUsage = analytics.cpuUsageTimeData.map { it.second.toFloat() }
+        val cpuTemp = analytics.cpuTempTimeData.map { it.second.toFloat() }
+        val batteryTemp = analytics.batteryTempTimeData.map { it.second.toFloat() }
+        val gpuUsage = analytics.gpuUsageTimeData.map { it.second.toFloat() }
+        val gpuFreq = analytics.gpuClockTimeData.map { it.second.toFloat() }
+        val gpuTemp = analytics.gpuTempTimeData.map { it.second.toFloat() }
+        val ram = analytics.ramUsageTimeData.map { it.second.toFloat() }
+        val power = analytics.powerTimeData.map { it.second.toFloat() }
+        val battery = analytics.batteryLevelTimeData.map { it.second.toFloat() }
+
+        val gpuMax = gpuFreq.maxOrNull() ?: 0f
+        val gpuMaxHit = if (gpuFreq.isNotEmpty() && gpuMax > 0f) (gpuFreq.count { it >= gpuMax }.toFloat() / gpuFreq.size) * 100f else 0f
+        val hours = sessionHours(analytics)
+        val drop = batteryDropPercent(battery)
+        val drainRate = if (hours > 0f) drop / hours else 0f
+        val totalWh = totalPowerWh(analytics)
+        val clusterRows = buildClusterFreqRows(analytics.cpuClockTimeData)
+
+        return listOf(
+            StatSection(
+                "FPS METRICS",
+                listOf(
+                    StatEntry("Avg FPS", formatValue(analytics.fpsStats.avgFps.toFloat()), toneFps(analytics.fpsStats.avgFps.toFloat())),
+                    StatEntry("Min FPS", formatValue(analytics.fpsStats.minFps.toFloat()), toneFps(analytics.fpsStats.minFps.toFloat())),
+                    StatEntry("Max FPS", formatValue(analytics.fpsStats.maxFps.toFloat()), p.blue),
+                    StatEntry("1% Low FPS", formatValue(analytics.fpsStats.fps1PercentLow.toFloat()), toneFps(analytics.fpsStats.fps1PercentLow.toFloat())),
+                    StatEntry("0.1% Low FPS", formatValue(analytics.fpsStats.fps0_1PercentLow.toFloat()), toneFps(analytics.fpsStats.fps0_1PercentLow.toFloat())),
+                    StatEntry("5% Low FPS", formatValue(low5), toneFps(low5)),
+                    StatEntry("FPS Variance", formatValue(analytics.fpsStats.variance.toFloat()), p.blue),
+                    StatEntry("FPS Std Deviation", formatValue(analytics.fpsStats.standardDeviation.toFloat()), p.blue),
+                    StatEntry("Smoothness", "${formatValue(analytics.fpsStats.smoothnessPercentage.toFloat())}%", toneSmooth(analytics.fpsStats.smoothnessPercentage.toFloat())),
+                )
+            ),
+            StatSection(
+                "FRAMETIME METRICS (ms)",
+                listOf(
+                    StatEntry("Avg Frametime", formatValue(avg(frame)), toneFrame(avg(frame))),
+                    StatEntry("1% High Frametime", formatValue(topPercent(frameSortedDesc, 0.01f)), toneFrame(topPercent(frameSortedDesc, 0.01f))),
+                    StatEntry("0.1% High Frametime", formatValue(topPercent(frameSortedDesc, 0.001f)), toneFrame(topPercent(frameSortedDesc, 0.001f))),
+                    StatEntry("Frametime Variance", formatValue(frameVariance), p.blue),
+                    StatEntry("Frametime Std Deviation", formatValue(frameStd), p.blue),
+                    StatEntry("Frame Spikes (>33.3ms)", frameSpikes.toString(), if (frameSpikes == 0) Color.parseColor("#3FB950") else if (frameSpikes < 10) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")),
+                    StatEntry("Dropped Frames", "${formatValue(droppedPct)}%", if (droppedPct < 1f) Color.parseColor("#3FB950") else if (droppedPct < 5f) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")),
+                )
+            ),
+            StatSection(
+                "CPU METRICS",
+                buildList {
+                    add(StatEntry("Total CPU Usage (%)", rangeTriple(cpuUsage), toneCpu(avg(cpuUsage))))
+                    addAll(clusterRows)
+                    add(StatEntry("CPU Temperature (°C)", rangeTriple(cpuTemp), toneTemp(avg(cpuTemp))))
+                    add(StatEntry("Device Temp (Battery °C)", rangeTriple(batteryTemp), toneTemp(avg(batteryTemp))))
+                }
+            ),
+            StatSection(
+                "GPU METRICS",
+                listOf(
+                    StatEntry("GPU Usage (%)", rangeTriple(gpuUsage), toneCpu(avg(gpuUsage))),
+                    StatEntry("GPU Frequency (MHz)", rangeTriple(gpuFreq), p.blue),
+                    StatEntry("GPU Max Frequency Hit", "${formatValue(gpuMaxHit)}%", if (gpuMaxHit > 40f) Color.parseColor("#3FB950") else if (gpuMaxHit > 15f) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")),
+                    StatEntry("GPU Temperature (°C)", rangeTriple(gpuTemp), toneTemp(avg(gpuTemp))),
+                )
+            ),
+            StatSection(
+                "RAM / MEMORY METRICS",
+                listOf(
+                    StatEntry("RAM Usage (MB)", rangeTriple(ram), p.blue),
+                )
+            ),
+            StatSection(
+                "POWER METRICS",
+                listOf(
+                    StatEntry("Total Power Consumption", "${formatValue(totalWh)} Wh", p.blue),
+                    StatEntry("Total Battery % Dropped", "${formatValue(drop)}%", if (drop < 3f) Color.parseColor("#3FB950") else if (drop < 8f) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")),
+                    StatEntry("Average Power Consumption", "${formatValue(analytics.powerStats.avgPower.toFloat())} W", if (analytics.powerStats.avgPower < 3.0) Color.parseColor("#3FB950") else if (analytics.powerStats.avgPower < 6.0) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")),
+                    StatEntry("Battery Drain Rate", "${formatValue(drainRate)} %/h", if (drainRate < 5f) Color.parseColor("#3FB950") else if (drainRate < 12f) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")),
+                )
+            )
+        )
     }
 
     private fun drawHeader(canvas: Canvas, appName: String, analytics: LogAnalytics, startY: Float, p: Palette): Float {
@@ -782,6 +993,93 @@ object FpsRecordImageGenerator {
         val count = (values.size * percent).toInt().coerceAtLeast(1)
         return values.take(count).average().toFloat()
     }
+
+    private fun variance(values: List<Float>): Float {
+        if (values.size <= 1) return 0f
+        val avg = values.average().toFloat()
+        return values.sumOf { ((it - avg) * (it - avg)).toDouble() }.toFloat() / values.size
+    }
+
+    private fun topPercent(sortedDesc: List<Float>, percent: Float): Float {
+        if (sortedDesc.isEmpty()) return 0f
+        val count = (sortedDesc.size * percent).toInt().coerceAtLeast(1)
+        return sortedDesc.take(count).average().toFloat()
+    }
+
+    private fun avg(values: List<Float>): Float = if (values.isEmpty()) 0f else values.average().toFloat()
+
+    private fun rangeTriple(values: List<Float>): String {
+        if (values.isEmpty()) return "--"
+        val max = values.maxOrNull() ?: 0f
+        val min = values.minOrNull() ?: 0f
+        val avg = avg(values)
+        return "Max ${formatValue(max)} / Min ${formatValue(min)} / Avg ${formatValue(avg)}"
+    }
+
+    private fun buildClusterFreqRows(cpuClockTimeData: Map<Int, List<Pair<Long, Double>>>): List<StatEntry> {
+        if (cpuClockTimeData.isEmpty()) return listOf(StatEntry("Per-cluster Metrics", "N/A", Color.parseColor("#58A6FF")))
+        val groups = CpuClusterDetermination.resolveClusters(cpuClockTimeData)
+        val labels = listOf("Little", "Mid", "Big")
+        return groups.mapIndexed { index, cores ->
+            val merged = mergeCoreSeries(cores, cpuClockTimeData).mapNotNull { it }.filter { it > 0f }
+            if (merged.isEmpty()) {
+                StatEntry("${labels.getOrElse(index) { "Cluster ${index + 1}" }}", "N/A", Color.parseColor("#58A6FF"))
+            } else {
+                val avg = avg(merged)
+                val max = merged.maxOrNull() ?: 0f
+                val est = if (max > 0f) ((avg / max) * 100f).coerceIn(0f, 100f) else 0f
+                StatEntry(
+                    "${labels.getOrElse(index) { "Cluster ${index + 1}" }} (Est / Avg / Max)",
+                    "${formatValue(est)}% / ${formatValue(avg)} MHz / ${formatValue(max)} MHz",
+                    toneCpu(est)
+                )
+            }
+        }
+    }
+
+    private fun sessionHours(analytics: LogAnalytics): Float {
+        val maxMs = analytics.fpsTimeData.maxOfOrNull { it.first } ?: 0L
+        if (maxMs > 0L) return (maxMs / 1000f) / 3600f
+        val parts = analytics.sessionDuration.lowercase(Locale.getDefault())
+        val mins = Regex("(\\d+)m").find(parts)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+        val secs = Regex("(\\d+)s").find(parts)?.groupValues?.get(1)?.toFloatOrNull() ?: 0f
+        return (mins * 60f + secs) / 3600f
+    }
+
+    private fun batteryDropPercent(levels: List<Float>): Float {
+        if (levels.size < 2) return 0f
+        return (levels.first() - levels.last()).coerceAtLeast(0f)
+    }
+
+    private fun totalPowerWh(analytics: LogAnalytics): Float {
+        val data = analytics.powerTimeData
+        if (data.isEmpty()) return 0f
+        if (data.size == 1) return data.first().second.toFloat() / 3600f
+        var wh = 0f
+        for (i in 1 until data.size) {
+            val prev = data[i - 1]
+            val cur = data[i]
+            val dtHours = ((cur.first - prev.first).coerceAtLeast(0L) / 1000f) / 3600f
+            val avgW = ((prev.second + cur.second) / 2.0).toFloat()
+            wh += avgW * dtHours
+        }
+        return wh
+    }
+
+    private fun toneFps(value: Float): Int =
+        if (value >= 55f) Color.parseColor("#3FB950") else if (value >= 35f) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")
+
+    private fun toneSmooth(value: Float): Int =
+        if (value >= 95f) Color.parseColor("#3FB950") else if (value >= 80f) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")
+
+    private fun toneFrame(ms: Float): Int =
+        if (ms <= 16.67f) Color.parseColor("#3FB950") else if (ms <= 25f) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")
+
+    private fun toneTemp(c: Float): Int =
+        if (c < 45f) Color.parseColor("#3FB950") else if (c < 55f) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")
+
+    private fun toneCpu(usage: Float): Int =
+        if (usage < 55f) Color.parseColor("#3FB950") else if (usage < 80f) Color.parseColor("#FFB347") else Color.parseColor("#FF6B6B")
 
     private fun formatValue(value: Float): String =
         if (value <= 0f) "0.0" else String.format(Locale.getDefault(), "%.1f", value)
