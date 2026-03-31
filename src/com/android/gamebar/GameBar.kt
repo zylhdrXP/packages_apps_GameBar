@@ -103,10 +103,10 @@ class GameBar private constructor(context: Context) {
     private var valueColorHex = "#FFB347"
     private var customTypeface: Typeface? = null
     private var overlayFormat = "full"
-    private var position = "top_center"
+    private var position = "draggable"
     private var splitMode = "side_by_side"
     private var updateIntervalMs = 1000
-    private var draggable = false
+    private var draggable = true
 
     // Display toggles
     private var showBatteryTemp = false
@@ -285,7 +285,7 @@ class GameBar private constructor(context: Context) {
         
         updateOverlayFormat(prefs.getString("game_bar_format", "full") ?: "full")
         updateUpdateInterval(prefs.getString("game_bar_update_interval", "1000") ?: "1000")
-        updatePosition(prefs.getString("game_bar_position", "draggable") ?: "draggable")
+        updatePosition("draggable")
 
         val spacing = prefs.getInt("game_bar_item_spacing", 8)
         updateItemSpacing(spacing)
@@ -339,17 +339,12 @@ class GameBar private constructor(context: Context) {
                 PixelFormat.TRANSLUCENT
         )
 
-        if ("draggable" == position) {
-            draggable = true
-            loadSavedPosition(layoutParams!!)
-            if (layoutParams!!.x == 0 && layoutParams!!.y == 0) {
-                layoutParams!!.gravity = Gravity.TOP or Gravity.START
-                layoutParams!!.x = 0
-                layoutParams!!.y = 100
-            }
-        } else {
-            draggable = false
-            applyPosition(layoutParams!!, position)
+        draggable = true
+        loadSavedPosition(layoutParams!!)
+        if (layoutParams!!.x == 0 && layoutParams!!.y == 0) {
+            layoutParams!!.gravity = Gravity.TOP or Gravity.START
+            layoutParams!!.x = 0
+            layoutParams!!.y = 100
         }
 
         overlayView = LinearLayout(context).apply {
@@ -399,6 +394,7 @@ class GameBar private constructor(context: Context) {
                         val deltaY = (event.rawY - initialTouchY).toInt()
                         layoutParams!!.x = initialX + deltaX
                         layoutParams!!.y = initialY + deltaY
+                        clampToScreenBounds(layoutParams!!, overlayView)
                         windowManager.updateViewLayout(overlayView, layoutParams)
                     }
                     true
@@ -1032,20 +1028,16 @@ class GameBar private constructor(context: Context) {
     }
 
     fun updatePosition(pos: String) {
-        position = pos
+        position = "draggable"
         if (isShowing && overlayView != null && layoutParams != null) {
-            if ("draggable" == position) {
-                draggable = true
-                loadSavedPosition(layoutParams!!)
-                if (layoutParams!!.x == 0 && layoutParams!!.y == 0) {
-                    layoutParams!!.gravity = Gravity.TOP or Gravity.START
-                    layoutParams!!.x = 0
-                    layoutParams!!.y = 100
-                }
-            } else {
-                draggable = false
-                applyPosition(layoutParams!!, position)
+            draggable = true
+            loadSavedPosition(layoutParams!!)
+            if (layoutParams!!.x == 0 && layoutParams!!.y == 0) {
+                layoutParams!!.gravity = Gravity.TOP or Gravity.START
+                layoutParams!!.x = 0
+                layoutParams!!.y = 100
             }
+            clampToScreenBounds(layoutParams!!, overlayView)
             windowManager.updateViewLayout(overlayView, layoutParams)
         }
     }
@@ -1171,6 +1163,18 @@ class GameBar private constructor(context: Context) {
                 lp.y = 100
             }
         }
+    }
+
+    private fun clampToScreenBounds(lp: WindowManager.LayoutParams, view: View?) {
+        val metrics = context.resources.displayMetrics
+        val screenWidth = metrics.widthPixels
+        val screenHeight = metrics.heightPixels
+        val viewWidth = view?.width?.takeIf { it > 0 } ?: 0
+        val viewHeight = view?.height?.takeIf { it > 0 } ?: 0
+        val maxX = (screenWidth - viewWidth).coerceAtLeast(0)
+        val maxY = (screenHeight - viewHeight).coerceAtLeast(0)
+        lp.x = lp.x.coerceIn(0, maxX)
+        lp.y = lp.y.coerceIn(0, maxY)
     }
 
     private fun readLine(path: String): String? {

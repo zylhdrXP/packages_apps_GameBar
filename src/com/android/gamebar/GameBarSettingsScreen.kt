@@ -155,7 +155,6 @@ fun GameBarSettingsScreen(
     var updateInterval by remember { mutableStateOf(prefs.getString("game_bar_update_interval", "1000") ?: "1000") }
     var titleColor by remember { mutableStateOf(prefs.getInt("game_bar_title_color", 0xFF9FCEDE.toInt())) }
     var valueColor by remember { mutableStateOf(prefs.getInt("game_bar_value_color", 0xFFFFB347.toInt())) }
-    var position by remember { mutableStateOf(prefs.getString("game_bar_position", "draggable") ?: "draggable") }
     var overlayFormat by remember { mutableStateOf(prefs.getString("game_bar_format", "full") ?: "full") }
     var splitMode by remember { mutableStateOf(prefs.getString("game_bar_split_mode", "side_by_side") ?: "side_by_side") }
 
@@ -180,15 +179,6 @@ fun GameBarSettingsScreen(
         SelectOption("1000", "Every second"),
         SelectOption("2000", "Every 2 seconds"),
         SelectOption("5000", "Every 5 seconds"),
-    )
-    val positionOptions = listOf(
-        SelectOption("top_left", "Top Left"),
-        SelectOption("top_center", "Top Center"),
-        SelectOption("top_right", "Top Right"),
-        SelectOption("bottom_left", "Bottom Left"),
-        SelectOption("bottom_center", "Bottom Center"),
-        SelectOption("bottom_right", "Bottom Right"),
-        SelectOption("draggable", "Custom Draggable"),
     )
     val overlayFormatOptions = listOf(SelectOption("full", "Full"), SelectOption("minimal", "Minimal"))
     val splitModeOptions = listOf(SelectOption("side_by_side", "Side-by-Side"), SelectOption("stacked", "Stacked"))
@@ -392,7 +382,6 @@ fun GameBarSettingsScreen(
                                     }
                                 }
                                 SettingsActionRow("Overlay Font Style", "Choose custom font for overlay text", onOpenFontSelector)
-                                SettingsSelectRow("Overlay Position", position, positionOptions) { position = it; putString("game_bar_position", it); applyPrefs() }
                                 SettingsSelectRow("Overlay Format", overlayFormat, overlayFormatOptions) { overlayFormat = it; putString("game_bar_format", it); applyPrefs() }
                             }
                         }

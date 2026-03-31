@@ -67,7 +67,6 @@ class PresetManager private constructor(private val context: Context) {
             "game_bar_value_color",
             "game_bar_text_color",  // Legacy text color if exists
             "game_bar_font_path",
-            "game_bar_position",
             "game_bar_format",
             
             // Split Config
