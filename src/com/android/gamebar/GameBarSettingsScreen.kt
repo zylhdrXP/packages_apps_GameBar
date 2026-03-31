@@ -330,6 +330,11 @@ fun GameBarSettingsScreen(
                             SettingsSectionCard(title = "Overlay Features") {
                                 SettingsSwitchRow("FPS Overlay", "Show current FPS", fpsEnable) { fpsEnable = it; putBoolean("game_bar_fps_enable", it); applyPrefs() }
                                 SettingsSelectRow("FPS Display Mode", fpsDisplayMode, fpsDisplayOptions) { fpsDisplayMode = it; putString("game_bar_fps_display_mode", it); applyPrefs(rebuild = true) }
+                                SettingsSelectRow("Select FPS Method", fpsMethod, fpsMethodOptions) {
+                                    fpsMethod = it
+                                    putString("game_bar_fps_method", it)
+                                    applyPrefs(rebuild = true)
+                                }
                                 SettingsSwitchRow("Frame Time", "Show frame time in milliseconds", frameTimeEnable) { frameTimeEnable = it; putBoolean("game_bar_frame_time_enable", it); applyPrefs() }
                                 SettingsSwitchRow("Device Temperature", "Show device temperature", tempEnable) { tempEnable = it; putBoolean("game_bar_temp_enable", it); applyPrefs() }
                                 SettingsSwitchRow("CPU Usage", "Show current CPU usage", cpuUsageEnable) { cpuUsageEnable = it; putBoolean("game_bar_cpu_usage_enable", it); applyPrefs() }
@@ -341,15 +346,6 @@ fun GameBarSettingsScreen(
                                 SettingsSwitchRow("GPU Usage", "Show GPU usage percentage", gpuUsageEnable) { gpuUsageEnable = it; putBoolean("game_bar_gpu_usage_enable", it); applyPrefs() }
                                 SettingsSwitchRow("GPU Clock Speed", "Show current GPU clock frequency", gpuClockEnable) { gpuClockEnable = it; putBoolean("game_bar_gpu_clock_enable", it); applyPrefs() }
                                 SettingsSwitchRow("GPU Temperature", "Show current GPU temperature", gpuTempEnable) { gpuTempEnable = it; putBoolean("game_bar_gpu_temp_enable", it); applyPrefs() }
-                            }
-                        }
-                        item {
-                            SettingsSectionCard(title = "FPS Measurement Method") {
-                                SettingsSelectRow("Select FPS Method", fpsMethod, fpsMethodOptions) {
-                                    fpsMethod = it
-                                    putString("game_bar_fps_method", it)
-                                    applyPrefs(rebuild = true)
-                                }
                             }
                         }
                     }
