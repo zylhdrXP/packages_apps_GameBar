@@ -228,7 +228,7 @@ fun GameBarSettingsScreen(
     val pageSummary = when (selectedTab) {
         GameBarNavTab.HOME -> stringResource(R.string.game_bar_summary)
         GameBarNavTab.FEATURES -> "Overlay features and FPS method"
-        GameBarNavTab.CUSTOMIZATION -> "Configure customization, split, gestures and per-app behavior"
+        GameBarNavTab.CUSTOMIZATION -> "Configure overlay customization, split mode and gesture behavior"
         GameBarNavTab.FPS_RECORD -> stringResource(R.string.fps_record_summary)
         GameBarNavTab.PRESETS -> stringResource(R.string.preset_category_summary)
     }
@@ -302,7 +302,7 @@ fun GameBarSettingsScreen(
                         item {
                             HomeMenuCard(
                                 title = "Customisations and UI",
-                                summary = "Customization, split config, gestures and per-app controls"
+                                summary = "Customization, split config and gesture controls"
                             ) {
                                 selectedTab = GameBarNavTab.CUSTOMIZATION
                             }
@@ -407,31 +407,6 @@ fun GameBarSettingsScreen(
                                 SettingsSelectRow("Long Press Duration", longPressTimeout, longPressOptions, longPressEnable) { longPressTimeout = it; putString("game_bar_longpress_timeout", it); applyPrefs() }
                             }
                         }
-                        item {
-                            SettingsSectionCard(title = "Per-App GameBar") {
-                                SettingsSwitchRow(
-                                    "Auto-Enable GameBar for Selected Apps",
-                                    "If turned on, selected apps will auto-enable GameBar even if the main switch is off",
-                                    autoEnable
-                                ) {
-                                    autoEnable = it
-                                    putBoolean("game_bar_auto_enable", it)
-                                    if (it || gameBarEnabled) {
-                                        context.startService(Intent(context, GameBarMonitorService::class.java))
-                                    } else {
-                                        context.stopService(Intent(context, GameBarMonitorService::class.java))
-                                    }
-                                }
-                                SettingsActionRow("Configure Apps", "Choose which apps will auto-enable GameBar", onOpenPerAppConfig)
-                                SettingsSwitchRow("Show launcher icon", "Show or hide GameBar icon in launcher", showLauncherIcon) {
-                                    showLauncherIcon = it
-                                    context.getSharedPreferences(GameBarSettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
-                                        .edit().putBoolean(GameBarSettingsActivity.KEY_SHOW_LAUNCHER_ICON, it).apply()
-                                    onToggleLauncherIcon(it)
-                                }
-                                SettingsActionRow(stringResource(R.string.game_bar_user_guide), "Open complete usage guide", onOpenUserGuide)
-                            }
-                        }
                     }
 
                     GameBarNavTab.FPS_RECORD -> {
@@ -452,6 +427,47 @@ fun GameBarSettingsScreen(
                                 ) {
                                     UiStyleController.setAmoledBlackEnabled(context, it)
                                 }
+                            }
+                        }
+                        item {
+                            SettingsSectionCard(title = "Per-App GameBar") {
+                                SettingsSwitchRow(
+                                    "Auto-Enable GameBar for Selected Apps",
+                                    "If turned on, selected apps will auto-enable GameBar even if the main switch is off",
+                                    autoEnable
+                                ) {
+                                    autoEnable = it
+                                    putBoolean("game_bar_auto_enable", it)
+                                    if (it || gameBarEnabled) {
+                                        context.startService(Intent(context, GameBarMonitorService::class.java))
+                                    } else {
+                                        context.stopService(Intent(context, GameBarMonitorService::class.java))
+                                    }
+                                }
+                                SettingsActionRow("Configure Apps", "Choose which apps will auto-enable GameBar", onOpenPerAppConfig)
+                            }
+                        }
+                        item {
+                            SettingsSectionCard(title = "Launcher Icon", showHeader = false) {
+                                SettingsSwitchRow(
+                                    "Show launcher icon",
+                                    "Show or hide GameBar icon in launcher",
+                                    showLauncherIcon
+                                ) {
+                                    showLauncherIcon = it
+                                    context.getSharedPreferences(GameBarSettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
+                                        .edit().putBoolean(GameBarSettingsActivity.KEY_SHOW_LAUNCHER_ICON, it).apply()
+                                    onToggleLauncherIcon(it)
+                                }
+                            }
+                        }
+                        item {
+                            SettingsSectionCard(title = "User Guide", showHeader = false) {
+                                SettingsActionRow(
+                                    stringResource(R.string.game_bar_user_guide),
+                                    "Open complete usage guide",
+                                    onOpenUserGuide
+                                )
                             }
                         }
                         item {
