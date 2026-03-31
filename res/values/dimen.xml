@@ -12,6 +12,4 @@
   <dimen name="gamebar_column_width">58dp</dimen>
   <dimen name="gamebar_item_size">50dp</dimen>
   <dimen name="gamebar_item_horizontal_padding">8dp</dimen>
-  <dimen name="gamebar_color_preference_normal">28dp</dimen>
-  <dimen name="gamebar_color_preference_large">40dp</dimen>
 </resources>

@@ -15,12 +15,6 @@
     <string name="tile_on">On</string>
     <string name="tile_off">Off</string>
 
-    <!-- Custom seekbar -->
-    <string name="custom_seekbar_value">Value: <xliff:g id="v">%s</xliff:g></string>
-    <string name="custom_seekbar_default_value">by default</string>
-    <string name="custom_seekbar_default_value_to_set">Default value: <xliff:g id="v">%s</xliff:g>\nLong tap to set</string>
-    <string name="custom_seekbar_default_value_is_set">Default value is set</string>
-
     <!-- GameBar Overlay -->
     <string name="game_bar_title">GameBar</string>
     <string name="game_bar_summary">Enable the system overlay (FPS, Temp, etc.)</string>
@@ -105,8 +99,8 @@
     <string name="hint_search_apps">Search apps...</string>
 
     <!-- Preset Management -->
-    <string name="preset_category_title">Configuration Presets</string>
-    <string name="preset_category_summary">Save and manage your GameBar configurations</string>
+    <string name="preset_category_title">Settings and Presets</string>
+    <string name="preset_category_summary">Manage theme settings and GameBar presets</string>
     <string name="preset_save_current">Save Current Configuration</string>
     <string name="preset_save_current_summary">Create a new preset from current settings</string>
     <string name="preset_import">Import Preset from Backup</string>
