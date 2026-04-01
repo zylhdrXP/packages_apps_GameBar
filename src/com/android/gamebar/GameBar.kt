@@ -458,6 +458,13 @@ class GameBar private constructor(context: Context) {
                         if (touchMode == OverlayTouchMode.HORIZONTAL_SCROLL) {
                             pressActive = false
                             handler.removeCallbacks(longPressRunnable)
+                            downRawX = event.rawX
+                            startScrollX = (overlayView as? HorizontalScrollView)?.scrollX ?: 0
+                        } else if (touchMode == OverlayTouchMode.DRAG) {
+                            initialTouchX = event.rawX
+                            initialTouchY = event.rawY
+                            initialX = layoutParams!!.x
+                            initialY = layoutParams!!.y
                         }
                     }
 
@@ -471,12 +478,13 @@ class GameBar private constructor(context: Context) {
                     }
 
                     if (touchMode == OverlayTouchMode.HORIZONTAL_SCROLL) {
+                        val currentDx = event.rawX - downRawX
                         val hsv = overlayView as? HorizontalScrollView
-                        hsv?.scrollTo((startScrollX - totalDx).toInt(), 0)
+                        hsv?.scrollTo((startScrollX - currentDx).toInt(), 0)
                         return@setOnTouchListener true
                     }
 
-                    if (draggable && touchMode != OverlayTouchMode.HORIZONTAL_SCROLL) {
+                    if (draggable && touchMode == OverlayTouchMode.DRAG) {
                         val deltaX = (event.rawX - initialTouchX).toInt()
                         val deltaY = (event.rawY - initialTouchY).toInt()
                         layoutParams!!.x = initialX + deltaX
