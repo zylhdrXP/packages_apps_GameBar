@@ -152,6 +152,7 @@ fun GameBarSettingsScreen(
     var cornerRadius by remember { mutableStateOf(prefs.getInt("game_bar_corner_radius", 30)) }
     var paddingValue by remember { mutableStateOf(prefs.getInt("game_bar_padding", 4)) }
     var itemSpacing by remember { mutableStateOf(prefs.getInt("game_bar_item_spacing", 8)) }
+    var overlayWidthDp by remember { mutableStateOf(prefs.getInt("game_bar_overlay_width_dp", 280)) }
     var updateInterval by remember { mutableStateOf(prefs.getString("game_bar_update_interval", "1000") ?: "1000") }
     var titleColor by remember { mutableStateOf(prefs.getInt("game_bar_title_color", 0xFF9FCEDE.toInt())) }
     var valueColor by remember { mutableStateOf(prefs.getInt("game_bar_value_color", 0xFFFFB347.toInt())) }
@@ -161,7 +162,7 @@ fun GameBarSettingsScreen(
     var singleTapEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_single_tap_enable", true)) }
     var singleTapFunction by remember { mutableStateOf(readGestureAction("game_bar_single_tap_function", "toggle_format")) }
     var doubleTapEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_doubletap_enable", true)) }
-    var doubleTapFunction by remember { mutableStateOf(readGestureAction("game_bar_doubletap_function", "no_action")) }
+    var doubleTapFunction by remember { mutableStateOf(readGestureAction("game_bar_doubletap_function", "adjust_length")) }
     var longPressEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_longpress_enable", true)) }
     var longPressFunction by remember { mutableStateOf(readGestureAction("game_bar_longpress_function", "load_preset")) }
     var longPressTimeout by remember { mutableStateOf(prefs.getString("game_bar_longpress_timeout", "500") ?: "500") }
@@ -184,6 +185,7 @@ fun GameBarSettingsScreen(
     val splitModeOptions = listOf(SelectOption("side_by_side", "Side-by-Side"), SelectOption("stacked", "Stacked"))
     val gestureOptions = listOf(
         SelectOption("no_action", "No Action"),
+        SelectOption("adjust_length", "Length Adjustment Mode"),
         SelectOption("toggle_format", "Toggle Full/Minimal Format"),
         SelectOption("open_settings", "Open GameBar Settings"),
         SelectOption("take_screenshot", "Take Screenshot"),
@@ -366,6 +368,11 @@ fun GameBarSettingsScreen(
                                 SettingsCustomSliderRow("Overlay Corner Radius", cornerRadius, 0, 100, defaultValue = 30) { cornerRadius = it; putInt("game_bar_corner_radius", it); applyPrefs() }
                                 SettingsCustomSliderRow("Overlay Padding", paddingValue, 0, 64, defaultValue = 4) { paddingValue = it; putInt("game_bar_padding", it); applyPrefs() }
                                 SettingsCustomSliderRow("Item Spacing", itemSpacing, 0, 50, defaultValue = 8) { itemSpacing = it; putInt("game_bar_item_spacing", it); applyPrefs() }
+                                SettingsCustomSliderRow("Overlay Length", overlayWidthDp, 160, 720, defaultValue = 280, units = "dp") {
+                                    overlayWidthDp = it
+                                    putInt("game_bar_overlay_width_dp", it)
+                                    applyPrefs()
+                                }
                                 SettingsSelectRow("Update Interval", updateInterval, intervalOptions) { updateInterval = it; putString("game_bar_update_interval", it); applyPrefs() }
                                 SettingsActionRow("Stat Title Color", colorLabel(titleColor)) {
                                     openColorPicker(dialogId = 1002, currentColor = titleColor, showAlpha = false) { picked ->

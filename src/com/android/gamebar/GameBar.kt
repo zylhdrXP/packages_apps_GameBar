@@ -48,7 +48,8 @@ class GameBar private constructor(context: Context) {
     private enum class OverlayTouchMode {
         UNDECIDED,
         DRAG,
-        HORIZONTAL_SCROLL
+        HORIZONTAL_SCROLL,
+        WIDTH_EDIT
     }
 
     companion object {
@@ -112,6 +113,8 @@ class GameBar private constructor(context: Context) {
     private var overlayFormat = "full"
     private var position = "draggable"
     private var splitMode = "side_by_side"
+    private var overlayWidthDp = 280
+    private var overlayWidthEditing = false
     private var updateIntervalMs = 1000
     private var draggable = true
 
@@ -141,7 +144,7 @@ class GameBar private constructor(context: Context) {
     private var singleTapEnabled = true
     private var singleTapFunction = "toggle_format"
     private var doubleTapEnabled = true
-    private var doubleTapFunction = "no_action"
+    private var doubleTapFunction = "adjust_length"
     private var longPressFunction = "load_preset"
     private var bgDrawable: GradientDrawable? = null
     
@@ -211,6 +214,15 @@ class GameBar private constructor(context: Context) {
             "screen_record" -> {
                 toggleScreenRecording()
             }
+            "adjust_length" -> {
+                overlayWidthEditing = !overlayWidthEditing
+                updateWidthEditVisualState()
+                Toast.makeText(
+                    context,
+                    if (overlayWidthEditing) "Length edit mode enabled" else "Length edit mode disabled",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
             "load_preset" -> {
                 showPresetQuickLoader()
             }
@@ -264,7 +276,7 @@ class GameBar private constructor(context: Context) {
         doubleTapFunction = sanitizeGestureFunction(
             prefs = prefs,
             key = "game_bar_doubletap_function",
-            defaultValue = "no_action"
+            defaultValue = "adjust_length"
         )
         longPressFunction = sanitizeGestureFunction(
             prefs = prefs,
@@ -293,6 +305,12 @@ class GameBar private constructor(context: Context) {
         updateOverlayFormat(prefs.getString("game_bar_format", "full") ?: "full")
         updateUpdateInterval(prefs.getString("game_bar_update_interval", "1000") ?: "1000")
         updatePosition("draggable")
+        overlayWidthDp = prefs.getInt("game_bar_overlay_width_dp", 280)
+        if (isShowing && layoutParams != null && overlayView != null) {
+            applyOverlayWindowWidth(layoutParams!!)
+            clampToScreenBounds(layoutParams!!, overlayView)
+            windowManager.updateViewLayout(overlayView, layoutParams)
+        }
 
         val spacing = prefs.getInt("game_bar_item_spacing", 8)
         updateItemSpacing(spacing)
@@ -353,6 +371,7 @@ class GameBar private constructor(context: Context) {
             layoutParams!!.x = 0
             layoutParams!!.y = 100
         }
+        applyOverlayWindowWidth(layoutParams!!)
 
         val contentLayout = LinearLayout(context).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -375,11 +394,13 @@ class GameBar private constructor(context: Context) {
         applySplitMode()
         applyBackgroundStyle()
         applyPadding()
+        updateWidthEditVisualState()
 
         var touchMode = OverlayTouchMode.UNDECIDED
         var downRawX = 0f
         var downRawY = 0f
         var startScrollX = 0
+        var startWindowWidth = 0
         overlayView?.setOnTouchListener { _, event ->
             gestureDetector?.let {
                 if (it.onTouchEvent(event)) {
@@ -392,13 +413,19 @@ class GameBar private constructor(context: Context) {
                     downRawX = event.rawX
                     downRawY = event.rawY
                     startScrollX = (overlayView as? HorizontalScrollView)?.scrollX ?: 0
+                    startWindowWidth = layoutParams?.width ?: 0
+                    if (overlayWidthEditing) {
+                        touchMode = OverlayTouchMode.WIDTH_EDIT
+                        pressActive = false
+                        handler.removeCallbacks(longPressRunnable)
+                    }
                     if (draggable) {
                         initialX = layoutParams!!.x
                         initialY = layoutParams!!.y
                         initialTouchX = event.rawX
                         initialTouchY = event.rawY
                     }
-                    if (longPressEnabled) {
+                    if (longPressEnabled && touchMode != OverlayTouchMode.WIDTH_EDIT) {
                         pressActive = true
                         downX = event.rawX
                         downY = event.rawY
@@ -411,6 +438,16 @@ class GameBar private constructor(context: Context) {
                     val totalDy = event.rawY - downRawY
                     val absDx = Math.abs(totalDx)
                     val absDy = Math.abs(totalDy)
+
+                    if (touchMode == OverlayTouchMode.WIDTH_EDIT) {
+                        val lp = layoutParams ?: return@setOnTouchListener false
+                        val newWidth = (startWindowWidth + totalDx.toInt())
+                            .coerceIn(minOverlayWidthPx(), maxOverlayWidthPx())
+                        lp.width = newWidth
+                        overlayWidthDp = pxToDp(newWidth)
+                        windowManager.updateViewLayout(overlayView, lp)
+                        return@setOnTouchListener true
+                    }
 
                     if (touchMode == OverlayTouchMode.UNDECIDED && (absDx > TOUCH_SLOP || absDy > TOUCH_SLOP)) {
                         touchMode = if (splitMode == "side_by_side" && absDx > absDy + 8f) {
@@ -460,6 +497,11 @@ class GameBar private constructor(context: Context) {
                                 .putInt(PREF_KEY_X, layoutParams!!.x)
                                 .putInt(PREF_KEY_Y, layoutParams!!.y)
                                 .apply()
+                    }
+                    if (touchMode == OverlayTouchMode.WIDTH_EDIT) {
+                        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                        prefs.edit().putInt("game_bar_overlay_width_dp", overlayWidthDp).apply()
+                        Toast.makeText(context, "Overlay width: ${overlayWidthDp}dp (edit mode active)", Toast.LENGTH_SHORT).show()
                     }
                     touchMode = OverlayTouchMode.UNDECIDED
                     true
@@ -1226,6 +1268,42 @@ class GameBar private constructor(context: Context) {
         val maxY = (screenHeight - viewHeight).coerceAtLeast(0)
         lp.x = lp.x.coerceIn(0, maxX)
         lp.y = lp.y.coerceIn(0, maxY)
+    }
+
+    private fun applyOverlayWindowWidth(lp: WindowManager.LayoutParams) {
+        lp.width = overlayWidthPxFromDp(overlayWidthDp)
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT
+    }
+
+    private fun updateWidthEditVisualState() {
+        val view = overlayView ?: return
+        if (overlayWidthEditing) {
+            val border = GradientDrawable().apply {
+                setColor(Color.TRANSPARENT)
+                cornerRadius = cornerRadius.toFloat()
+                setStroke(dpToPx(context, 2), 0xFF58A6FF.toInt())
+            }
+            view.foreground = border
+        } else {
+            view.foreground = null
+        }
+    }
+
+    private fun overlayWidthPxFromDp(dp: Int): Int {
+        val px = dpToPx(context, dp.coerceAtLeast(160))
+        return px.coerceIn(minOverlayWidthPx(), maxOverlayWidthPx())
+    }
+
+    private fun minOverlayWidthPx(): Int = dpToPx(context, 160)
+
+    private fun maxOverlayWidthPx(): Int {
+        val screenWidth = context.resources.displayMetrics.widthPixels
+        return (screenWidth - dpToPx(context, 24)).coerceAtLeast(minOverlayWidthPx())
+    }
+
+    private fun pxToDp(px: Int): Int {
+        val scale = context.resources.displayMetrics.density
+        return (px / scale).toInt().coerceAtLeast(1)
     }
 
     private fun readLine(path: String): String? {
