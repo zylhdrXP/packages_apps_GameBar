@@ -796,6 +796,8 @@ class GameBar private constructor(context: Context) {
             layoutParams?.let { lp ->
                 overlayView?.let { view ->
                     try {
+                        applyAdaptiveOverlayWidth(lp, layout)
+                        clampToScreenBounds(lp, view)
                         windowManager.updateViewLayout(view, lp)
                     } catch (e: Exception) {
                         // View might be in invalid state, ignore
@@ -1273,6 +1275,28 @@ class GameBar private constructor(context: Context) {
     private fun applyOverlayWindowWidth(lp: WindowManager.LayoutParams) {
         lp.width = overlayWidthPxFromDp(overlayWidthDp)
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT
+    }
+
+    private fun applyAdaptiveOverlayWidth(lp: WindowManager.LayoutParams, contentLayout: View) {
+        if (overlayWidthEditing) {
+            // While editing, keep explicit width for interactive feedback.
+            return
+        }
+        val desiredWidthPx = overlayWidthPxFromDp(overlayWidthDp)
+        val measuredContentWidth = measureContentWidthPx(contentLayout)
+        lp.width = if (measuredContentWidth in 1 until desiredWidthPx) {
+            WindowManager.LayoutParams.WRAP_CONTENT
+        } else {
+            desiredWidthPx
+        }
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT
+    }
+
+    private fun measureContentWidthPx(contentLayout: View): Int {
+        val widthSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        val heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+        contentLayout.measure(widthSpec, heightSpec)
+        return contentLayout.measuredWidth
     }
 
     private fun updateWidthEditVisualState() {
