@@ -12,7 +12,20 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -521,6 +534,9 @@ fun GameBarSettingsScreen(
                                 )
                             }
                         }
+                        item {
+                            AboutGameBarCard()
+                        }
                     }
                 }
             }
@@ -590,5 +606,92 @@ fun GameBarSettingsScreen(
                 TextButton(onClick = { showResetDefaultsDialog = false }) { Text(stringResource(android.R.string.cancel)) }
             }
         )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalLayoutApi::class)
+fun AboutGameBarCard() {
+    val context = LocalContext.current
+    androidx.compose.material3.ElevatedCard(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = androidx.compose.material3.CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            val packageInfo = runCatching { context.packageManager.getPackageInfo(context.packageName, 0) }.getOrNull()
+            val versionName = packageInfo?.versionName ?: "1.0"
+            
+            Text(
+                text = "GameBar v$versionName",
+                style = MaterialTheme.typography.headlineMedium,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "Universal real-time performance overlay toolkit for Android devices",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            androidx.compose.ui.viewinterop.AndroidView(
+                factory = { ctx ->
+                    android.widget.ImageView(ctx).apply {
+                        setImageDrawable(ctx.packageManager.getApplicationIcon(ctx.packageName))
+                        scaleType = android.widget.ImageView.ScaleType.FIT_CENTER
+                    }
+                },
+                modifier = Modifier
+                    .size(100.dp)
+                    .clip(RoundedCornerShape(20.dp))
+            )
+
+            Text(
+                text = "Developed by kenway214",
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center
+            )
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                androidx.compose.material3.Button(
+                    onClick = { 
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kenway214/packages_apps_GameBar")))
+                    },
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Default.Code,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("GitHub")
+                }
+                
+                androidx.compose.material3.Button(
+                    onClick = { 
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/pandemonium_haydn")))
+                    },
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Default.BugReport,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Support")
+                }
+            }
+        }
     }
 }
