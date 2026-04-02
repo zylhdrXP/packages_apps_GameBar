@@ -29,7 +29,8 @@ object GameBarStatsSampler {
         val gpuClock: String,
         val gpuTemp: String,
         val batteryLevel: String,
-        val powerWatt: String
+        val powerWatt: String,
+        val appRamUsage: String
     )
 
     fun capture(context: Context, packageName: String): Snapshot {
@@ -60,7 +61,8 @@ object GameBarStatsSampler {
             gpuClock = GameBarGpuInfo.getGpuClock(),
             gpuTemp = GameBarGpuInfo.getGpuTemp(),
             batteryLevel = GameBarBatteryInfo.getBatteryLevelPercent(context),
-            powerWatt = GameBarBatteryInfo.getBatteryPowerWatt(context)
+            powerWatt = GameBarBatteryInfo.getBatteryPowerWatt(context),
+            appRamUsage = GameBarMemInfo.getAppRamUsage(context, packageName)
         )
     }
 
@@ -82,7 +84,8 @@ object GameBarStatsSampler {
             if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_GPU_CLOCK, true)) snapshot.gpuClock else "N/A",
             if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_GPU_TEMP, true)) snapshot.gpuTemp else "N/A",
             snapshot.batteryLevel,
-            snapshot.powerWatt
+            snapshot.powerWatt,
+            if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_RAM, true)) snapshot.appRamUsage else "N/A"
         )
     }
 }

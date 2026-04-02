@@ -55,7 +55,8 @@ class GameDataExport private constructor() {
             "GPU_Clock",
             "GPU_Temp",
             "Battery_Level",
-            "Power_W"
+            "Power_W",
+            "App_RAM_Usage"
         )
     }
 
@@ -117,7 +118,8 @@ class GameDataExport private constructor() {
         gpuClock: String,
         gpuTemp: String,
         batteryLevel: String,
-        powerWatt: String
+        powerWatt: String,
+        appRamUsage: String
     ) {
         if (!capturing) return
 
@@ -152,7 +154,8 @@ class GameDataExport private constructor() {
                     gpuClock,
                     gpuTemp,
                     batteryLevel,
-                    powerWatt
+                    powerWatt,
+                    appRamUsage
                 )
                 statsRows.add(row)
             }
@@ -174,7 +177,8 @@ class GameDataExport private constructor() {
                     gpuClock,
                     gpuTemp,
                     batteryLevel,
-                    powerWatt
+                    powerWatt,
+                    appRamUsage
                 )
             }
         }

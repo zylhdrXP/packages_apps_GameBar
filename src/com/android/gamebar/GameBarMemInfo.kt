@@ -99,4 +99,22 @@ object GameBarMemInfo {
         }
         return "N/A"
     }
+
+    fun getAppRamUsage(context: android.content.Context, packageName: String): String {
+        try {
+            val am = context.getSystemService(android.content.Context.ACTIVITY_SERVICE) as android.app.ActivityManager
+            val pids = am.runningAppProcesses?.filter { it.processName == packageName }?.map { it.pid }?.toIntArray()
+            if (pids != null && pids.isNotEmpty()) {
+                val memInfos = am.getProcessMemoryInfo(pids)
+                var totalPssKb = 0
+                for (info in memInfos) {
+                    totalPssKb += info.totalPss
+                }
+                return (totalPssKb / 1024).toString()
+            }
+        } catch (e: Exception) {
+            // ignore
+        }
+        return "N/A"
+    }
 }

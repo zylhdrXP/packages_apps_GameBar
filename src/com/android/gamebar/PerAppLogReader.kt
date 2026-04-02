@@ -33,6 +33,7 @@ data class LogAnalytics(
     val ramUsageTimeData: List<Pair<Long, Double>>,  // RAM usage over time (MB)
     val ramSpeedTimeData: List<Pair<Long, Double>>,  // RAM speed over time (MHz)
     val ramTempTimeData: List<Pair<Long, Double>>,   // RAM temp over time (C)
+    val appRamUsageTimeData: List<Pair<Long, Double>>, // App RAM usage over time (MB)
     val cpuClockTimeData: Map<Int, List<Pair<Long, Double>>>,  // Per-core clock speeds over time
     val gpuUsageTimeData: List<Pair<Long, Double>>,  // GPU usage over time
     val gpuTempTimeData: List<Pair<Long, Double>>,   // GPU temp over time
@@ -100,6 +101,7 @@ class PerAppLogReader {
         private const val COL_GPU_TEMP = 13
         private const val COL_BATTERY_LEVEL = 14
         private const val COL_POWER = 15
+        private const val COL_APP_RAM_USAGE = 16
     }
 
     /**
@@ -127,6 +129,7 @@ class PerAppLogReader {
             val ramUsageTimeData = mutableListOf<Pair<Long, Double>>()
             val ramSpeedTimeData = mutableListOf<Pair<Long, Double>>()
             val ramTempTimeData = mutableListOf<Pair<Long, Double>>()
+            val appRamUsageTimeData = mutableListOf<Pair<Long, Double>>()
             val cpuClockTimeData = mutableMapOf<Int, MutableList<Pair<Long, Double>>>()
             val gpuUsageValues = mutableListOf<Double>()
             val gpuUsageTimeData = mutableListOf<Pair<Long, Double>>()
@@ -142,6 +145,7 @@ class PerAppLogReader {
             var lineCount = 0
             var sessionStartTimeMs: Long = 0
             var powerColumnIndex = -1
+            var COL_APP_RAM_USAGE_RUNTIME = -1
 
             BufferedReader(FileReader(file)).use { reader ->
                 var line = reader.readLine()
@@ -155,6 +159,13 @@ class PerAppLogReader {
                             normalized.contains("power_w") ||
                             normalized.contains("power(w)") ||
                             normalized.contains("watt")
+                    }
+                    var appRamColumnIndex = headers.indexOfFirst { header ->
+                        val normalized = header.trim().lowercase()
+                        normalized == "app_ram_usage" || normalized.contains("app_ram")
+                    }
+                    if (appRamColumnIndex >= 0) {
+                        COL_APP_RAM_USAGE_RUNTIME = appRamColumnIndex
                     }
                     line = reader.readLine()
                 }
@@ -429,6 +440,25 @@ class PerAppLogReader {
                                 }
                             }
 
+                            // Extract App RAM Usage
+                            val resolvedAppRamIndex = if (COL_APP_RAM_USAGE_RUNTIME >= 0) COL_APP_RAM_USAGE_RUNTIME else {
+                                if (columns.size > COL_APP_RAM_USAGE) COL_APP_RAM_USAGE else -1
+                            }
+                            if (resolvedAppRamIndex >= 0 && columns.size > resolvedAppRamIndex) {
+                                val appRamStr = columns[resolvedAppRamIndex].trim()
+                                if (appRamStr.isNotEmpty() && appRamStr != "N/A" && appRamStr != "-") {
+                                    val appRam = parseNumericValue(appRamStr)
+                                    if (appRam != null && appRam >= 0) {
+                                        val relativeTime = if (sessionStartTimeMs > 0) {
+                                            fpsTimeData.lastOrNull()?.first ?: (lineCount * 1000L)
+                                        } else {
+                                            lineCount * 1000L
+                                        }
+                                        appRamUsageTimeData.add(Pair(relativeTime, appRam))
+                                    }
+                                }
+                            }
+
                             // Extract timestamps for session duration
                             if (firstTimestamp == null) {
                                 firstTimestamp = timestampStr
@@ -490,6 +520,7 @@ class PerAppLogReader {
                 ramUsageTimeData = ramUsageTimeData,
                 ramSpeedTimeData = ramSpeedTimeData,
                 ramTempTimeData = ramTempTimeData,
+                appRamUsageTimeData = appRamUsageTimeData,
                 cpuClockTimeData = cpuClockTimeData,
                 gpuUsageTimeData = gpuUsageTimeData,
                 gpuTempTimeData = gpuTempTimeData,

@@ -398,6 +398,7 @@ private fun FpsRecordDetailScreen(
     val ramUsageValues = analytics.ramUsageTimeData.map { it.second.toFloat() }
     val ramSpeedValues = analytics.ramSpeedTimeData.map { it.second.toFloat() }
     val ramTempValues = analytics.ramTempTimeData.map { it.second.toFloat() }
+    val appRamUsageValues = analytics.appRamUsageTimeData.map { it.second.toFloat() }
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val cpuClockSeries = remember(analytics.cpuClockTimeData, isDark) {
         buildCpuClusterSeries(analytics.cpuClockTimeData, isDark)
@@ -886,6 +887,38 @@ private fun FpsRecordDetailScreen(
                         max = maxUsage,
                         min = ramUsageValues.minOrNull(),
                         avg = avgOrNull(ramUsageValues),
+                        unit = "MB",
+                    )
+                )
+            }
+        }
+
+        if (selectedDetailTab == SessionDetailTab.CHARTS && appRamUsageValues.isNotEmpty()) {
+            item {
+                val appRamUsageColor = Color(0xFFE91E63) // A pleasing Pink shade for App RAM differential emphasis
+                val maxUsage = appRamUsageValues.maxOrNull() ?: 0f
+                val yMax = (((maxUsage / 256f).toInt() + 1).coerceAtLeast(4) * 256f)
+                LineChartCard(
+                    title = "App RAM Usage (MB)",
+                    series = listOf(ChartSeries("App RAM", appRamUsageColor, appRamUsageValues)),
+                    chartContent = {
+                        FixedAxisLineChart(
+                            series = listOf(ChartSeries("App RAM", appRamUsageColor, appRamUsageValues)),
+                            yMin = 0f,
+                            yMax = yMax,
+                            yStep = 256f,
+                            fillUnderFirstSeries = true,
+                            fillGradientColors = listOf(
+                                Color(0x80E91E63),
+                                Color(0x10E91E63),
+                            ),
+                            modifier = Modifier.fillMaxWidth().height(180.dp),
+                        )
+                    },
+                    footerStats = ChartFooter(
+                        max = maxUsage,
+                        min = appRamUsageValues.minOrNull(),
+                        avg = avgOrNull(appRamUsageValues),
                         unit = "MB",
                     )
                 )

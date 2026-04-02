@@ -780,6 +780,7 @@ class GameBar private constructor(context: Context) {
             val logGpuTemp = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_GPU_TEMP, true)) gpuTempStr else "N/A"
             val logBatteryLevel = batteryLevelStr
             val logPowerWatt = batteryPowerWattStr
+            val logAppRamUsage = if (prefs.getBoolean(GameBarLoggingPrefs.PREF_LOG_RAM, true)) GameBarMemInfo.getAppRamUsage(context, pkgName) else "N/A"
 
             GameDataExport.getInstance().addOverlayData(
                     dateTime,
@@ -797,7 +798,8 @@ class GameBar private constructor(context: Context) {
                     logGpuClock,
                     logGpuTemp,
                     logBatteryLevel,
-                    logPowerWatt
+                    logPowerWatt,
+                    logAppRamUsage
             )
         }
 
