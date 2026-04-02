@@ -43,7 +43,6 @@ class GameBarSettingsActivity : FragmentActivity() {
                     onOpenPresetManager = {
                         startActivity(Intent(this, PresetManagementActivity::class.java))
                     },
-                    onOpenUserGuide = { openUserGuide() },
                     onToggleLauncherIcon = { enabled -> setLauncherIconEnabled(enabled) }
                 )
             }
@@ -82,13 +81,4 @@ class GameBarSettingsActivity : FragmentActivity() {
         packageManager.setComponentEnabledSetting(componentName, state, PackageManager.DONT_KILL_APP)
     }
 
-    private fun openUserGuide() {
-        try {
-            val url = getString(R.string.game_bar_user_guide_url)
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(this, "Unable to open user guide: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-    }
 }

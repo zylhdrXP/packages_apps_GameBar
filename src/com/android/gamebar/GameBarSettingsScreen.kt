@@ -23,7 +23,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.Arrangement
@@ -76,7 +78,6 @@ fun GameBarSettingsScreen(
     onOpenFpsRecord: () -> Unit,
     onOpenFontSelector: () -> Unit,
     onOpenPresetManager: () -> Unit,
-    onOpenUserGuide: () -> Unit,
     onToggleLauncherIcon: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
@@ -505,15 +506,6 @@ fun GameBarSettingsScreen(
                             }
                         }
                         item {
-                            SettingsSectionCard(title = "User Guide", showHeader = false) {
-                                SettingsActionRow(
-                                    stringResource(R.string.game_bar_user_guide),
-                                    "Open complete usage guide",
-                                    onOpenUserGuide
-                                )
-                            }
-                        }
-                        item {
                             SettingsSectionCard(title = stringResource(R.string.preset_category_title), summary = stringResource(R.string.preset_category_summary)) {
                                 SettingsActionRow(
                                     title = stringResource(R.string.preset_save_current),
@@ -679,7 +671,7 @@ fun AboutGameBarCard() {
                 
                 androidx.compose.material3.Button(
                     onClick = { 
-                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/pandemonium_haydn")))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/kenway214/packages_apps_GameBar/issues")))
                     },
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
                 ) {
@@ -689,7 +681,38 @@ fun AboutGameBarCard() {
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
+                    Text("Issues")
+                }
+
+                androidx.compose.material3.Button(
+                    onClick = { 
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/pandemonium_haydn")))
+                    },
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Default.Chat,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text("Support")
+                }
+
+                androidx.compose.material3.Button(
+                    onClick = {
+                        val url = context.getString(R.string.game_bar_user_guide_url)
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    },
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Guide")
                 }
             }
         }
