@@ -1,8 +1,11 @@
 # GameBar - Real-time Performance Overlay for Android
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com)
-[![API](https://img.shields.io/badge/API-33%2B-brightgreen.svg)](https://android-arsenal.com/api?level=33)
+[![Platform](https://img.shields.io/badge/Platform-Android-3DDC84.svg?logo=android&logoColor=white)](https://www.android.com)
+[![API](https://img.shields.io/badge/API-33%2B-brightgreen.svg?logo=android)](https://android-arsenal.com/api?level=33)
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Java](https://img.shields.io/badge/Java-17+-ED8B00.svg?logo=java&logoColor=white)](https://www.java.com)
+[![Jetpack Compose](https://img.shields.io/badge/Jetpack_Compose-Material3-4285F4.svg?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 
 GameBar is a comprehensive real-time performance monitoring overlay for Android devices. It provides detailed system metrics including FPS, CPU/GPU usage, temperatures, and memory statistics with a customizable floating overlay.
 
@@ -11,9 +14,11 @@ GameBar is a comprehensive real-time performance monitoring overlay for Android 
 - **Real-time FPS Monitoring** - Track frame rates with multiple measurement methods
 - **CPU Metrics** - Usage percentage, per-core frequencies, and temperature
 - **GPU Metrics** - Usage, clock speed, and temperature
-- **Memory Stats** - RAM usage, speed, and temperature
+- **Memory Stats** - Total System RAM usage, RAM frequency, and RAM temperature
+- **Per-App RAM Tracking** - Isolate and track direct application physical PSS memory footprints autonomously (No Root required)
 - **Battery Temperature** - Monitor device thermal status
 - **Customizable Overlay** - Adjustable position, size, colors, and transparency
+- **Modern Settings Hub** - Redesigned 2x2 Grid UI Layout featuring dynamic Lottie logic and intuitive brand-linked Support/About cards
 - **Per-App Configuration** - Auto-enable GameBar for specific applications
 - **Logging & Analytics** - Record and analyze performance data
 - **Gesture Controls** - Double-tap screenshot, long-press actions
@@ -194,29 +199,10 @@ The logging method has been simplified to a single, manual action.
 - Go to **Settings > System > GameBar > GameBar FPS Records** to view your list of saved logs.
 - From there, you can view detailed analytics for each session.
 
-## SELinux Policy
-
-GameBar includes SELinux policies for:
-- Access to sysfs nodes (thermal, kgsl, drm)
-- Overlay window permissions
-- System service interactions
-- File provider for log sharing
-
-Policies are automatically included via `sepolicy/SEPolicy.mk`.
-
-## Permissions
-
-Required permissions (granted automatically as system app):
-- `SYSTEM_ALERT_WINDOW` - Overlay display
-- `PACKAGE_USAGE_STATS` - Foreground app detection
-- `WRITE_EXTERNAL_STORAGE` - Log file storage
-- `ACCESS_SURFACE_FLINGER` - FPS measurement
-- `WRITE_SECURE_SETTINGS` - Configuration persistence
-
 ## Troubleshooting
 
 ### Overlay not showing
-- Check overlay permission in Settings → Apps → GameBar
+- Check overlay permission in Settings → Apps → GameBa
 - Verify SELinux is not blocking (check `adb logcat | grep avc`)
 - Ensure init.rc permissions are applied (`adb shell ls -l /sys/class/...`)
 
@@ -228,11 +214,6 @@ Required permissions (granted automatically as system app):
 ### Temperature values incorrect or missing
 - GameBar automatically detects if temperatures are milli/deci/celsius. If the value seems wrong, ensure your `config.xml` divider is set to `0` (auto), or manually override it completely (e.g., `1000` or `10`).
 - If your specific custom kernel uses a bizarre thermal zone name that is skipping detection, manually override the `"dynamic"` path in your `config.xml`.
-
-### Build errors
-- Ensure `org.lineageos.settings.resources` is available in your ROM
-- Check SettingsLib is included in build
-- Verify all resource files are present in res/ directory
 
 ## Contributing
 

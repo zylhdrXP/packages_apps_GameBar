@@ -30,12 +30,12 @@ GameBar is a **real-time performance overlay** that displays FPS, CPU/GPU usage,
 - **Drag:** Move the overlay (when draggable mode is enabled).
 
 ### How to Record a Performance Log
-The logging method has been simplified to a single, manual action.
+The logging mechanism has been uncoupled to run securely through a separate independent toggle!
 
-1.  **Enable the Overlay:** Open **Settings > System > GameBar** and turn on the main **"Enable GameBar Overlay"** switch. The overlay must be visible to start a recording.
-2.  **Run a Game:** Open the game or application you want to test.
-3.  **Start Recording:** When you are ready, **double-tap** the GameBar overlay. You will see an indicator that recording has started.
-4.  **Stop Recording:** Once you are finished, **double-tap** the overlay again. The log file will be saved automatically.
+1.  **Toggle Universal Logging Mode:** Open **Settings > System > GameBar**. Navigate to the **Records** card and ensure the master **"Enable Per-App Logging"** option is enabled independently.
+2.  **Enable the Overlay:** Turn on the main **"Enable GameBar Overlay"** switch on the home settings tab. The overlay must be visibly rendering to pipe real-time capture analytics.
+3.  **Start Recording:** Open the game or application you want to test. When you are ready to begin capturing, **double-tap** the GameBar overlay. You will see an indicator that recording has officially initialized.
+4.  **Stop Recording:** Once you are finished, **double-tap** the overlay again. The log file will be finalized and saved instantly!
 
 ### Viewing Your Recordings
 - All recordings are saved in one place:
@@ -57,7 +57,8 @@ You can select which data to log:
    - ✅ CPU Usage
    - ✅ CPU Clock Speed
    - ✅ CPU Temperature
-   - ✅ RAM Usage
+   - ✅ System RAM Usage
+   - ✅ App RAM Usage (Process PSS Memory)
    - ✅ RAM Speed
    - ✅ RAM Temperature
    - ✅ GPU Usage
@@ -225,6 +226,8 @@ Result:
 📉 Min FPS: 45 (during intense battle)
 🔥 Avg CPU Temp: 42.5°C
 🌡️ Max CPU Temp: 48.0°C
+📱 App RAM Peak: 1.2 GB (Pink Chart)
+💻 System RAM Peak: 4.8 GB (Yellow Chart)
 ```
 
 ### Example: App Comparison
