@@ -661,7 +661,7 @@ fun AboutGameBarCard() {
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
                 ) {
                     androidx.compose.material3.Icon(
-                        imageVector = Icons.Default.Code,
+                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.brand_github),
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
@@ -691,7 +691,7 @@ fun AboutGameBarCard() {
                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
                 ) {
                     androidx.compose.material3.Icon(
-                        imageVector = Icons.Default.Chat,
+                        painter = androidx.compose.ui.res.painterResource(id = R.drawable.brand_telegram),
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
