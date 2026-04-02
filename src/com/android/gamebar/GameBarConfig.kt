@@ -46,12 +46,23 @@ object GameBarConfig {
         get() = SysfsDetector.getCpuBasePath()
     
     val cpuTempPath: String?
-        get() = SysfsDetector.getCpuTempInfo().first
+        get() = getCpuTempConfig().first
     val cpuTempDivider: Int
-        get() = SysfsDetector.getCpuTempInfo().second
+        get() = getCpuTempConfig().second
 
     fun getCpuTempConfig(): Pair<String?, Int> {
-        return SysfsDetector.getCpuTempInfo()
+        val resPath = context.getString(R.string.config_cpu_temp_path)
+        val resDivider = context.resources.getInteger(R.integer.config_cpu_temp_divider)
+
+        if (resPath != "dynamic" && resPath.isNotEmpty()) {
+            val divider = if (resDivider > 0) resDivider else SysfsDetector.detectTemperatureDivider(resPath)
+            return Pair(resPath, divider)
+        }
+
+        val detectorInfo = SysfsDetector.getCpuTempInfo()
+        val finalDivider = if (resDivider > 0) resDivider else detectorInfo.second
+        
+        return Pair(detectorInfo.first, finalDivider)
     }
     
     // GPU configuration
@@ -60,19 +71,49 @@ object GameBarConfig {
     val gpuClockPath: String
         get() = context.getString(R.string.config_gpu_clock_path)
     val gpuTempPath: String
-        get() = context.getString(R.string.config_gpu_temp_path)
+        get() = getGpuTempConfig().first ?: context.getString(R.string.config_gpu_temp_path)
     val gpuTempDivider: Int
-        get() = context.resources.getInteger(R.integer.config_gpu_temp_divider)
+        get() = getGpuTempConfig().second
     val gpuClockDivider: Int
         get() = context.resources.getInteger(R.integer.config_gpu_clock_divider)
+
+    fun getGpuTempConfig(): Pair<String?, Int> {
+        val resPath = context.getString(R.string.config_gpu_temp_path)
+        val resDivider = context.resources.getInteger(R.integer.config_gpu_temp_divider)
+
+        if (resPath != "dynamic" && resPath.isNotEmpty()) {
+            val divider = if (resDivider > 0) resDivider else SysfsDetector.detectTemperatureDivider(resPath)
+            return Pair(resPath, divider)
+        }
+
+        val detectorInfo = SysfsDetector.getGpuTempInfo()
+        val finalDivider = if (resDivider > 0) resDivider else detectorInfo.second
+        
+        return Pair(detectorInfo.first ?: "/sys/class/kgsl/kgsl-3d0/temp", finalDivider)
+    }
     
     // RAM configuration
     val ramFreqPath: String
         get() = context.getString(R.string.config_ram_freq_path)
     val ramTempPath: String
-        get() = context.getString(R.string.config_ram_temp_path)
+        get() = getRamTempConfig().first ?: context.getString(R.string.config_ram_temp_path)
     val ramTempDivider: Int
-        get() = context.resources.getInteger(R.integer.config_ram_temp_divider)
+        get() = getRamTempConfig().second
+
+    fun getRamTempConfig(): Pair<String?, Int> {
+        val resPath = context.getString(R.string.config_ram_temp_path)
+        val resDivider = context.resources.getInteger(R.integer.config_ram_temp_divider)
+
+        if (resPath != "dynamic" && resPath.isNotEmpty()) {
+            val divider = if (resDivider > 0) resDivider else SysfsDetector.detectTemperatureDivider(resPath)
+            return Pair(resPath, divider)
+        }
+
+        val detectorInfo = SysfsDetector.getRamTempInfo()
+        val finalDivider = if (resDivider > 0) resDivider else detectorInfo.second
+        
+        return Pair(detectorInfo.first ?: "", finalDivider)
+    }
     
     // Proc filesystem paths
     val procStatPath: String

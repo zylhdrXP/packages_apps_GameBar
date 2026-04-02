@@ -28,7 +28,7 @@ object SysfsDetector {
      * @param path The sysfs path to analyze
      * @return The appropriate divider value (1000, 100, 10, or 1)
      */
-    private fun detectTemperatureDivider(path: String): Int {
+    fun detectTemperatureDivider(path: String): Int {
         return try {
             val file = File(path)
             if (!file.exists() || !file.canRead()) return 1000 //by default
@@ -225,6 +225,85 @@ object SysfsDetector {
         Log.w(TAG, "No valid path found for $pathType")
         detectedPaths[pathType] = null
         return null
+    }
+
+    /** Helper to dynamically find thermal zone by its type name */
+    private fun findThermalZonePath(vararg possibleTypes: String): String? {
+        val thermalBaseDirs = arrayOf("/sys/class/thermal", "/sys/devices/virtual/thermal")
+        for (baseDirPath in thermalBaseDirs) {
+            val baseDir = File(baseDirPath)
+            if (!baseDir.exists() || !baseDir.isDirectory()) continue
+
+            baseDir.listFiles()?.forEach { zone ->
+                val typeFile = File(zone, "type")
+                val tempFile = File(zone, "temp")
+
+                if (typeFile.exists() && tempFile.exists() && tempFile.canRead()) {
+                    try {
+                        val type = typeFile.readText().trim().lowercase()
+                        for (pt in possibleTypes) {
+                            if (type == pt || type.startsWith(pt)) {
+                                return tempFile.absolutePath
+                            }
+                        }
+                    } catch (e: Exception) {
+                        // Ignore read errors and continue
+                    }
+                }
+            }
+        }
+        return null
+    }
+
+    /** @return GPU temperature sysfs path and divider based on KGSL or generic thermal zones */
+    fun getGpuTempInfo(): Pair<String?, Int> {
+        if (detectedPaths.containsKey("gpu_temp")) {
+            val path = detectedPaths["gpu_temp"]
+            val divider = detectedDividers["gpu_temp"] ?: 1000
+            return Pair(path, divider)
+        }
+
+        // Always try standard kgsl direct path first
+        var path: String? = "/sys/class/kgsl/kgsl-3d0/temp"
+        val kgslFile = File(path!!)
+        if (!kgslFile.exists() || !kgslFile.canRead()) {
+            // Fallback to standard thermal zones typical of qualcomm/mediatek GPUs
+            path = findThermalZonePath("gpuss-0", "gpu", "gpuss")
+        }
+
+        if (path != null) {
+            val file = File(path)
+            if (file.exists() && file.canRead()) {
+                val divider = detectTemperatureDivider(path)
+                detectedPaths["gpu_temp"] = path
+                detectedDividers["gpu_temp"] = divider
+                return Pair(path, divider)
+            }
+        }
+        
+        return Pair(null, 1000)
+    }
+
+    /** @return RAM/Memory temperature sysfs path and divider */
+    fun getRamTempInfo(): Pair<String?, Int> {
+        if (detectedPaths.containsKey("ram_temp")) {
+            val path = detectedPaths["ram_temp"]
+            val divider = detectedDividers["ram_temp"] ?: 1000
+            return Pair(path, divider)
+        }
+
+        // Dynamically find RAM thermal zone
+        val path = findThermalZonePath("ddr", "ram", "mch", "pop")
+        if (path != null) {
+            val file = File(path)
+            if (file.exists() && file.canRead()) {
+                val divider = detectTemperatureDivider(path)
+                detectedPaths["ram_temp"] = path
+                detectedDividers["ram_temp"] = divider
+                return Pair(path, divider)
+            }
+        }
+        return Pair(null, 1000)
     }
 
     // Public API for each hardware component

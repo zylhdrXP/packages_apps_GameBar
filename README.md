@@ -93,30 +93,25 @@ GameBar is a comprehensive real-time performance monitoring overlay for Android 
    $(call inherit-product, packages/apps/GameBar/gamebar.mk)
    ```
 
-3. **Configure hardware paths**:
+3. **Configure hardware paths (Optional)**:
    
-   Edit your device overlay `config.xml`:
+   GameBar features a **dynamic sysfs detector** that automatically finds your thermal zones based on standard CPU, GPU, and RAM types. For most devices, **zero manual configuration** is needed!
+   
+   If auto-detection fails on your specific kernel, you can override the dynamic detector by using your device tree `config.xml` overlay:
    
    ```xml
    <resources>
-       <!-- Find your device's thermal zones -->
-       <!-- Run: adb shell "ls /sys/class/thermal/thermal_zone*/type" -->
+       <!-- To hardcode a path, replace "dynamic" with the absolute sysfs path -->
+       <string name="config_cpu_temp_path">/sys/class/thermal/thermal_zone15/temp</string>
        
-       <!-- GPU temperature path -->
-       <string name="config_gpu_temp_path">/sys/class/kgsl/kgsl-3d0/temp</string>
-       
-       <!-- RAM temperature path -->
-       <string name="config_ram_temp_path">/sys/class/thermal/thermal_zone78/temp</string>
-       
-       <!-- Adjust dividers if needed (usually 1000 for millidegrees, 10 for decidegrees) -->
+       <!-- Dividers are automatically calculated (0), but can be manually overridden -->
        <integer name="config_cpu_temp_divider">1000</integer>
    </resources>
    ```
 
 4. **Customize init.rc** (if needed):
    
-   Edit `packages/apps/GameBar/init/init.gamebar.rc` to match your device's hardware paths.
-   Ensure permissions are set for all sysfs nodes used by GameBar.
+   Standard Android thermal zones (`/sys/class/thermal/*`) are globally readable by default. If your custom nodes (like kgsl GPU usage) require permissions, ensure you `chmod` them in your specific `init.<device>.rc`.
 
 5. **Build**:
    ```bash
@@ -230,10 +225,9 @@ Required permissions (granted automatically as system app):
 - Check file permissions: `adb shell cat /sys/class/thermal/thermal_zone*/temp`
 - Review logcat for file access errors
 
-### Temperature values incorrect
-- Adjust divider values in config.xml
-- Most devices use 1000 (millidegrees) or 10 (decidegrees)
-- Test: `adb shell cat <temp_path>` and divide manually
+### Temperature values incorrect or missing
+- GameBar automatically detects if temperatures are milli/deci/celsius. If the value seems wrong, ensure your `config.xml` divider is set to `0` (auto), or manually override it completely (e.g., `1000` or `10`).
+- If your specific custom kernel uses a bizarre thermal zone name that is skipping detection, manually override the `"dynamic"` path in your `config.xml`.
 
 ### Build errors
 - Ensure `org.lineageos.settings.resources` is available in your ROM
