@@ -14,6 +14,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
@@ -323,35 +324,53 @@ fun GameBarSettingsScreen(
                             }
                         }
                         item {
-                            HomeMenuCard(
-                                title = "Overlay Features and FPS Method",
-                                summary = "Overlay stats visibility and FPS measurement mode"
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(14.dp)
                             ) {
-                                selectedTab = GameBarNavTab.FEATURES
+                                Box(modifier = Modifier.weight(1f)) {
+                                    HomeMenuCard(
+                                        title = "Features",
+                                        summary = "Stats & methods",
+                                        iconRes = GameBarNavTab.FEATURES.iconRes
+                                    ) {
+                                        selectedTab = GameBarNavTab.FEATURES
+                                    }
+                                }
+                                Box(modifier = Modifier.weight(1f)) {
+                                    HomeMenuCard(
+                                        title = "UI \u0026 Style",
+                                        summary = "Customizations",
+                                        iconRes = GameBarNavTab.CUSTOMIZATION.iconRes
+                                    ) {
+                                        selectedTab = GameBarNavTab.CUSTOMIZATION
+                                    }
+                                }
                             }
                         }
                         item {
-                            HomeMenuCard(
-                                title = "Customisations and UI",
-                                summary = "Customization, split config and gesture controls"
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(14.dp)
                             ) {
-                                selectedTab = GameBarNavTab.CUSTOMIZATION
-                            }
-                        }
-                        item {
-                            HomeMenuCard(
-                                title = stringResource(R.string.fps_record_title),
-                                summary = stringResource(R.string.fps_record_summary)
-                            ) {
-                                selectedTab = GameBarNavTab.FPS_RECORD
-                            }
-                        }
-                        item {
-                            HomeMenuCard(
-                                title = stringResource(R.string.preset_category_title),
-                                summary = stringResource(R.string.preset_category_summary)
-                            ) {
-                                selectedTab = GameBarNavTab.PRESETS
+                                Box(modifier = Modifier.weight(1f)) {
+                                    HomeMenuCard(
+                                        title = "Records",
+                                        summary = "FPS tracking logs",
+                                        iconRes = GameBarNavTab.FPS_RECORD.iconRes
+                                    ) {
+                                        selectedTab = GameBarNavTab.FPS_RECORD
+                                    }
+                                }
+                                Box(modifier = Modifier.weight(1f)) {
+                                    HomeMenuCard(
+                                        title = "Settings",
+                                        summary = "App configs",
+                                        iconRes = GameBarNavTab.PRESETS.iconRes
+                                    ) {
+                                        selectedTab = GameBarNavTab.PRESETS
+                                    }
+                                }
                             }
                         }
                     }
