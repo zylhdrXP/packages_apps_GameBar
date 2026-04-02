@@ -123,6 +123,20 @@ fun GameBarSettingsScreen(
 
     var gameBarEnabled by remember { mutableStateOf(prefs.getBoolean("game_bar_enable", false)) }
     var autoEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_auto_enable", false)) }
+
+    androidx.compose.runtime.DisposableEffect(prefs) {
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { sharedPrefs, key ->
+            when (key) {
+                "game_bar_enable" -> gameBarEnabled = sharedPrefs.getBoolean(key, false)
+                "game_bar_auto_enable" -> autoEnable = sharedPrefs.getBoolean(key, false)
+                "game_bar_fps_record_control_enabled" -> fpsRecordControlEnabled = sharedPrefs.getBoolean(key, false)
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
     var showLauncherIcon by remember {
         mutableStateOf(
             context.getSharedPreferences(GameBarSettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
