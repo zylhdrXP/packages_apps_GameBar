@@ -99,13 +99,12 @@ fun GameBarLottieCard() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
-                .background(Color.Black)
         ) {
             AndroidView(
                 factory = { context ->
                     LottieAnimationView(context).apply {
                         setAnimation(R.raw.gamebar)
-                        setBackgroundColor(android.graphics.Color.BLACK)
+                        setBackgroundColor(android.graphics.Color.TRANSPARENT)
                         LottieColorUtils.applyDynamicColors(context, this)
                         repeatCount = LottieDrawable.INFINITE
                         repeatMode = LottieDrawable.RESTART
