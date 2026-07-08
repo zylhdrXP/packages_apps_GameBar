@@ -398,6 +398,7 @@ private fun FpsRecordDetailScreen(
     val ramUsageValues = analytics.ramUsageTimeData.map { it.second.toFloat() }
     val ramSpeedValues = analytics.ramSpeedTimeData.map { it.second.toFloat() }
     val ramTempValues = analytics.ramTempTimeData.map { it.second.toFloat() }
+    val timelineDurationSeconds = computeTimelineDurationSeconds(analytics)
     val appRamUsageValues = analytics.appRamUsageTimeData.map { it.second.toFloat() }
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val cpuClockSeries = remember(analytics.cpuClockTimeData, isDark) {
@@ -658,6 +659,7 @@ private fun FpsRecordDetailScreen(
                         yMin = 0f,
                         yMax = yMax,
                         yStep = fpsStep,
+                        xDurationSeconds = timelineDurationSeconds,
                         fillUnderFirstSeries = true,
                         fillGradientColors = listOf(
                             Color(0x804CAF50),
@@ -689,6 +691,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
+                            xDurationSeconds = timelineDurationSeconds,
                             fillUnderFirstSeries = true,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
@@ -712,6 +715,7 @@ private fun FpsRecordDetailScreen(
                     AreaChart(
                         values = frameTimeValues,
                         color = chartColors.blue,
+                        xDurationSeconds = timelineDurationSeconds,
                         modifier = Modifier.fillMaxWidth().height(180.dp),
                     )
                 },
@@ -735,6 +739,7 @@ private fun FpsRecordDetailScreen(
                         yMin = 0f,
                         yMax = 100f,
                         yStep = 10f,
+                        xDurationSeconds = timelineDurationSeconds,
                         modifier = Modifier.fillMaxWidth().height(180.dp),
                     )
                 },
@@ -761,6 +766,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = freqUpper,
                             yStep = 300f,
+                            xDurationSeconds = timelineDurationSeconds,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
                     },
@@ -789,6 +795,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
+                            xDurationSeconds = timelineDurationSeconds,
                             fillUnderFirstSeries = true,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
@@ -818,6 +825,7 @@ private fun FpsRecordDetailScreen(
                         GpuDualAxisChart(
                             freq = gpuClockValues,
                             usage = gpuUsageValues,
+                            xDurationSeconds = timelineDurationSeconds,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                             colors = chartColors
                         )
@@ -847,6 +855,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
+                            xDurationSeconds = timelineDurationSeconds,
                             fillUnderFirstSeries = true,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
@@ -875,6 +884,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 512f,
+                            xDurationSeconds = timelineDurationSeconds,
                             fillUnderFirstSeries = true,
                             fillGradientColors = listOf(
                                 Color(0x80FFC107),
@@ -907,6 +917,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 256f,
+                            xDurationSeconds = timelineDurationSeconds,
                             fillUnderFirstSeries = true,
                             fillGradientColors = listOf(
                                 Color(0x80E91E63),
@@ -939,6 +950,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 200f,
+                            xDurationSeconds = timelineDurationSeconds,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
                     },
@@ -966,6 +978,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = yMax,
                             yStep = 10f,
+                            xDurationSeconds = timelineDurationSeconds,
                             fillUnderFirstSeries = true,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
@@ -995,6 +1008,7 @@ private fun FpsRecordDetailScreen(
                         PowerCapacityDualAxisChart(
                             power = powerValues,
                             capacity = capacityValues,
+                            xDurationSeconds = timelineDurationSeconds,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                             colors = chartColors
                         )
@@ -1021,6 +1035,7 @@ private fun FpsRecordDetailScreen(
                             yMin = 0f,
                             yMax = 100f,
                             yStep = 10f,
+                            xDurationSeconds = timelineDurationSeconds,
                             modifier = Modifier.fillMaxWidth().height(180.dp),
                         )
                     },
@@ -1493,7 +1508,7 @@ private fun LineChart(
                 strokeWidth = 1f,
                 pathEffect = dash
             )
-            val label = formatTimeLabel(i, xSteps, samplesCount)
+            val label = formatTimeLabel(i, xSteps, (samplesCount - 1).coerceAtLeast(0))
             drawContext.canvas.nativeCanvas.drawText(
                 label,
                 x,
@@ -1646,12 +1661,32 @@ private fun formatAxis(value: Float): String {
     }
 }
 
-private fun formatTimeLabel(index: Int, steps: Int, samples: Int): String {
-    if (samples <= 1) return "0s"
-    val seconds = ((samples - 1) * index / steps)
+private fun formatTimeLabel(index: Int, steps: Int, totalDurationSeconds: Int): String {
+    if (totalDurationSeconds <= 0) return "0s"
+    val seconds = (totalDurationSeconds * index / steps).coerceAtLeast(0)
     val mins = seconds / 60
     val secs = seconds % 60
     return if (mins > 0) "${mins}m${secs}s" else "${secs}s"
+}
+
+private fun computeTimelineDurationSeconds(analytics: LogAnalytics): Int {
+    val maxMs = buildList<Long> {
+        addAll(analytics.fpsTimeData.map { it.first })
+        addAll(analytics.frameTimeData.map { it.first })
+        addAll(analytics.batteryTempTimeData.map { it.first })
+        addAll(analytics.batteryLevelTimeData.map { it.first })
+        addAll(analytics.cpuUsageTimeData.map { it.first })
+        addAll(analytics.cpuTempTimeData.map { it.first })
+        addAll(analytics.ramUsageTimeData.map { it.first })
+        addAll(analytics.ramSpeedTimeData.map { it.first })
+        addAll(analytics.ramTempTimeData.map { it.first })
+        addAll(analytics.gpuUsageTimeData.map { it.first })
+        addAll(analytics.gpuTempTimeData.map { it.first })
+        addAll(analytics.gpuClockTimeData.map { it.first })
+        addAll(analytics.powerTimeData.map { it.first })
+        analytics.cpuClockTimeData.values.forEach { series -> addAll(series.map { it.first }) }
+    }.maxOrNull() ?: 0L
+    return (maxMs / 1000L).toInt().coerceAtLeast(0)
 }
 
 private fun avgOrNull(values: List<Float>): Float? {
@@ -1722,6 +1757,7 @@ private fun writeFileToUri(context: Context, source: File, targetUri: Uri): Bool
 private fun GpuDualAxisChart(
     freq: List<Float>,
     usage: List<Float?>,
+    xDurationSeconds: Int,
     modifier: Modifier = Modifier,
     colors: ChartColors,
 ) {
@@ -1792,7 +1828,7 @@ private fun GpuDualAxisChart(
                 strokeWidth = 1f,
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f),
             )
-            val label = formatTimeLabel(i, xSteps, freq.size)
+            val label = formatTimeLabel(i, xSteps, xDurationSeconds)
             drawContext.canvas.nativeCanvas.drawText(
                 label,
                 x,
@@ -1849,6 +1885,7 @@ private fun GpuDualAxisChart(
 private fun PowerCapacityDualAxisChart(
     power: List<Float>,
     capacity: List<Float?>,
+    xDurationSeconds: Int,
     modifier: Modifier = Modifier,
     colors: ChartColors,
 ) {
@@ -1918,7 +1955,7 @@ private fun PowerCapacityDualAxisChart(
                 strokeWidth = 1f,
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 8f), 0f),
             )
-            val label = formatTimeLabel(i, xSteps, power.size)
+            val label = formatTimeLabel(i, xSteps, xDurationSeconds)
             drawContext.canvas.nativeCanvas.drawText(
                 label,
                 x,
@@ -2001,6 +2038,7 @@ private fun rememberChartColors(): ChartColors {
 private fun AreaChart(
     values: List<Float?>,
     color: Color,
+    xDurationSeconds: Int,
     modifier: Modifier = Modifier,
 ) {
     val points = values.filterNotNull()
@@ -2046,7 +2084,7 @@ private fun AreaChart(
         for (i in 0..xSteps) {
             val x = leftPad + plotW * i / xSteps
             drawLine(gridColor, start = Offset(x, topPad), end = Offset(x, topPad + plotH), strokeWidth = 1f, pathEffect = dash)
-            val label = formatTimeLabel(i, xSteps, values.size)
+            val label = formatTimeLabel(i, xSteps, xDurationSeconds)
             drawContext.canvas.nativeCanvas.drawText(
                 label,
                 x,
@@ -2092,6 +2130,7 @@ private fun FixedAxisLineChart(
     yMin: Float,
     yMax: Float,
     yStep: Float,
+    xDurationSeconds: Int,
     fillUnderFirstSeries: Boolean = false,
     fillGradientColors: List<Color>? = null,
     modifier: Modifier = Modifier,
@@ -2139,7 +2178,7 @@ private fun FixedAxisLineChart(
         for (i in 0..xSteps) {
             val x = leftPad + plotW * i / xSteps
             drawLine(gridColor, start = Offset(x, topPad), end = Offset(x, topPad + plotH), strokeWidth = 1f, pathEffect = dash)
-            val label = formatTimeLabel(i, xSteps, samplesCount)
+            val label = formatTimeLabel(i, xSteps, xDurationSeconds)
             drawContext.canvas.nativeCanvas.drawText(
                 label,
                 x,

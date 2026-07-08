@@ -30,6 +30,8 @@ class FpsRecordControlOverlayService : Service() {
 
     companion object {
         const val ACTION_SET_ENABLED = "com.android.gamebar.action.SET_FPS_RECORD_CONTROL_ENABLED"
+        const val ACTION_TOGGLE_RECORDING = "com.android.gamebar.action.TOGGLE_FPS_RECORDING"
+        const val ACTION_SYNC_RECORDING_STATE = "com.android.gamebar.action.SYNC_FPS_RECORDING_STATE"
         const val EXTRA_ENABLED = "enabled"
 
         private const val PREF_ENABLED = "game_bar_fps_record_control_enabled"
@@ -82,6 +84,27 @@ class FpsRecordControlOverlayService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_TOGGLE_RECORDING -> {
+                toggleRecordingFromBubble()
+                if (prefs.getBoolean(PREF_ENABLED, false) && bubbleView == null && Settings.canDrawOverlays(this)) {
+                    showBubble()
+                } else {
+                    updateBubbleAppearance()
+                }
+                return START_STICKY
+            }
+            ACTION_SYNC_RECORDING_STATE -> {
+                syncRecordingStateFromManager()
+                if (prefs.getBoolean(PREF_ENABLED, false) && bubbleView == null && Settings.canDrawOverlays(this)) {
+                    showBubble()
+                } else {
+                    updateBubbleAppearance()
+                }
+                return START_STICKY
+            }
+        }
+
         val enabled = when (intent?.action) {
             ACTION_SET_ENABLED -> intent.getBooleanExtra(EXTRA_ENABLED, false)
             else -> prefs.getBoolean(PREF_ENABLED, false)
@@ -197,10 +220,22 @@ class FpsRecordControlOverlayService : Service() {
     }
 
     private fun toggleRecordingFromBubble() {
+        syncRecordingStateFromManager()
         if (!isRecording) {
             startRecording()
         } else {
             stopRecording(autoStop = false)
+        }
+    }
+
+    private fun syncRecordingStateFromManager() {
+        val activeApps = perAppLogManager.getCurrentlyLoggingApps()
+        if (activeApps.isNotEmpty()) {
+            isRecording = true
+            recordingPackage = activeApps.first()
+        } else {
+            isRecording = false
+            recordingPackage = ""
         }
     }
 

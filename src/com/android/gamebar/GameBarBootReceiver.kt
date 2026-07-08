@@ -9,6 +9,8 @@ package com.android.gamebar
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.UserHandle
+import android.provider.Settings
 import androidx.preference.PreferenceManager
 
 class GameBarBootReceiver : BroadcastReceiver() {
@@ -24,6 +26,13 @@ class GameBarBootReceiver : BroadcastReceiver() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(context)
         val mainEnabled = prefs.getBoolean("game_bar_enable", false)
         val autoEnabled = prefs.getBoolean("game_bar_auto_enable", false)
+
+        Settings.System.putIntForUser(
+            context.contentResolver,
+            "game_bar_enabled",
+            if (mainEnabled) 1 else 0,
+            UserHandle.USER_CURRENT
+        )
         
         if (mainEnabled) {
             val gameBar = GameBar.getInstance(context)

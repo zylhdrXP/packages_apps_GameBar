@@ -144,7 +144,7 @@ class GameBar private constructor(context: Context) {
     private var singleTapEnabled = true
     private var singleTapFunction = "toggle_format"
     private var doubleTapEnabled = true
-    private var doubleTapFunction = "adjust_length"
+    private var doubleTapFunction = "toggle_fps_logging"
     private var longPressFunction = "load_preset"
     private var bgDrawable: GradientDrawable? = null
     
@@ -214,6 +214,13 @@ class GameBar private constructor(context: Context) {
             "screen_record" -> {
                 toggleScreenRecording()
             }
+            "toggle_fps_logging" -> {
+                context.startService(
+                    Intent(context, FpsRecordControlOverlayService::class.java).apply {
+                        action = FpsRecordControlOverlayService.ACTION_TOGGLE_RECORDING
+                    }
+                )
+            }
             "adjust_length" -> {
                 overlayWidthEditing = !overlayWidthEditing
                 updateWidthEditVisualState()
@@ -276,7 +283,7 @@ class GameBar private constructor(context: Context) {
         doubleTapFunction = sanitizeGestureFunction(
             prefs = prefs,
             key = "game_bar_doubletap_function",
-            defaultValue = "adjust_length"
+            defaultValue = "toggle_fps_logging"
         )
         longPressFunction = sanitizeGestureFunction(
             prefs = prefs,
@@ -330,8 +337,8 @@ class GameBar private constructor(context: Context) {
     ): String {
         val value = prefs.getString(key, defaultValue) ?: defaultValue
         if (value == "capture_logs") {
-            prefs.edit().putString(key, "no_action").apply()
-            return "no_action"
+            prefs.edit().putString(key, "toggle_fps_logging").apply()
+            return "toggle_fps_logging"
         }
         return value
     }

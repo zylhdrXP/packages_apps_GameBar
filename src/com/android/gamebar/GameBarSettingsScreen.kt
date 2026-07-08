@@ -94,8 +94,8 @@ fun GameBarSettingsScreen(
     fun readGestureAction(key: String, defaultValue: String): String {
         val raw = prefs.getString(key, defaultValue) ?: defaultValue
         return if (raw == "capture_logs") {
-            putString(key, "no_action")
-            "no_action"
+            putString(key, "toggle_fps_logging")
+            "toggle_fps_logging"
         } else {
             raw
         }
@@ -191,7 +191,7 @@ fun GameBarSettingsScreen(
     var singleTapEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_single_tap_enable", true)) }
     var singleTapFunction by remember { mutableStateOf(readGestureAction("game_bar_single_tap_function", "toggle_format")) }
     var doubleTapEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_doubletap_enable", true)) }
-    var doubleTapFunction by remember { mutableStateOf(readGestureAction("game_bar_doubletap_function", "adjust_length")) }
+    var doubleTapFunction by remember { mutableStateOf(readGestureAction("game_bar_doubletap_function", "toggle_fps_logging")) }
     var longPressEnable by remember { mutableStateOf(prefs.getBoolean("game_bar_longpress_enable", true)) }
     var longPressFunction by remember { mutableStateOf(readGestureAction("game_bar_longpress_function", "load_preset")) }
     var longPressTimeout by remember { mutableStateOf(prefs.getString("game_bar_longpress_timeout", "500") ?: "500") }
@@ -214,6 +214,7 @@ fun GameBarSettingsScreen(
     val splitModeOptions = listOf(SelectOption("side_by_side", "Side-by-Side"), SelectOption("stacked", "Stacked"))
     val gestureOptions = listOf(
         SelectOption("no_action", "No Action"),
+        SelectOption("toggle_fps_logging", "Start/Stop FPS Logging"),
         SelectOption("adjust_length", "Length Adjustment Mode"),
         SelectOption("toggle_format", "Toggle Full/Minimal Format"),
         SelectOption("open_settings", "Open GameBar Settings"),

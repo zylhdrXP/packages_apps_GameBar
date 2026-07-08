@@ -120,6 +120,15 @@
             android:name=".FpsRecordControlOverlayService"
             android:exported="false" />
 
+        <!-- GameBar Toggle Receiver -->
+        <receiver
+            android:name=".GameBarToggleReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.gamebar.ACTION_TOGGLE" />
+            </intent-filter>
+        </receiver>
+
         <!-- GameBar BootReceiver -->
         <receiver
             android:name=".GameBarBootReceiver"
