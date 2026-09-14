@@ -28,6 +28,10 @@ class GameBarSettingsActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setLauncherIconEnabled(
+            getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getBoolean(KEY_SHOW_LAUNCHER_ICON, false)
+        )
         setContent {
             GameBarComposeTheme {
                 GameBarSettingsScreen(

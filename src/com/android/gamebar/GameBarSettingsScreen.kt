@@ -155,7 +155,7 @@ fun GameBarSettingsScreen(
     var showLauncherIcon by remember {
         mutableStateOf(
             context.getSharedPreferences(GameBarSettingsActivity.PREFS_NAME, Context.MODE_PRIVATE)
-                .getBoolean(GameBarSettingsActivity.KEY_SHOW_LAUNCHER_ICON, true)
+                .getBoolean(GameBarSettingsActivity.KEY_SHOW_LAUNCHER_ICON, false)
         )
     }
 
