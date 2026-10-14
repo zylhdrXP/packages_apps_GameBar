@@ -547,7 +547,8 @@ class GameBar private constructor(context: Context) {
         }
         
         // Remove overlay view
-        overlayView?.let { view ->
+        val view = overlayView
+        if (view != null) {
             try {
                 if (view.parent != null) {
                     windowManager.removeView(view)
