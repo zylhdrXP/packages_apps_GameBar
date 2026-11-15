@@ -34,6 +34,7 @@ android_app {
         "androidx.compose.ui_ui-tooling-preview",
         "androidx.lifecycle_lifecycle-runtime-compose",
         "androidx.core_core",
+        "androidx.graphics_graphics-shapes",
         "androidx.recyclerview_recyclerview",
         "org.lineageos.settings.resources"
     ],

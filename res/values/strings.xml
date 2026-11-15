@@ -162,4 +162,33 @@
     <string name="fps_record_empty">No FPS record sessions found</string>
     <string name="fps_record_stats_title">Session Summary</string>
 
+    <!-- About GameBar -->
+    <string name="about_version">GameBar v%s</string>
+    <string name="about_description">Universal real-time performance overlay toolkit for Android devices</string>
+    <string name="about_developer">Developed by kenway214\nDesigned by ZylhdrXP</string>
+    <string name="about_github">GitHub</string>
+    <string name="about_issues">Issues</string>
+    <string name="about_support">Support</string>
+    <string name="about_guide">Guide</string>
+
+    <!-- Navigation Tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_features">Features</string>
+    <string name="tab_customization">Style</string>
+    <string name="tab_records">Records</string>
+    <string name="tab_presets">Settings</string>
+
+    <!-- Tab Summaries -->
+    <string name="features_summary">Overlay metrics, FPS monitoring mode and calculation method</string>
+    <string name="customization_summary">Configure dimensions, colors, transparency and gesture controls</string>
+    <string name="presets_tab_summary">Manage themes, per-app configs, presets and app info</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_reset_all_title">Reset All Settings</string>
+    <string name="dialog_reset_all_message">Are you sure you want to reset all GameBar settings to factory defaults?</string>
+
+    <!-- Status -->
+    <string name="gamebar_status_active">Overlay Active</string>
+    <string name="gamebar_status_inactive">Overlay Inactive</string>
+
 </resources>

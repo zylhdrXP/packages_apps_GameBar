@@ -306,7 +306,7 @@ class GameBar private constructor(context: Context) {
         updateValueColor(valueColorHex)
         
         // Load custom font
-        val fontPath = prefs.getString("game_bar_font_path", "fonts/Circular-Std-Bold.ttf") ?: "fonts/Circular-Std-Bold.ttf"
+        val fontPath = prefs.getString("game_bar_font_path", "default") ?: "default"
         loadCustomFont(fontPath)
         
         updateOverlayFormat(prefs.getString("game_bar_format", "full") ?: "full")
